@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ella Rises</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <nav class="navbar-pill">
+        <div class="logo-circle">ER</div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">About</a>
+            <a href="/events" class="nav-link">Programs</a>
+            <a href="/events" class="nav-link">Events</a>
+            <a href="/donate" class="nav-link">Get Involved</a>
+            <a href="#" class="nav-link">Press</a>
+            <a href="#" class="nav-link">Contact Us</a>
+        </div>
+        <div class="nav-actions">
+            <% if (user) { %>
+                <a href="/admin/dashboard" class="btn">Dashboard</a>
+                <% } else { %>
+                    <a href="/donate" class="btn">Donate</a>
+                    <% } %>
+        </div>
+    </nav>
+    <div class="container">

@@ -1,0 +1,32 @@
+<%- include('partials/header', { user: user }) %>
+
+    <h1 class="mb-4 text-center">Upcoming Events</h1>
+
+    <div class="grid grid-3">
+        <% if (events && events.length> 0) { %>
+            <% events.forEach(event=> { %>
+                <div class="card">
+                    <h3>
+                        <%= event.event_name %>
+                    </h3>
+                    <span class="badge">
+                        <%= event.event_type %>
+                    </span>
+                    <p class="mt-4">
+                        <%= event.description %>
+                    </p>
+                    <hr class="mt-4 mb-4" style="border: 0; border-top: 1px solid #eee;">
+                    <p><strong>When:</strong>
+                        <%= new Date(event.start_time).toLocaleString() %>
+                    </p>
+                    <p><strong>Where:</strong>
+                        <%= event.location %>
+                    </p>
+                </div>
+                <% }) %>
+                    <% } else { %>
+                        <p class="text-center">No upcoming events scheduled at this time.</p>
+                        <% } %>
+    </div>
+
+    <%- include('partials/footer') %>

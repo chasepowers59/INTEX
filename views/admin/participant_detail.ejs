@@ -1,0 +1,148 @@
+<%- include('../partials/header', { user: user }) %>
+
+    <div class="container">
+        <!-- Header Section -->
+        <div class="card"
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h1 style="margin-bottom: 0.5rem;">
+                    <%= participant.first_name %>
+                        <%= participant.last_name %>
+                </h1>
+                <span class="badge"
+                    style="background: var(--btn-blue); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;">
+                    <%= participant.generation_status %> Generation
+                </span>
+            </div>
+            <button class="btn">Edit Profile</button>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Left Column: Demographics & Contact -->
+            <div class="left-col">
+                <div class="card">
+                    <h3 class="mb-4">Demographics</h3>
+                    <div style="margin-bottom: 1rem;">
+                        <p class="stat-label">Household Income</p>
+                        <p><strong>
+                                <%= participant.household_income_bracket || 'Not Provided' %>
+                            </strong></p>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <p class="stat-label">Email</p>
+                        <p><a href="mailto:<%= participant.email %>">
+                                <%= participant.email %>
+                            </a></p>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <p class="stat-label">Phone</p>
+                        <p>
+                            <%= participant.phone || 'N/A' %>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="mb-4">Quick Stats</h3>
+                    <div style="display: flex; justify-content: space-between; text-align: center;">
+                        <div>
+                            <div class="stat-value">
+                                <%= registrations.length %>
+                            </div>
+                            <div class="stat-label">Events</div>
+                        </div>
+                        <div>
+                            <div class="stat-value">
+                                <%= milestones.length %>
+                            </div>
+                            <div class="stat-label">Milestones</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center/Right Column: Timeline & History -->
+            <div class="right-col">
+                <!-- Events Timeline -->
+                <div class="card">
+                    <h3 class="mb-4">Events Attended</h3>
+                    <% if (registrations.length> 0) { %>
+                        <% registrations.forEach(reg=> { %>
+                            <div class="timeline-item">
+                                <h4>
+                                    <%= reg.event_name %>
+                                </h4>
+                                <p style="color: #666; font-size: 0.9rem;">
+                                    <%= new Date(reg.start_time).toLocaleDateString() %> | <%= reg.event_type %>
+                                </p>
+                                <p style="margin-top: 0.5rem;">
+                                    <%= reg.location %>
+                                </p>
+                            </div>
+                            <% }) %>
+                                <% } else { %>
+                                    <p>No events attended yet.</p>
+                                    <% } %>
+                </div>
+
+                <div class="grid grid-3" style="grid-template-columns: 1fr 1fr;">
+                    <!-- Milestones -->
+                    <div class="card">
+                        <h3 class="mb-4">Milestones</h3>
+                        <% if (milestones.length> 0) { %>
+                            <ul style="list-style: none; padding: 0;">
+                                <% milestones.forEach(m=> { %>
+                                    <li
+                                        style="margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;">
+                                        <strong>
+                                            <%= m.title %>
+                                        </strong><br>
+                                        <small style="color: #666;">
+                                            <%= new Date(m.date_achieved).toLocaleDateString() %>
+                                        </small>
+                                    </li>
+                                    <% }) %>
+                            </ul>
+                            <% } else { %>
+                                <p style="color: #888; font-style: italic;">No milestones recorded.</p>
+                                <% } %>
+                                    <a href="/admin/milestone/add" class="btn"
+                                        style="margin-top: 1rem; font-size: 0.8rem; padding: 0.5rem 1rem;">+ Add
+                                        Milestone</a>
+                    </div>
+
+                    <!-- Survey History -->
+                    <div class="card">
+                        <h3 class="mb-4">Survey History</h3>
+                        <% if (surveys.length> 0) { %>
+                            <% surveys.forEach(s=> { %>
+                                <div
+                                    style="margin-bottom: 1rem; background: #f9f9f9; padding: 0.8rem; border-radius: 8px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                        <span>Satisfaction</span>
+                                        <strong>
+                                            <%= s.satisfaction_score %>/10
+                                        </strong>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span>Confidence</span>
+                                        <strong>
+                                            <%= s.self_confidence_rating %>/10
+                                        </strong>
+                                    </div>
+                                    <% if (s.comments) { %>
+                                        <p style="margin-top: 0.5rem; font-size: 0.85rem; font-style: italic;">"<%=
+                                                s.comments %>"</p>
+                                        <% } %>
+                                </div>
+                                <% }) %>
+                                    <% } else { %>
+                                        <p style="color: #888; font-style: italic;">No survey data available.</p>
+                                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>

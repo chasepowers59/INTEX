@@ -1,0 +1,33 @@
+<%- include('partials/header', { user: user }) %>
+
+    <div class="hero">
+        <h1>WELCOME TO</h1>
+
+        <div class="hero-circles">
+            <!-- Using placeholders for now, user can replace with real images -->
+            <img src="https://via.placeholder.com/200/FFB6C1/000000?text=Culture" alt="Culture" class="circle-img">
+            <img src="https://via.placeholder.com/200/87CEFA/000000?text=Art" alt="Art" class="circle-img">
+            <div class="circle-img"
+                style="background: #1A1A1A; display: flex; align-items: center; justify-content: center; color: white; font-family: 'Montserrat'; font-weight: 800; font-size: 2rem;">
+                Ella<br>RISES</div>
+            <img src="https://via.placeholder.com/200/90EE90/000000?text=Music" alt="Music" class="circle-img">
+            <img src="https://via.placeholder.com/200/FFD700/000000?text=STEM" alt="STEM" class="circle-img">
+        </div>
+
+        <p class="hero-text">
+            Inviting young women to pursue higher education and embrace their heritage
+            by providing culturally rooted programs and educational experiences.
+        </p>
+    </div>
+
+    <div class="cta-section">
+        <div class="cta-content">
+            <h2>Enroll today in programs focused<br>on mariachi and STEAM!</h2>
+            <div style="margin-top: 2rem;">
+                <a href="/events" class="btn btn-dark" style="padding: 1rem 3rem; font-size: 1.1rem;">Click here to
+                    enroll!</a>
+            </div>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>

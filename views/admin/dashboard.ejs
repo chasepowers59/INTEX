@@ -1,0 +1,28 @@
+<%- include('../partials/header', { user: user }) %>
+
+    <div class="container">
+        <h1 class="mb-4">Program Dashboard</h1>
+
+        <div class="grid grid-3 mb-4">
+            <div class="card">
+                <a href="/admin/participants" class="btn">Manage Participants</a>
+            </div>
+            <div class="card">
+                <a href="/admin/donation/add" class="btn">Add Donation</a>
+            </div>
+            <div class="card">
+                <a href="/admin/milestone/add" class="btn">Add Milestone</a>
+            </div>
+        </div>
+
+        <!-- Tableau/Chart.js Placeholder -->
+        <div class="card"
+            style="min-height: 400px; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa; border: 2px dashed #ccc;">
+            <div class="text-center">
+                <h3>Analytics Dashboard</h3>
+                <p>Tableau / Chart.js Embed Area</p>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>

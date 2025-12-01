@@ -1,0 +1,53 @@
+<%- include('../partials/header', { user: user }) %>
+
+    <div class="container">
+        <h1 class="mb-4">Participants</h1>
+
+        <!-- Search Bar -->
+        <form action="/admin/participants" method="GET" class="mb-4">
+            <div style="display: flex; gap: 1rem;">
+                <input type="text" name="search" class="form-control" placeholder="Search by name or email..."
+                    value="<%= search || '' %>">
+                <button type="submit" class="btn">Search</button>
+            </div>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Generation</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (participants.length> 0) { %>
+                    <% participants.forEach(p=> { %>
+                        <tr>
+                            <td>
+                                <%= p.first_name %>
+                                    <%= p.last_name %>
+                            </td>
+                            <td>
+                                <%= p.email %>
+                            </td>
+                            <td>
+                                <%= p.generation_status %>
+                            </td>
+                            <td>
+                                <a href="/admin/participant/<%= p.participant_id %>" class="btn"
+                                    style="padding: 0.5rem 1rem; font-size: 0.8rem;">View</a>
+                            </td>
+                        </tr>
+                        <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="4" class="text-center">No participants found.</td>
+                                </tr>
+                                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <%- include('../partials/footer') %>

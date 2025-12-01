@@ -1,0 +1,33 @@
+<%- include('../../partials/header', { user: user }) %>
+
+    <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <h1 class="text-center mb-4">Add Milestone</h1>
+
+        <form action="/admin/milestone/add" method="POST">
+            <div class="form-group">
+                <label for="participant_id">Participant</label>
+                <select id="participant_id" name="participant_id" class="form-control" required>
+                    <% participants.forEach(p=> { %>
+                        <option value="<%= p.participant_id %>">
+                            <%= p.first_name %>
+                                <%= p.last_name %>
+                        </option>
+                        <% }) %>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="title">Milestone Title</label>
+                <input type="text" id="title" name="title" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="date_achieved">Date Achieved</label>
+                <input type="date" id="date_achieved" name="date_achieved" class="form-control" required>
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%;">Save Milestone</button>
+        </form>
+    </div>
+
+    <%- include('../../partials/footer') %>

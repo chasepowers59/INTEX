@@ -1,42 +1,58 @@
-require('dotenv').config(); 
+require('dotenv').config();
 const express = require('express');
-const { Pool } = require('pg');
+const path = require('path');
+const helmet = require('helmet');
+const session = require('express-session');
+const knex = require('knex');
+const knexConfig = require('./knexfile');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Database Configuration
-// Elastic Beanstalk provides these specific RDS_ variables automatically
-const pool = new Pool({
-  host: process.env.RDS_HOSTNAME,
-  user: process.env.RDS_USERNAME,
-  password: process.env.RDS_PASSWORD,
-  database: process.env.RDS_DB_NAME,
-  port: process.env.RDS_PORT,
-  ssl: { rejectUnauthorized: false }
+// Database Connection
+const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
+
+// Middleware
+app.use(helmet());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'supersecretkey',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: process.env.NODE_ENV === 'production' }
+}));
+
+// View Engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+// Routes
+const mainRoutes = require('./routes/index');
+const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
+
+app.use('/', mainRoutes);
+app.use('/auth', authRoutes);
+app.use('/admin', adminRoutes);
+
+// Health Check
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
 });
 
-// 1. Health Check Endpoint
-app.get('/', (req, res) => {
-  res.send('Hello! The API is running with a Coupled Database.');
+// Easter Egg
+app.get('/teapot', (req, res) => {
+    res.status(418).send("I am a teapot - Ella Rises Code");
 });
 
-// 2. Database Connection Test
-app.get('/db-test', async (req, res) => {
-  try {
-    const client = await pool.connect();
-    const result = await client.query('SELECT NOW() as time');
-    client.release();
-    res.json({ 
-      status: 'Database connected successfully!', 
-      server_time: result.rows[0].time 
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Database connection failed', details: err.message });
-  }
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke! Please try again later.');
 });
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+    console.log(`Server running on port ${port}`);
 });

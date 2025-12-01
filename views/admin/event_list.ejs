@@ -1,0 +1,51 @@
+<%- include('../partials/header', { user: user }) %>
+
+    <div class="container">
+        <h1 class="mb-4">Manage Events</h1>
+
+        <!-- Search Bar -->
+        <form action="/admin/events" method="GET" class="mb-4">
+            <div style="display: flex; gap: 1rem;">
+                <input type="text" name="search" class="form-control" placeholder="Search by event name..."
+                    value="<%= search || '' %>">
+                <button type="submit" class="btn">Search</button>
+            </div>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Event Name</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Location</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (events.length> 0) { %>
+                    <% events.forEach(e=> { %>
+                        <tr>
+                            <td>
+                                <%= e.event_name %>
+                            </td>
+                            <td>
+                                <%= e.event_type %>
+                            </td>
+                            <td>
+                                <%= new Date(e.start_time).toLocaleString() %>
+                            </td>
+                            <td>
+                                <%= e.location %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="4" class="text-center">No events found.</td>
+                                </tr>
+                                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <%- include('../partials/footer') %>
