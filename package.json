@@ -20,13 +20,35 @@
     "express-session": "^1.17.3",
     "helmet": "^7.1.0",
     "knex": "^3.0.1",
-    "multer": "^2.0.2",
-    "pg": "^8.11.3"
-  },
-  "engines": {
-    "node": "20.x"
-  },
-  "overrides": {
-    "debug": "4.3.4"
-  }
-}
+    {
+      "name": "ella-rises-capstone",
+      "version": "1.0.0",
+      "description": "Ella Rises Capstone Project",
+      "main": "index.js",
+      "scripts": {
+        "start": "node index.js",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "migrate": "knex migrate:latest",
+        "seed": "knex seed:run"
+      },
+      "dependencies": {
+        "bcrypt": "^5.1.1",
+        "connect-flash": "^0.1.1",
+        "csurf": "^1.11.0",
+        "debug": "^4.4.0",
+        "dotenv": "^16.3.1",
+        "ejs": "^3.1.9",
+        "express": "^4.18.2",
+        "express-session": "^1.17.3",
+        "helmet": "^7.1.0",
+        "knex": "^3.0.1",
+        "multer": "^2.0.2",
+        "pg": "^8.11.3"
+      },
+      "engines": {
+        "node": "20.x"
+      },
+      "overrides": {
+        "debug": "^4.4.0"
+      }
+    }
