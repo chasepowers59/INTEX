@@ -3,12 +3,14 @@ const express = require('express');
 const path = require('path');
 const helmet = require('helmet');
 const session = require('express-session');
+const KnexSessionStore = require('connect-session-knex')(session);
 const knex = require('knex');
 const knexConfig = require('./knexfile');
 // const csrf = require('csurf'); // DISABLED
 const flash = require('connect-flash');
 
 const app = express();
+app.set('trust proxy', 1); // Trust first proxy (Elastic Beanstalk Load Balancer)
 const port = process.env.PORT || 3000;
 
 // Database Connection
