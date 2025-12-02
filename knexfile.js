@@ -26,7 +26,7 @@ module.exports = {
             password: process.env.RDS_PASSWORD || process.env.DB_PASSWORD,
             database: process.env.RDS_DB_NAME || process.env.DB_NAME,
             port: process.env.RDS_PORT || 5432,
-            ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false
+            ssl: { rejectUnauthorized: false }
         },
         migrations: {
             directory: './migrations'
