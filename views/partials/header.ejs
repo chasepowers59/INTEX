@@ -1,47 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ella Rises</title>
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <!DOCTYPE html>
-    <html lang="en">
-
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Ella Rises</title>
-        <link rel="stylesheet" href="/css/main.css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link
-            href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Montserrat:wght@400;500;600;700&display=swap"
-            rel="stylesheet">
-    </head>
-
-<body>
-    <nav class="navbar">
-        <a href="/" class="logo-circle" style="text-decoration: none;">ER</a>
-        <div class="nav-links">
-            <a href="/about" class="nav-link">About</a>
-            <a href="/programs" class="nav-link">Programs</a>
-            <a href="/events" class="nav-link">Events</a>
-            <a href="/get-involved" class="nav-link">Get Involved</a>
-            <a href="/press" class="nav-link">Press</a>
-            <a href="/contact" class="nav-link">Contact Us</a>
-        </div>
-        <div class="nav-actions" style="display: flex; gap: 1rem; align-items: center;">
-            <% if (user) { %>
-                <a href="/admin/dashboard" class="btn">Dashboard</a>
-                <a href="/auth/logout" class="btn" style="background: white; color: var(--col-dark-gray);">Logout</a>
-                <% } else { %>
-                    <a href="/auth/login" class="nav-link">Login</a>
-                    <a href="/donate" class="btn" style="background: #94AAB9; color: white;">Donate</a>
-                    <% } %>
-        </div>
-    </nav>
-    <!-- Spacer for fixed navbar -->
-    <div style="height: 100px;"></div>
+<a href="/programs" class="nav-link">Programs</a>
+<a href="/events" class="nav-link">Events</a>
+<a href="/get-involved" class="nav-link">Get Involved</a>
+<a href="/press" class="nav-link">Press</a>
+<a href="/contact" class="nav-link">Contact Us</a>
+</div>
+<div class="nav-actions" style="display: flex; gap: 1rem; align-items: center;">
+    <% if (user) { %>
+        <a href="/admin/dashboard" class="btn">Dashboard</a>
+        <a href="/auth/logout" class="btn" style="background: white; color: var(--col-dark-gray);">Logout</a>
+        <% } else { %>
+            <a href="/auth/login" class="nav-link">Login</a>
+            <a href="/donate" class="btn" style="background: #94AAB9; color: white;">Donate</a>
+            <% } %>
+</div>
+</nav>
+<!-- Spacer for fixed navbar -->
+<div style="height: 100px;"></div>
