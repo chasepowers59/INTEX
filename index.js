@@ -19,6 +19,8 @@ const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
 const store = new KnexSessionStore({
     knex: db,
     tablename: 'sessions',
+    createtable: true,
+    clearInterval: 1000 * 60 * 60 // Clear expired sessions every hour
 });
 
 // Middleware
@@ -44,7 +46,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: false, // TEMPORARILY FALSE FOR DEBUGGING
         maxAge: 1000 * 60 * 60 * 24 // 1 day
     }
 }));
@@ -88,6 +90,19 @@ app.use('/surveys', surveyRoutes);
 // Easter Egg
 app.get('/teapot', (req, res) => {
     res.status(418).send("I am a teapot - Ella Rises Code");
+});
+
+// Debug Route
+app.get('/debug-session', (req, res) => {
+    res.json({
+        session: req.session,
+        sessionID: req.sessionID,
+        headers: req.headers,
+        protocol: req.protocol,
+        secure: req.secure,
+        ip: req.ip,
+        ips: req.ips
+    });
 });
 
 // Global Error Handler
