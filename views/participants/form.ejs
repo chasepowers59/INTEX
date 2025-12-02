@@ -1,0 +1,91 @@
+<%- include('../partials/header', { user: user }) %>
+
+    <div class="container mt-4">
+        <div class="card">
+            <h1>
+                <%= participant ? 'Edit' : 'Add' %> Participant
+            </h1>
+
+            <form action="/participants/<%= participant ? 'edit/' + participant.participant_id : 'add' %>" method="POST"
+                enctype="multipart/form-data">
+
+                <div class="form-group">
+                    <label for="participant_first_name">First Name</label>
+                    <input type="text" id="participant_first_name" name="participant_first_name" class="form-control"
+                        value="<%= participant ? participant.participant_first_name : '' %>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="participant_last_name">Last Name</label>
+                    <input type="text" id="participant_last_name" name="participant_last_name" class="form-control"
+                        value="<%= participant ? participant.participant_last_name : '' %>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="participant_email">Email</label>
+                    <input type="email" id="participant_email" name="participant_email" class="form-control"
+                        value="<%= participant ? participant.participant_email : '' %>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="participant_phone">Phone</label>
+                    <input type="text" id="participant_phone" name="participant_phone" class="form-control"
+                        value="<%= participant ? participant.participant_phone : '' %>">
+                </div>
+
+                <div class="form-group">
+                    <label for="participant_dob">Date of Birth</label>
+                    <input type="date" id="participant_dob" name="participant_dob" class="form-control"
+                        value="<%= participant && participant.participant_dob ? new Date(participant.participant_dob).toISOString().split('T')[0] : '' %>">
+                </div>
+
+                <div class="form-group">
+                    <label for="participant_role">Role</label>
+                    <select id="participant_role" name="participant_role" class="form-control">
+                        <option value="Student" <%=participant && participant.participant_role==='Student' ? 'selected'
+                            : '' %>>Student</option>
+                        <option value="Mentor" <%=participant && participant.participant_role==='Mentor' ? 'selected'
+                            : '' %>>Mentor</option>
+                        <option value="Parent" <%=participant && participant.participant_role==='Parent' ? 'selected'
+                            : '' %>>Parent</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="participant_city">City</label>
+                    <input type="text" id="participant_city" name="participant_city" class="form-control"
+                        value="<%= participant ? participant.participant_city : '' %>">
+                </div>
+
+                <div class="form-group">
+                    <label for="participant_state">State</label>
+                    <input type="text" id="participant_state" name="participant_state" class="form-control"
+                        value="<%= participant ? participant.participant_state : '' %>">
+                </div>
+
+                <div class="form-group">
+                    <label for="participant_zip">Zip</label>
+                    <input type="text" id="participant_zip" name="participant_zip" class="form-control"
+                        value="<%= participant ? participant.participant_zip : '' %>">
+                </div>
+
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button type="submit" class="btn">Save Participant</button>
+            <a href="/participants" class="btn btn-dark">Cancel</a>
+        </div>
+        </form>
+
+        <% if (participant) { %>
+            <form action="/participants/delete/<%= participant.participant_id %>" method="POST"
+                style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem;">
+                <button type="submit" class="btn" style="background-color: #ff6b6b;"
+                    onclick="return confirm('Are you sure you want to delete this participant?');">Delete
+                    Participant</button>
+            </form>
+            <% } %>
+    </div>
+    </div>
+
+    <%- include('../partials/footer') %>

@@ -1,0 +1,25 @@
+<%- include('partials/header', { user: user }) %>
+
+    <div class="container" style="margin-bottom: 4rem;">
+        <div class="grid-3">
+            <% programs.forEach(program=> { %>
+                <div class="card">
+                    <h3>
+                        <%= program.event_name %>
+                    </h3>
+                    <p style="color: var(--col-dark-pink); font-weight: 600; margin-bottom: 1rem;">
+                        <%= program.event_type %>
+                    </p>
+                    <p>
+                        <%= program.event_description %>
+                    </p>
+                    <div style="margin-top: 1.5rem;">
+                        <a href="/events?search=<%= encodeURIComponent(program.event_name) %>" class="btn">View
+                            Schedule</a>
+                    </div>
+                </div>
+                <% }); %>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>

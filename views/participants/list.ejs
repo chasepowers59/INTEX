@@ -1,0 +1,68 @@
+<%- include('../partials/header', { user: user }) %>
+
+    <div class="container mt-4">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1>Participants</h1>
+            <% if (user.role==='Manager' ) { %>
+                <a href="/participants/add" class="btn">Add Participant</a>
+                <% } %>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="card mb-4">
+            <form action="/participants" method="GET" style="display: flex; gap: 1rem;">
+                <input type="text" name="search" class="form-control" placeholder="Search by name or email..."
+                    value="<%= search || '' %>" style="margin-bottom: 0;">
+                <button type="submit" class="btn">Search</button>
+                <% if (search) { %>
+                    <a href="/participants" class="btn btn-dark">Clear</a>
+                    <% } %>
+            </form>
+        </div>
+
+        <!-- Participants Table -->
+        <div class="card" style="padding: 0;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (participants.length> 0) { %>
+                        <% participants.forEach(p=> { %>
+                            <tr>
+                                <td>
+                                    <%= p.participant_first_name %>
+                                        <%= p.participant_last_name %>
+                                </td>
+                                <td>
+                                    <%= p.participant_email %>
+                                </td>
+                                <td>
+                                    <%= p.participant_role %>
+                                </td>
+                                <td>
+                                    <a href="/participants/<%= p.participant_id %>" class="btn"
+                                        style="padding: 0.4rem 1rem; font-size: 0.8rem;">View Hub</a>
+                                    <% if (user.role==='Manager' ) { %>
+                                        <a href="/participants/edit/<%= p.participant_id %>" class="btn btn-dark"
+                                            style="padding: 0.4rem 1rem; font-size: 0.8rem;">Edit</a>
+                                        <% } %>
+                                </td>
+                            </tr>
+                            <% }) %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="4" class="text-center">No participants found.</td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>

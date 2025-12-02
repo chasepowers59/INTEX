@@ -1,0 +1,126 @@
+<%- include('../partials/header', { user: user }) %>
+
+    <div class="container mt-4">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h1 style="margin-bottom: 0.5rem;">
+                    <%= participant.participant_first_name %>'s Hub
+                </h1>
+                <p style="color: var(--text-gray);">
+                    <%= participant.participant_email %> | <%= participant.participant_role %>
+                </p>
+            </div>
+
+            <div class="card">
+                <h4>Milestones</h4>
+                <% if (milestones.length> 0) { %>
+                    <div class="timeline">
+                        <% milestones.forEach(m=> { %>
+                            <div class="timeline-item">
+                                <strong>
+                                    <%= m.milestone_title %>
+                                </strong><br>
+                                <span style="font-size: 0.9rem; color: #666;">
+                                    <%= new Date(m.milestone_date).toLocaleDateString() %>
+                                </span>
+                            </div>
+                            <% }) %>
+                    </div>
+                    <% } else { %>
+                        <p>No milestones yet.</p>
+                        <% } %>
+            </div>
+        </div>
+
+        <!-- Right Column: Activity -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Events -->
+            <div class="card">
+                <h4>Events Attended</h4>
+                <% if (registrations.length> 0) { %>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Date</th>
+                                <th>Location</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% registrations.forEach(e=> { %>
+                                <tr>
+                                    <td>
+                                        <%= e.event_name %>
+                                    </td>
+                                    <td>
+                                        <%= new Date(e.start_time).toLocaleDateString() %>
+                                    </td>
+                                    <td>
+                                        <%= e.location %>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                    </table>
+                    <% } else { %>
+                        <p>No events attended.</p>
+                        <% } %>
+            </div>
+
+            <!-- Surveys -->
+            <div class="card">
+                <h4>Survey Feedback</h4>
+                <% if (surveys.length> 0) { %>
+                    <div class="grid-3" style="margin: 0; gap: 1rem;">
+                        <% surveys.forEach(s=> { %>
+                            <div style="background: #f9f9f9; padding: 1rem; border-radius: 10px;">
+                                <strong>
+                                    <%= s.event_name %>
+                                </strong>
+                                <div style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
+                                    <span>Sat: <%= s.survey_satisfaction_score %>/10</span>
+                                    <span>Use: <%= s.survey_usefulness_score %>/10</span>
+                                </div>
+                                <p style="font-style: italic; font-size: 0.9rem; margin-top: 0.5rem;">"<%=
+                                        s.survey_comments %>
+                                        "</p>
+                            </div>
+                            <% }) %>
+                    </div>
+                    <% } else { %>
+                        <p>No surveys completed.</p>
+                        <% } %>
+            </div>
+
+            <!-- Donations -->
+            <div class="card">
+                <h4>Donation History</h4>
+                <% if (donations.length> 0) { %>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% donations.forEach(d=> { %>
+                                <tr>
+                                    <td>
+                                        <%= new Date(d.donation_date).toLocaleDateString() %>
+                                    </td>
+                                    <td>$<%= d.donation_amount %>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                    </table>
+                    <% } else { %>
+                        <p>No donations recorded.</p>
+                        <% } %>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <%- include('../partials/footer') %>

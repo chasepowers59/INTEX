@@ -1,115 +1,105 @@
 const knex = require('knex')(require('../knexfile')[process.env.NODE_ENV || 'development']);
 
-exports.getDashboard = (req, res) => {
-    res.render('admin/dashboard', { user: req.session.user });
-};
 
-exports.getParticipants = async (req, res) => {
-    const { search } = req.query;
-    let query = knex('participant').select('*');
-
-    if (search) {
-        query = query.where('first_name', 'ilike', `%${search}%`)
-            .orWhere('last_name', 'ilike', `%${search}%`)
-            .orWhere('email', 'ilike', `%${search}%`);
-    }
-
+exports.getDashboard = async (req, res) => {
     try {
-        const participants = await query;
-        res.render('admin/participant_list', { user: req.session.user, participants, search });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error');
-    }
-};
+        const { eventType, city, role } = req.query;
+        console.log('Dashboard Filters:', { eventType, city, role });
 
-exports.getEvents = async (req, res) => {
-    const { search } = req.query;
-    let query = knex('event_occurrence')
-        .join('event_template', 'event_occurrence.template_id', 'event_template.template_id')
-        .select('*')
-        .orderBy('start_time', 'desc');
+        // 1. Base Data Fetching - Get filtered IDs first
+        // This avoids complex join interactions by isolating the filtering logic
+        let filteredParticipantIds = knex('participants').select('participant_id');
+        let filteredRegistrationIds = knex('registrations')
+            .join('participants', 'registrations.participant_id', 'participants.participant_id')
+            .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+            .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
+            .select('registrations.registration_id');
 
-    if (search) {
-        query = query.where('event_name', 'ilike', `%${search}%`);
-    }
+        // Apply Filters to the ID lists
+        if (city && city !== '') {
+            filteredParticipantIds = filteredParticipantIds.where('participant_city', city);
+            filteredRegistrationIds = filteredRegistrationIds.where('participants.participant_city', city);
+        }
+        if (role && role !== '') {
+            filteredParticipantIds = filteredParticipantIds.where('participant_role', role);
+            filteredRegistrationIds = filteredRegistrationIds.where('participants.participant_role', role);
+        }
+        if (eventType && eventType !== '') {
+            // If filtering by event type, we only care about registrations for that event type
+            filteredRegistrationIds = filteredRegistrationIds.where('event_definitions.event_type', eventType);
 
-    try {
-        const events = await query;
-        res.render('admin/event_list', { user: req.session.user, events, search });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error');
-    }
-};
-
-exports.getParticipantDetail = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const participant = await knex('participant').where('participant_id', id).first();
-        if (!participant) {
-            return res.status(404).send('Participant not found');
+            // And participants who have at least one registration for that event type
+            filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', function () {
+                this.select('participant_id').from('registrations')
+                    .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+                    .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
+                    .where('event_definitions.event_type', eventType);
+            });
         }
 
-        const milestones = await knex('milestone').where('participant_id', id).orderBy('date_achieved', 'desc');
-        const donations = await knex('donation').where('participant_id', id).orderBy('date', 'desc');
-        const registrations = await knex('registration')
-            .join('event_occurrence', 'registration.occurrence_id', 'event_occurrence.occurrence_id')
-            .join('event_template', 'event_occurrence.template_id', 'event_template.template_id')
-            .where('registration.participant_id', id)
-            .select('*');
+        // Execute ID fetches
+        const pIds = await filteredParticipantIds.pluck('participant_id');
+        const rIds = await filteredRegistrationIds.pluck('registration_id');
 
-        // Fetch surveys linked to registrations
-        // This is a bit complex, might need a separate query or join.
-        // For now, let's just get surveys for the participant's registrations.
-        const surveys = await knex('survey')
-            .join('registration', 'survey.registration_id', 'registration.registration_id')
-            .where('registration.participant_id', id)
-            .select('*');
+        console.log(`Found ${pIds.length} participants and ${rIds.length} registrations matching filters.`);
 
-        res.render('admin/participant_detail', {
+        // 2. Calculate KPIs using the filtered IDs
+
+        // Total Participants
+        const totalParticipants = pIds.length;
+
+        // Avg Satisfaction (from filtered registrations)
+        const avgSatisfactionResult = await knex('surveys')
+            .whereIn('registration_id', rIds)
+            .avg('survey_satisfaction_score as avg')
+            .first();
+        const satisfactionScore = avgSatisfactionResult && avgSatisfactionResult.avg
+            ? parseFloat(avgSatisfactionResult.avg).toFixed(1)
+            : 0;
+
+        // STEAM Interest (Placeholder)
+        const steamInterestRate = 0;
+        const steamGradRate = 0;
+        const steamJobRate = 0;
+
+        // 3. Charts Data
+
+        // Satisfaction by Event Type
+        // We want to see the breakdown for the *filtered* set of registrations
+        const satisfactionByType = await knex('surveys')
+            .join('registrations', 'surveys.registration_id', 'registrations.registration_id')
+            .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+            .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
+            .whereIn('surveys.registration_id', rIds)
+            .select('event_definitions.event_type')
+            .avg('surveys.survey_satisfaction_score as avg_score')
+            .groupBy('event_definitions.event_type');
+
+        // City Distribution
+        // We want to see the breakdown for the *filtered* set of participants
+        const cityDistribution = await knex('participants')
+            .whereIn('participant_id', pIds)
+            .select('participant_city')
+            .count('participant_id as count')
+            .groupBy('participant_city');
+
+        res.render('admin/dashboard', {
             user: req.session.user,
-            participant,
-            milestones,
-            donations,
-            registrations,
-            surveys
+            kpis: {
+                steamInterestRate,
+                steamGradRate,
+                steamJobRate,
+                satisfactionScore,
+                totalParticipants
+            },
+            charts: {
+                satisfaction: satisfactionByType,
+                city: cityDistribution
+            },
+            filters: { eventType, city, role }
         });
     } catch (err) {
-        console.error(err);
+        console.error('Dashboard Error:', err);
         res.status(500).send('Server Error');
-    }
-};
-
-// Forms
-exports.getAddDonation = async (req, res) => {
-    const participants = await knex('participant').select('participant_id', 'first_name', 'last_name');
-    res.render('admin/forms/add_donation', { user: req.session.user, participants });
-};
-
-exports.postAddDonation = async (req, res) => {
-    const { participant_id, amount, date } = req.body;
-    try {
-        await knex('donation').insert({ participant_id, amount, date });
-        res.redirect(`/admin/participant/${participant_id}`);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error adding donation');
-    }
-};
-
-exports.getAddMilestone = async (req, res) => {
-    const participants = await knex('participant').select('participant_id', 'first_name', 'last_name');
-    res.render('admin/forms/add_milestone', { user: req.session.user, participants });
-};
-
-exports.postAddMilestone = async (req, res) => {
-    const { participant_id, title, date_achieved } = req.body;
-    try {
-        await knex('milestone').insert({ participant_id, title, date_achieved });
-        res.redirect(`/admin/participant/${participant_id}`);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error adding milestone');
     }
 };

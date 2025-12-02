@@ -4,15 +4,22 @@
         <!-- Header Section -->
         <div class="card"
             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <div>
-                <h1 style="margin-bottom: 0.5rem;">
-                    <%= participant.first_name %>
-                        <%= participant.last_name %>
-                </h1>
-                <span class="badge"
-                    style="background: var(--btn-blue); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;">
-                    <%= participant.generation_status %> Generation
-                </span>
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <!-- Photo Placeholder -->
+                <div
+                    style="width: 80px; height: 80px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #aaa;">
+                    <i class="fas fa-user" style="font-size: 2rem;"></i>
+                </div>
+                <div>
+                    <h1 style="margin-bottom: 0.5rem;">
+                        <%= participant.first_name %>
+                            <%= participant.last_name %>
+                    </h1>
+                    <span class="badge"
+                        style="background: var(--btn-blue); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem;">
+                        <%= participant.generation_status %> Generation
+                    </span>
+                </div>
             </div>
             <button class="btn">Edit Profile</button>
         </div>
@@ -111,34 +118,46 @@
                                         Milestone</a>
                     </div>
 
-                    <!-- Survey History -->
+                    <!-- Evolution (Survey History Chart) -->
                     <div class="card">
-                        <h3 class="mb-4">Survey History</h3>
-                        <% if (surveys.length> 0) { %>
-                            <% surveys.forEach(s=> { %>
-                                <div
-                                    style="margin-bottom: 1rem; background: #f9f9f9; padding: 0.8rem; border-radius: 8px;">
-                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                        <span>Satisfaction</span>
-                                        <strong>
-                                            <%= s.satisfaction_score %>/10
-                                        </strong>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between;">
-                                        <span>Confidence</span>
-                                        <strong>
-                                            <%= s.self_confidence_rating %>/10
-                                        </strong>
-                                    </div>
-                                    <% if (s.comments) { %>
-                                        <p style="margin-top: 0.5rem; font-size: 0.85rem; font-style: italic;">"<%=
-                                                s.comments %>"</p>
-                                        <% } %>
-                                </div>
-                                <% }) %>
-                                    <% } else { %>
-                                        <p style="color: #888; font-style: italic;">No survey data available.</p>
-                                        <% } %>
+                        <h3 class="mb-4">Evolution</h3>
+                        <canvas id="evolutionChart" height="200"></canvas>
+                        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const ctx = document.getElementById('evolutionChart').getContext('2d');
+                                const surveyData = <% - JSON.stringify(surveys) %>;
+
+                                // Sort by date if needed, assuming survey_date exists or using index
+                                const labels = surveyData.map((s, i) => `Survey ${i + 1}`);
+                                const confidenceScores = surveyData.map(s => s.self_confidence_rating);
+                                const satisfactionScores = surveyData.map(s => s.satisfaction_score);
+
+                                new Chart(ctx, {
+                                    type: 'line',
+                                    data: {
+                                        labels: labels,
+                                        datasets: [{
+                                            label: 'Confidence',
+                                            data: confidenceScores,
+                                            borderColor: '#978EC4',
+                                            tension: 0.4
+                                        }, {
+                                            label: 'Satisfaction',
+                                            data: satisfactionScores,
+                                            borderColor: '#94AAB9',
+                                            tension: 0.4
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        scales: {
+                                            y: { beginAtZero: true, max: 10 }
+                                        }
+                                    }
+                                });
+                            });
+                        </script>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,46 @@
+<%- include('partials/header', { user: user }) %>
+
+    <div style="background-color: var(--col-blue); padding: 4rem 0; text-align: center; margin-bottom: 4rem;">
+        <h1 style="color: white; font-size: 3rem; letter-spacing: 2px;">CONTACT US</h1>
+    </div>
+
+    <div class="container" style="max-width: 800px; margin-bottom: 4rem;">
+        <form action="/contact" method="POST">
+            <div class="form-control" style="background: #D8E2DC; border: none; color: #555;">
+                Select an option
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <input type="text" name="first_name" placeholder="First Name" class="form-control"
+                    style="background: #D8E2DC; border: none;" required>
+                <input type="text" name="last_name" placeholder="Last Name" class="form-control"
+                    style="background: #D8E2DC; border: none;" required>
+            </div>
+
+            <input type="email" name="email" placeholder="Email" class="form-control"
+                style="background: #D8E2DC; border: none;" required>
+
+            <textarea name="message" placeholder="Type your message here..." class="form-control" rows="5"
+                style="background: #D8E2DC; border: none;" required></textarea>
+
+            <p style="margin-top: 2rem; color: var(--text-gray);">Enter your phone number if you would like to receive
+                reminder messages.</p>
+            <input type="tel" name="phone" placeholder="Phone" class="form-control"
+                style="background: #D8E2DC; border: none;">
+
+            <p style="font-size: 0.8rem; color: #888; margin-bottom: 2rem;">
+                By signing up via text, you agree to receive reminder and other informative messages at the number
+                provided. Message and data rates may apply. Message frequency varies. Reply STOP to cancel.
+            </p>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="border: 1px solid #ccc; padding: 1rem; width: 200px; text-align: center;">
+                    [CAPTCHA Placeholder]
+                </div>
+                <button type="submit" class="btn"
+                    style="background-color: #9AB59D; color: #333; padding: 0.8rem 3rem;">Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <%- include('partials/footer') %>

@@ -1,0 +1,60 @@
+<%- include('../partials/header', { user: user }) %>
+
+    <div class="container mt-4">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1>Donations</h1>
+            <% if (user.role==='Manager' ) { %>
+                <a href="/donations/add" class="btn">Record Donation</a>
+                <% } %>
+        </div>
+
+        <!-- Search Bar -->
+        <form action="/donations" method="GET" class="mb-4">
+            <div style="display: flex; gap: 1rem;">
+                <input type="text" name="search" class="form-control" placeholder="Search by donor name..."
+                    value="<%= search || '' %>">
+                <button type="submit" class="btn">Search</button>
+            </div>
+        </form>
+
+        <div class="card" style="padding: 0;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Linked Participant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (donations.length> 0) { %>
+                        <% donations.forEach(d=> { %>
+                            <tr>
+                                <td>
+                                    <%= new Date(d.donation_date).toLocaleDateString() %>
+                                </td>
+                                <td style="font-weight: bold; color: var(--accent-blue);">$<%= d.donation_amount %>
+                                </td>
+                                <td>
+                                    <% if (d.participant_first_name) { %>
+                                        <a href="/admin/participant/<%= d.participant_id %>">
+                                            <%= d.participant_first_name %>
+                                                <%= d.participant_last_name %>
+                                        </a>
+                                        <% } else { %>
+                                            <em>External/Anonymous</em>
+                                            <% } %>
+                                </td>
+                            </tr>
+                            <% }) %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="3" class="text-center">No donations recorded.</td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>

@@ -1,10 +1,13 @@
 <%- include('../partials/header', { user: user }) %>
 
     <div class="container">
-        <h1 class="mb-4">Manage Events</h1>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1 class="mb-4">Manage Events</h1>
+            <a href="/events/add" class="btn">Create Event</a>
+        </div>
 
         <!-- Search Bar -->
-        <form action="/admin/events" method="GET" class="mb-4">
+        <form action="/events" method="GET" class="mb-4">
             <div style="display: flex; gap: 1rem;">
                 <input type="text" name="search" class="form-control" placeholder="Search by event name..."
                     value="<%= search || '' %>">
@@ -19,6 +22,7 @@
                     <th>Type</th>
                     <th>Date</th>
                     <th>Location</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,16 +36,25 @@
                                 <%= e.event_type %>
                             </td>
                             <td>
-                                <%= new Date(e.start_time).toLocaleString() %>
+                                <%= new Date(e.event_date_time_start).toLocaleString() %>
                             </td>
                             <td>
-                                <%= e.location %>
+                                <%= e.event_location %>
+                            </td>
+                            <td style="display: flex; gap: 0.5rem;">
+                                <a href="/events/edit/<%= e.event_instance_id %>" class="btn"
+                                    style="padding: 0.5rem 1rem; font-size: 0.8rem; background-color: var(--col-blue);">Edit</a>
+                                <form action="/events/delete/<%= e.event_instance_id %>" method="POST"
+                                    onsubmit="return confirm('Are you sure?');" style="margin: 0;">
+                                    <button type="submit" class="btn"
+                                        style="padding: 0.5rem 1rem; font-size: 0.8rem; background-color: var(--col-dark-pink);">Delete</button>
+                                </form>
                             </td>
                         </tr>
                         <% }) %>
                             <% } else { %>
                                 <tr>
-                                    <td colspan="4" class="text-center">No events found.</td>
+                                    <td colspan="5" class="text-center">No events found.</td>
                                 </tr>
                                 <% } %>
             </tbody>
