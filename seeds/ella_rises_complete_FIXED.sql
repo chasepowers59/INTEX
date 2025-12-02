@@ -26,8 +26,8 @@ CREATE TABLE app_user (
 );
 
 INSERT INTO app_user (username, password_hash, role) VALUES
-('admin', '$2b$10$bqPsb.1B1UvOGxpy4Dpg9eLbvKzrsZ1r2tM2mpdvRrIYYJ.sR32GG', 'Manager'),
-('volunteer', '$2b$10$bqPsb.1B1UvOGxpy4Dpg9eLbvKzrsZ1r2tM2mpdvRrIYYJ.sR32GG', 'Common');
+('admin', '$2b$10$m6Y5DDasY7gPwwxivAakpOLkt3BR9FgTo9t17L4vW0T8E4SNL4adi', 'Manager'),
+('volunteer', '$2b$10$m6Y5DDasY7gPwwxivAakpOLkt3BR9FgTo9t17L4vW0T8E4SNL4adi', 'Common');
 
 
 CREATE TABLE event_definitions (
