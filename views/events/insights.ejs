@@ -1,0 +1,120 @@
+<%- include('../partials/header', { user: user }) %>
+
+    <div class="container mt-4">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1>Event Impact Insights</h1>
+            <a href="/events" class="btn">Back to Events</a>
+        </div>
+
+        <!-- Correlation Card -->
+        <div class="card" style="margin-bottom: 3rem;">
+            <h3 style="margin-bottom: 1rem;">Does Attendance Drive Growth?</h3>
+            <p style="color: var(--text-light); margin-bottom: 2rem;">Correlation between number of events attended and
+                milestones achieved.</p>
+
+            <div style="height: 300px;">
+                <canvas id="correlationChart"></canvas>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+
+            <!-- Needs Encouragement -->
+            <div class="card" style="text-align: left; border-left: 5px solid var(--col-pink);">
+                <h3 style="color: var(--col-dark-pink);">Needs Encouragement</h3>
+                <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 1.5rem;">
+                    Participants with low event attendance and few milestones. Reach out to invite them!
+                </p>
+
+                <ul style="list-style: none; padding: 0;">
+                    <% needsEncouragement.forEach(p=> { %>
+                        <li style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #eee;">
+                            <strong style="display: block;">
+                                <%= p.participant_first_name %>
+                                    <%= p.participant_last_name %>
+                            </strong>
+                            <div
+                                style="font-size: 0.85rem; color: var(--text-light); display: flex; gap: 1rem; margin-top: 0.3rem;">
+                                <span><i class="fas fa-calendar"></i>
+                                    <%= p.event_count %> Events
+                                </span>
+                                <span><i class="fas fa-trophy"></i>
+                                    <%= p.milestone_count %> Milestones
+                                </span>
+                            </div>
+                            <a href="/participants/<%= p.participant_id %>"
+                                style="font-size: 0.8rem; color: var(--col-blue); font-weight: bold; margin-top: 0.5rem; display: inline-block;">View
+                                Profile &rarr;</a>
+                        </li>
+                        <% }) %>
+                </ul>
+            </div>
+
+            <!-- Success Stories -->
+            <div class="card" style="text-align: left; border-left: 5px solid var(--col-green);">
+                <h3 style="color: var(--col-green);">Success Stories</h3>
+                <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 1.5rem;">
+                    Highly engaged participants achieving great things. Highlight them!
+                </p>
+
+                <ul style="list-style: none; padding: 0;">
+                    <% successStories.forEach(p=> { %>
+                        <li style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #eee;">
+                            <strong style="display: block;">
+                                <%= p.participant_first_name %>
+                                    <%= p.participant_last_name %>
+                            </strong>
+                            <div
+                                style="font-size: 0.85rem; color: var(--text-light); display: flex; gap: 1rem; margin-top: 0.3rem;">
+                                <span><i class="fas fa-calendar"></i>
+                                    <%= p.event_count %> Events
+                                </span>
+                                <span><i class="fas fa-trophy"></i>
+                                    <%= p.milestone_count %> Milestones
+                                </span>
+                            </div>
+                            <a href="/participants/<%= p.participant_id %>"
+                                style="font-size: 0.8rem; color: var(--col-blue); font-weight: bold; margin-top: 0.5rem; display: inline-block;">View
+                                Profile &rarr;</a>
+                        </li>
+                        <% }) %>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('correlationChart');
+            const data = <% - JSON.stringify(correlationData) %>;
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.bucket),
+                    datasets: [{
+                        label: 'Avg Milestones Achieved',
+                        data: data.map(d => d.avg_milestones),
+                        backgroundColor: '#978EC4',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Avg Milestones' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Number of Events Attended' }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+    <%- include('../partials/footer') %>

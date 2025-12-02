@@ -6,13 +6,20 @@
             <div style="display: flex; gap: 1rem;">
                 <a href="/participants" class="btn">Manage Participants</a>
                 <a href="/events" class="btn">Manage Events</a>
+                <a href="/donations/insights" class="btn" style="background-color: var(--col-green);">Donation
+                    Insights</a>
+                <a href="/events/insights" class="btn" style="background-color: var(--col-purple);">Impact Report</a>
             </div>
         </div>
 
         <!-- Analytics Placeholder -->
         <div id="tableau-dashboard"
-            style="background: #f0f0f0; height: 300px; margin-bottom: 2rem; display: flex; align-items: center; justify-content: center; border: 2px dashed #ccc;">
-            <p style="color: #888;">Tableau Analytics Dashboard Placeholder</p>
+            style="background: #f0f0f0; height: 300px; margin-bottom: 2rem; display: flex; align-items: center; justify-content: center; border: 2px dashed #ccc; border-radius: var(--radius-card);">
+            <div style="text-align: center;">
+                <h3 style="color: #888;">Tableau Analytics Integration</h3>
+                <p style="color: #aaa;">Connect your Tableau dashboard here for deep insights.</p>
+                <button class="btn" style="background: #ccc; cursor: not-allowed;">Connect Data Source</button>
+            </div>
         </div>
 
         <!-- Filters -->
@@ -59,74 +66,90 @@
                 <p>Total Participants</p>
             </div>
             <div class="card">
-                <div class="card">
-                    <h3>Event Satisfaction</h3>
-                    <div style="height: 300px; position: relative;">
-                        <canvas id="satisfactionChart"
-                            data-chart-data='<%- JSON.stringify(charts.satisfaction) %>'></canvas>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>Participant Cities</h3>
-                    <div style="height: 300px; position: relative;">
-                        <canvas id="cityChart" data-chart-data='<%- JSON.stringify(charts.city) %>'></canvas>
-                    </div>
-                </div>
+                <h3 style="font-size: 3rem; color: var(--col-green);">
+                    <%= kpis.satisfactionScore %>
+                </h3>
+                <p>Avg Satisfaction</p>
+            </div>
+            <div class="card">
+                <h3 style="font-size: 3rem; color: var(--col-purple);">
+                    <%= kpis.milestoneCount %>
+                </h3>
+                <p>Higher Ed Milestones</p>
             </div>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                // Satisfaction Chart
-                const satisfactionCanvas = document.getElementById('satisfactionChart');
-                if (satisfactionCanvas) {
-                    const satisfactionCtx = satisfactionCanvas.getContext('2d');
-                    const satisfactionData = JSON.parse(satisfactionCanvas.dataset.chartData);
+        <!-- Charts -->
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-bottom: 4rem;">
+            <div class="card">
+                <h3>Event Satisfaction</h3>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="satisfactionChart"
+                        data-chart-data='<%- JSON.stringify(charts.satisfaction) %>'></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Participant Cities</h3>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="cityChart" data-chart-data='<%- JSON.stringify(charts.city) %>'></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                    new Chart(satisfactionCtx, {
-                        type: 'bar',
-                        data: {
-                            labels: satisfactionData.map(d => d.event_type),
-                            datasets: [{
-                                label: 'Avg Satisfaction Score',
-                                data: satisfactionData.map(d => d.avg_score),
-                                backgroundColor: ['#99B7C6', '#978EC4', '#9AB59D'],
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                                y: { beginAtZero: true, max: 5 }
-                            }
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Satisfaction Chart
+            const satisfactionCanvas = document.getElementById('satisfactionChart');
+            if (satisfactionCanvas) {
+                const satisfactionCtx = satisfactionCanvas.getContext('2d');
+                const satisfactionData = JSON.parse(satisfactionCanvas.dataset.chartData);
+
+                new Chart(satisfactionCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: satisfactionData.map(d => d.event_type),
+                        datasets: [{
+                            label: 'Avg Satisfaction Score',
+                            data: satisfactionData.map(d => d.avg_score),
+                            backgroundColor: ['#99B7C6', '#978EC4', '#9AB59D'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, max: 10 }
                         }
-                    });
-                }
+                    }
+                });
+            }
 
-                // City Chart
-                const cityCanvas = document.getElementById('cityChart');
-                if (cityCanvas) {
-                    const cityCtx = cityCanvas.getContext('2d');
-                    const cityData = JSON.parse(cityCanvas.dataset.chartData);
+            // City Chart
+            const cityCanvas = document.getElementById('cityChart');
+            if (cityCanvas) {
+                const cityCtx = cityCanvas.getContext('2d');
+                const cityData = JSON.parse(cityCanvas.dataset.chartData);
 
-                    new Chart(cityCtx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: cityData.map(d => d.participant_city || 'Unknown'),
-                            datasets: [{
-                                data: cityData.map(d => d.count),
-                                backgroundColor: ['#FFD8D1', '#F9AFB1', '#F4B092', '#CE325B', '#9AB59D']
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false
-                        }
-                    });
-                }
-            });
-        </script>
+                new Chart(cityCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: cityData.map(d => d.participant_city || 'Unknown'),
+                        datasets: [{
+                            data: cityData.map(d => d.count),
+                            backgroundColor: ['#FFD8D1', '#F9AFB1', '#F4B092', '#CE325B', '#9AB59D']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+        });
+    </script>
 
-        <%- include('../partials/footer') %>
+    <%- include('../partials/footer') %>

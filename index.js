@@ -46,7 +46,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false, // TEMPORARILY FALSE FOR DEBUGGING
+        secure: false, // SSL terminated at Load Balancer/Nginx
         maxAge: 1000 * 60 * 60 * 24 // 1 day
     }
 }));
@@ -90,19 +90,6 @@ app.use('/surveys', surveyRoutes);
 // Easter Egg
 app.get('/teapot', (req, res) => {
     res.status(418).send("I am a teapot - Ella Rises Code");
-});
-
-// Debug Route
-app.get('/debug-session', (req, res) => {
-    res.json({
-        session: req.session,
-        sessionID: req.sessionID,
-        headers: req.headers,
-        protocol: req.protocol,
-        secure: req.secure,
-        ip: req.ip,
-        ips: req.ips
-    });
 });
 
 // Global Error Handler

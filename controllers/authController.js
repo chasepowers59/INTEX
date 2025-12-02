@@ -23,6 +23,11 @@ exports.postLogin = async (req, res) => {
         if (isMatch) {
             req.session.user = user;
             console.log('Session user set:', req.session.user);
+
+            // Redirect based on role/link
+            if (user.participant_id) {
+                return res.redirect(`/participants/${user.participant_id}`);
+            }
             return res.redirect('/admin/dashboard');
         }
 

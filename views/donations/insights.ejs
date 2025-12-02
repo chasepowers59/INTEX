@@ -1,0 +1,69 @@
+<%- include('../partials/header', { user: user }) %>
+
+    <div class="container mt-4">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1>Donation Insights</h1>
+            <a href="/donations" class="btn">Back to List</a>
+        </div>
+
+        <div class="grid-3">
+            <div class="card">
+                <h3 style="color: var(--col-green);">$<%= totalRaised.toLocaleString() %>
+                </h3>
+                <p>Total Raised</p>
+            </div>
+            <div class="card">
+                <h3 style="color: var(--col-blue);">
+                    <%= totalDonations %>
+                </h3>
+                <p>Total Donations</p>
+            </div>
+            <div class="card">
+                <h3 style="color: var(--col-purple);">$<%= avgDonation %>
+                </h3>
+                <p>Average Donation</p>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 2rem;">
+            <h3 style="margin-bottom: 1.5rem; color: var(--col-dark-pink);">Top Donors</h3>
+            <p style="margin-bottom: 2rem; color: var(--text-light);">Recognizing our most committed supporters.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Donor</th>
+                        <th>Total Contributed</th>
+                        <th>Donation Count</th>
+                        <th>Last Donation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% topDonors.forEach(d=> { %>
+                        <tr>
+                            <td>
+                                <strong>
+                                    <%= d.participant_first_name %>
+                                        <%= d.participant_last_name %>
+                                </strong>
+                            </td>
+                            <td style="color: var(--col-green); font-weight: bold;">$<%= d.total_amount.toLocaleString()
+                                    %>
+                            </td>
+                            <td>
+                                <span
+                                    style="background: var(--col-cream); padding: 0.2rem 0.8rem; border-radius: 10px; font-size: 0.9rem;">
+                                    <%= d.donation_count %>
+                                </span>
+                            </td>
+                            <td>
+                                <%= new Date(d.last_donation).toLocaleDateString() %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>

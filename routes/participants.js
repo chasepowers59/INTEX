@@ -97,6 +97,20 @@ router.post('/add', isAuthenticated, isManager, upload, async (req, res) => {
 // Participant Detail Dashboard ("One Kid Hub")
 router.get('/:id', isAuthenticated, async (req, res) => {
     try {
+        // Access Control
+        const user = req.session.user;
+        const isAuthorized =
+            user.role === 'Admin' ||
+            user.role === 'Manager' ||
+            user.participant_id == req.params.id;
+
+        if (!isAuthorized) {
+            return res.status(403).render('error', {
+                message: 'You are not authorized to view this profile.',
+                error: { status: 403, stack: '' }
+            });
+        }
+
         const participant = await db('participants').where({ participant_id: req.params.id }).first();
         if (!participant) return res.status(404).send('Participant not found');
 
