@@ -18,29 +18,34 @@
         <!-- Filters -->
         <div class="card" style="margin-bottom: 2rem; padding: 1.5rem;">
             <h4 style="margin-bottom: 1rem;">Filters</h4>
-            <form id="filterForm" action="/admin/dashboard" method="GET" style="display: flex; gap: 1rem;">
+            <form id="filterForm" action="/admin/dashboard" method="GET"
+                style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <select name="eventType" class="form-control" style="width: auto;" onchange="this.form.submit()">
                     <option value="">All Event Types</option>
-                    <option value="STEAM" <%=filters.eventType==='STEAM' ? 'selected' : '' %>>STEAM</option>
-                    <option value="Leadership" <%=filters.eventType==='Leadership' ? 'selected' : '' %>>Leadership
-                    </option>
-                    <option value="Mariachi" <%=filters.eventType==='Mariachi' ? 'selected' : '' %>>Mariachi</option>
-                    <option value="Mentorship" <%=filters.eventType==='Mentorship' ? 'selected' : '' %>>Mentorship
-                    </option>
-                    <option value="Community Service" <%=filters.eventType==='Community Service' ? 'selected' : '' %>
-                        >Community Service</option>
+                    <% if (options && options.eventTypes) { %>
+                        <% options.eventTypes.forEach(type=> { %>
+                            <option value="<%= type %>" <%=filters.eventType===type ? 'selected' : '' %>><%= type %>
+                            </option>
+                            <% }) %>
+                                <% } %>
                 </select>
                 <select name="city" class="form-control" style="width: auto;" onchange="this.form.submit()">
                     <option value="">All Cities</option>
-                    <option value="Provo" <%=filters.city==='Provo' ? 'selected' : '' %>>Provo</option>
-                    <option value="Orem" <%=filters.city==='Orem' ? 'selected' : '' %>>Orem</option>
-                    <option value="Lehi" <%=filters.city==='Lehi' ? 'selected' : '' %>>Lehi</option>
+                    <% if (options && options.cities) { %>
+                        <% options.cities.forEach(city=> { %>
+                            <option value="<%= city %>" <%=filters.city===city ? 'selected' : '' %>><%= city %>
+                            </option>
+                            <% }) %>
+                                <% } %>
                 </select>
                 <select name="role" class="form-control" style="width: auto;" onchange="this.form.submit()">
                     <option value="">All Roles</option>
-                    <option value="Student" <%=filters.role==='Student' ? 'selected' : '' %>>Student</option>
-                    <option value="Mentor" <%=filters.role==='Mentor' ? 'selected' : '' %>>Mentor</option>
-                    <option value="Parent" <%=filters.role==='Parent' ? 'selected' : '' %>>Parent</option>
+                    <% if (options && options.roles) { %>
+                        <% options.roles.forEach(role=> { %>
+                            <option value="<%= role %>" <%=filters.role===role ? 'selected' : '' %>><%= role %>
+                            </option>
+                            <% }) %>
+                                <% } %>
                 </select>
             </form>
         </div>
@@ -54,90 +59,74 @@
                 <p>Total Participants</p>
             </div>
             <div class="card">
-                <h3 style="font-size: 3rem; color: var(--col-purple);">
-                    <%= kpis.satisfactionScore %>
-                </h3>
-                <p>Avg Satisfaction Score</p>
-            </div>
-            <div class="card">
-                <h3 style="font-size: 3rem; color: var(--col-green);">
-                    <%= kpis.steamInterestRate %>%
-                </h3>
-                <p>STEAM Interest Rate</p>
-            </div>
-        </div>
-
-        <!-- Charts Section -->
-        <div
-            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-bottom: 4rem;">
-            <div class="card">
-                <h3>Event Satisfaction</h3>
-                <div style="height: 300px; position: relative;">
-                    <canvas id="satisfactionChart"
-                        data-chart-data='<%- JSON.stringify(charts.satisfaction) %>'></canvas>
+                <div class="card">
+                    <h3>Event Satisfaction</h3>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="satisfactionChart"
+                            data-chart-data='<%- JSON.stringify(charts.satisfaction) %>'></canvas>
+                    </div>
                 </div>
-            </div>
-            <div class="card">
-                <h3>Participant Cities</h3>
-                <div style="height: 300px; position: relative;">
-                    <canvas id="cityChart" data-chart-data='<%- JSON.stringify(charts.city) %>'></canvas>
+                <div class="card">
+                    <h3>Participant Cities</h3>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="cityChart" data-chart-data='<%- JSON.stringify(charts.city) %>'></canvas>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Satisfaction Chart
-            const satisfactionCanvas = document.getElementById('satisfactionChart');
-            if (satisfactionCanvas) {
-                const satisfactionCtx = satisfactionCanvas.getContext('2d');
-                const satisfactionData = JSON.parse(satisfactionCanvas.dataset.chartData);
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Satisfaction Chart
+                const satisfactionCanvas = document.getElementById('satisfactionChart');
+                if (satisfactionCanvas) {
+                    const satisfactionCtx = satisfactionCanvas.getContext('2d');
+                    const satisfactionData = JSON.parse(satisfactionCanvas.dataset.chartData);
 
-                new Chart(satisfactionCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: satisfactionData.map(d => d.event_type),
-                        datasets: [{
-                            label: 'Avg Satisfaction Score',
-                            data: satisfactionData.map(d => d.avg_score),
-                            backgroundColor: ['#99B7C6', '#978EC4', '#9AB59D'],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: { beginAtZero: true, max: 5 }
+                    new Chart(satisfactionCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: satisfactionData.map(d => d.event_type),
+                            datasets: [{
+                                label: 'Avg Satisfaction Score',
+                                data: satisfactionData.map(d => d.avg_score),
+                                backgroundColor: ['#99B7C6', '#978EC4', '#9AB59D'],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: { beginAtZero: true, max: 5 }
+                            }
                         }
-                    }
-                });
-            }
+                    });
+                }
 
-            // City Chart
-            const cityCanvas = document.getElementById('cityChart');
-            if (cityCanvas) {
-                const cityCtx = cityCanvas.getContext('2d');
-                const cityData = JSON.parse(cityCanvas.dataset.chartData);
+                // City Chart
+                const cityCanvas = document.getElementById('cityChart');
+                if (cityCanvas) {
+                    const cityCtx = cityCanvas.getContext('2d');
+                    const cityData = JSON.parse(cityCanvas.dataset.chartData);
 
-                new Chart(cityCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: cityData.map(d => d.participant_city || 'Unknown'),
-                        datasets: [{
-                            data: cityData.map(d => d.count),
-                            backgroundColor: ['#FFD8D1', '#F9AFB1', '#F4B092', '#CE325B', '#9AB59D']
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false
-                    }
-                });
-            }
-        });
-    </script>
+                    new Chart(cityCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: cityData.map(d => d.participant_city || 'Unknown'),
+                            datasets: [{
+                                data: cityData.map(d => d.count),
+                                backgroundColor: ['#FFD8D1', '#F9AFB1', '#F4B092', '#CE325B', '#9AB59D']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                }
+            });
+        </script>
 
-    <%- include('../partials/footer') %>
+        <%- include('../partials/footer') %>

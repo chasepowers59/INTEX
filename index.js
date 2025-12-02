@@ -5,11 +5,11 @@ const helmet = require('helmet');
 const session = require('express-session');
 const knex = require('knex');
 const knexConfig = require('./knexfile');
-const csrf = require('csurf');
+// const csrf = require('csurf'); // DISABLED
 const flash = require('connect-flash');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 
 // Database Connection
 const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
@@ -40,11 +40,12 @@ app.use(session({
 
 app.use(flash());
 // CSRF protection - must be after session and body parser
-app.use(csrf());
+// app.use(csrf()); // DISABLED
 
 // Global variables for views
 app.use((req, res, next) => {
-    res.locals.csrfToken = req.csrfToken();
+    // res.locals.csrfToken = req.csrfToken(); // DISABLED
+    res.locals.csrfToken = 'disabled'; // Dummy token
     res.locals.messages = req.flash();
     res.locals.user = req.session.user || null;
     next();
@@ -80,12 +81,14 @@ app.get('/teapot', (req, res) => {
 
 // Global Error Handler
 app.use((err, req, res, next) => {
+    /*
     if (err.code === 'EBADCSRFTOKEN') {
         // handle CSRF token errors here
         res.status(403);
         res.send('Form tampered with');
         return;
     }
+    */
     console.error(err.stack);
     res.status(500).send('Something broke! Please try again later.');
 });

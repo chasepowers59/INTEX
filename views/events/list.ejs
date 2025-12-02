@@ -1,52 +1,57 @@
 <%- include('../partials/header', { user: user }) %>
 
-    <div style="background-color: var(--col-blue); padding: 4rem 0; text-align: center; margin-bottom: 4rem;">
-        <h1 style="color: white; font-size: 3rem; letter-spacing: 2px;">EVENTS</h1>
+    <!-- Hero / Title Section -->
+    <div class="section-header-blue">
+        <div class="brush-border-top"></div>
+        <h2>UPCOMING EVENTS</h2>
+        <div class="brush-border-bottom"></div>
     </div>
 
-    <div class="container" style="margin-bottom: 4rem;">
-        <!-- Search Bar and Add Button -->
-        <div
-            style="display: flex; justify-content: space-between; align-items: center; max-width: 800px; margin: 0 auto 3rem auto;">
-            <form action="/events" method="GET" style="flex-grow: 1; margin-right: 1rem;">
-                <div style="display: flex; gap: 1rem;">
-                    <input type="text" name="search" class="form-control" placeholder="Search events..."
-                        value="<%= typeof search !== 'undefined' ? search : '' %>">
-                    <button type="submit" class="btn">Search</button>
-                </div>
+    <div class="container" style="padding: 4rem 0;">
+        <!-- Search & Filter Bar -->
+        <div class="card"
+            style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <form action="/events" method="GET" style="display: flex; gap: 1rem; flex: 1;">
+                <input type="text" name="search" class="form-control" placeholder="Search events..."
+                    value="<%= search %>">
+                <button type="submit" class="btn">Search</button>
             </form>
+
             <% if (user && user.role==='Manager' ) { %>
-                <a href="/events/add" class="btn" style="background-color: var(--col-green);">+ Add Event</a>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="/events/definitions/add" class="btn" style="background-color: var(--col-purple);">New
+                        Definition</a>
+                    <a href="/events/add" class="btn" style="background-color: var(--col-green);">Schedule Event</a>
+                </div>
                 <% } %>
         </div>
 
-        <% if (typeof groupedEvents !=='undefined' && groupedEvents && Object.keys(groupedEvents).length> 0) { %>
+        <!-- Events List -->
+        <% if (groupedEvents && groupedEvents.length> 0) { %>
             <div style="display: flex; flex-direction: column; gap: 2rem;">
-                <% Object.values(groupedEvents).forEach(function(group) { %>
-                    <div class="card" style="text-align: left; padding: 0; overflow: hidden;">
-                        <!-- Header / Definition Info -->
-                        <div style="padding: 2rem; background: white; border-bottom: 1px solid #eee; cursor: pointer;"
+                <% groupedEvents.forEach(function(group) { %>
+                    <div class="card" style="padding: 0; overflow: hidden; border: none; box-shadow: var(--shadow-md);">
+                        <!-- Event Header (Clickable to expand) -->
+                        <div style="padding: 2rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: white;"
                             onclick="toggleInstances(this)">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                                <div>
-                                    <h3 style="font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--col-blue);">
-                                        <%= group.definition.event_name %>
-                                    </h3>
-                                    <p style="color: var(--col-dark-pink); font-weight: 600; margin-bottom: 0.5rem;">
-                                        <%= group.definition.event_type %>
-                                            <% if (group.definition.event_recurrence_pattern) { %>
-                                                | <%= group.definition.event_recurrence_pattern %>
-                                                    <% } %>
-                                    </p>
-                                    <p style="color: #666; margin-bottom: 1rem; max-width: 800px;">
-                                        <%= group.definition.event_description %>
-                                    </p>
-                                </div>
-                                <button class="btn btn-toggle"
-                                    style="background-color: var(--col-light-pink); color: var(--col-blue);">
-                                    Select Date to Register (<%= group.instances.length %>)
-                                </button>
+                            <div>
+                                <h3 style="margin-bottom: 0.5rem; color: var(--col-blue);">
+                                    <%= group.definition.event_name %>
+                                </h3>
+                                <p style="color: var(--col-dark-pink); font-weight: 600; margin-bottom: 0.5rem;">
+                                    <%= group.definition.event_type %>
+                                        <% if (group.definition.event_recurrence_pattern) { %>
+                                            | <%= group.definition.event_recurrence_pattern %>
+                                                <% } %>
+                                </p>
+                                <p style="color: #666; margin-bottom: 1rem; max-width: 800px;">
+                                    <%= group.definition.event_description %>
+                                </p>
                             </div>
+                            <button class="btn btn-toggle"
+                                style="background-color: var(--col-light-pink); color: var(--col-blue);">
+                                Select Date to Register (<%= group.instances.length %>)
+                            </button>
                         </div>
 
                         <!-- Collapsible Instances List -->

@@ -62,15 +62,6 @@
                                 <% }) %>
                         </tbody>
                     </table>
-                    <% } else { %>
-                        <p>No events attended.</p>
-                        <% } %>
-            </div>
-
-            <!-- Surveys -->
-            <div class="card">
-                <h4>Survey Feedback</h4>
-                <% if (surveys.length> 0) { %>
                     <div class="grid-3" style="margin: 0; gap: 1rem;">
                         <% surveys.forEach(s=> { %>
                             <div style="background: #f9f9f9; padding: 1rem; border-radius: 10px;">
@@ -121,6 +112,46 @@
             </div>
         </div>
     </div>
-    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('surveyChart');
+            if (ctx) {
+                const surveyData = <% - JSON.stringify(surveys) %>;
+
+                // If no data, don't break
+                if (!surveyData || surveyData.length === 0) return;
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: surveyData.map(s => s.event_name),
+                        datasets: [{
+                            label: 'Satisfaction',
+                            data: surveyData.map(s => s.survey_satisfaction_score),
+                            borderColor: '#978EC4',
+                            tension: 0.1
+                        }, {
+                            label: 'Usefulness',
+                            data: surveyData.map(s => s.survey_usefulness_score),
+                            borderColor: '#9AB59D',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 
     <%- include('../partials/footer') %>

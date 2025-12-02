@@ -4,10 +4,47 @@
         <h1 class="text-center" style="margin-bottom: 2rem;">Event Survey</h1>
 
         <div class="card" style="max-width: 600px; margin: 0 auto;">
-            <h3 style="margin-bottom: 1rem;">
+            <h3 style="margin-bottom: 1rem; color: var(--col-blue);">
                 <%= registration.event_name %>
-                    <button type="submit" class="btn" style="width: 100%;">Submit Survey</button>
-                    </form>
+            </h3>
+            <p style="margin-bottom: 2rem; color: #666;">Please help us improve by sharing your feedback.</p>
+
+            <form action="/surveys/new" method="POST">
+                <input type="hidden" name="registration_id" value="<%= registration.registration_id %>">
+
+                <div class="form-group">
+                    <label>Satisfaction Score (1-10)</label>
+                    <p class="text-muted" style="font-size: 0.9rem;">How satisfied were you with this event?</p>
+                    <input type="number" name="satisfaction" class="form-control" min="1" max="10" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Usefulness Score (1-10)</label>
+                    <p class="text-muted" style="font-size: 0.9rem;">How useful was this event for your goals?</p>
+                    <input type="number" name="usefulness" class="form-control" min="1" max="10" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Instructor Score (1-10)</label>
+                    <p class="text-muted" style="font-size: 0.9rem;">How would you rate the instructor/mentor?</p>
+                    <input type="number" name="instructor" class="form-control" min="1" max="10" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Recommendation Score (1-10)</label>
+                    <p class="text-muted" style="font-size: 0.9rem;">How likely are you to recommend this to a friend?
+                        (NPS)</p>
+                    <input type="number" name="recommendation" class="form-control" min="1" max="10" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Comments</label>
+                    <textarea name="comments" class="form-control" rows="4"
+                        placeholder="Any other feedback?"></textarea>
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%;">Submit Survey</button>
+            </form>
         </div>
     </div>
 

@@ -46,6 +46,33 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Create Definition Form
+router.get('/definitions/add', isAuthenticated, isManager, (req, res) => {
+    res.render('events/definition_form', { user: req.session.user });
+});
+
+// Handle Create Definition
+router.post('/definitions/add', isAuthenticated, isManager, async (req, res) => {
+    try {
+        const { event_name, event_type, event_description, event_recurrence_pattern, event_default_capacity } = req.body;
+        const definitionId = generateId();
+
+        await db('event_definitions').insert({
+            event_definition_id: definitionId,
+            event_name,
+            event_type,
+            event_description,
+            event_recurrence_pattern: event_recurrence_pattern || null,
+            event_default_capacity: event_default_capacity || 30
+        });
+
+        res.redirect('/events/add'); // Redirect to add instance using this new definition
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
 // Add Event Form
 router.get('/add', isAuthenticated, isManager, async (req, res) => {
     try {

@@ -6,23 +6,62 @@
         <!-- Search Bar -->
         <form action="/participants" method="GET" class="mb-4">
             <div style="display: flex; gap: 1rem;">
-                <input type="text" name="search" class="form-control" placeholder="Search by name or email..."
-                    value="<%= search || '' %>">
-                <button type="submit" class="btn">Search</button>
-            </div>
-        </form>
+                <%- include('../partials/header', { user: user }) %>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Generation</th>
-                    <th>Actions</th>
-                </tr>
-                <% } %>
-                    </tbody>
-        </table>
-    </div>
+                    <div class="container">
+                        <h1 class="mb-4">Participants</h1>
 
-    <%- include('../partials/footer') %>
+                        <!-- Search Bar -->
+                        <form action="/participants" method="GET" class="mb-4">
+                            <div style="display: flex; gap: 1rem;">
+                                <input type="text" name="search" class="form-control"
+                                    placeholder="Search by name or email..." value="<%= search || '' %>">
+                                <button type="submit" class="btn">Search</button>
+                            </div>
+                        </form>
+
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>City</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (participants && participants.length> 0) { %>
+                                    <% participants.forEach(p=> { %>
+                                        <tr>
+                                            <td>
+                                                <%= p.participant_first_name %>
+                                                    <%= p.participant_last_name %>
+                                            </td>
+                                            <td>
+                                                <%= p.participant_email %>
+                                            </td>
+                                            <td>
+                                                <%= p.participant_role %>
+                                            </td>
+                                            <td>
+                                                <%= p.participant_city %>
+                                            </td>
+                                            <td>
+                                                <a href="/participants/<%= p.participant_id %>"
+                                                    class="btn btn-sm btn-primary">View</a>
+                                                <a href="/participants/edit/<%= p.participant_id %>"
+                                                    class="btn btn-sm btn-secondary">Edit</a>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                            <% } else { %>
+                                                <tr>
+                                                    <td colspan="5" class="text-center">No participants found.</td>
+                                                </tr>
+                                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <%- include('../partials/footer') %>

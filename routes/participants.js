@@ -7,20 +7,51 @@ const { isAuthenticated, isManager } = require('../middleware/authMiddleware');
 const upload = require('../middleware/upload');
 const { generateId } = require('../utils/idGenerator');
 
-// List Participants (with Search)
+// List Participants (with Search & Filters)
 router.get('/', isAuthenticated, async (req, res) => {
     try {
-        const { search } = req.query;
+        const { search, role, city, sort } = req.query;
         let query = db('participants').select('*');
 
         if (search) {
-            query = query.where('participant_first_name', 'ilike', `%${search}%`)
-                .orWhere('participant_last_name', 'ilike', `%${search}%`)
-                .orWhere('participant_email', 'ilike', `%${search}%`);
+            query = query.where(builder => {
+                builder.where('participant_first_name', 'ilike', `%${search}%`)
+                    .orWhere('participant_last_name', 'ilike', `%${search}%`)
+                    .orWhere('participant_email', 'ilike', `%${search}%`);
+            });
         }
 
+        if (role) {
+            query = query.where('participant_role', 'ilike', role);
+        }
+
+        if (city) {
+            query = query.where('participant_city', 'ilike', city);
+        }
+
+        if (sort) {
+            const [field, dir] = sort.split(':');
+            query = query.orderBy(field, dir || 'asc');
+        } else {
+            query = query.orderBy('participant_last_name', 'asc');
+        }
+
+        console.log('Filter Params:', { search, role, city, sort }); // DEBUG
+        console.log('SQL Query:', query.toString()); // DEBUG
+
         const participants = await query;
-        res.render('participants/list', { user: req.session.user, participants, search });
+
+        // Fetch distinct values for filters
+        const roles = await db('participants').distinct('participant_role').pluck('participant_role');
+        const cities = await db('participants').distinct('participant_city').pluck('participant_city');
+
+        res.render('participants/list', {
+            user: req.session.user,
+            participants,
+            search,
+            filters: { role, city, sort },
+            options: { roles: roles.filter(Boolean).sort(), cities: cities.filter(Boolean).sort() }
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -90,13 +121,26 @@ router.get('/:id', isAuthenticated, async (req, res) => {
         const donations = await db('donations')
             .where({ participant_id: req.params.id });
 
+        // Calculate Averages
+        let avgSat = 0, avgUse = 0, avgRec = 0;
+        if (surveys.length > 0) {
+            avgSat = surveys.reduce((acc, s) => acc + parseFloat(s.survey_satisfaction_score || 0), 0) / surveys.length;
+            avgUse = surveys.reduce((acc, s) => acc + parseFloat(s.survey_usefulness_score || 0), 0) / surveys.length;
+            avgRec = surveys.reduce((acc, s) => acc + parseFloat(s.survey_recommendation_score || 0), 0) / surveys.length;
+        }
+
         res.render('participants/detail', {
             user: req.session.user,
             participant,
             milestones,
             registrations: events, // View expects 'registrations' for the event list
             surveys,
-            donations
+            donations,
+            averages: {
+                satisfaction: avgSat.toFixed(1),
+                usefulness: avgUse.toFixed(1),
+                recommendation: avgRec.toFixed(1)
+            }
         });
     } catch (err) {
         console.error(err);

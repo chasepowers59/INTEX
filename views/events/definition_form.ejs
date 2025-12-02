@@ -1,0 +1,61 @@
+<%- include('../partials/header', { user: user }) %>
+
+    <div class="container mt-4">
+        <div class="card" style="max-width: 600px; margin: 0 auto;">
+            <h1 class="mb-4">Create Event Definition</h1>
+            <p class="text-muted mb-4">Define a new type of event (e.g., "Weekly Mariachi Practice") that can be
+                scheduled multiple times.</p>
+
+            <form action="/events/definitions/add" method="POST">
+
+                <div class="form-group">
+                    <label for="event_name">Event Name</label>
+                    <input type="text" id="event_name" name="event_name" class="form-control"
+                        placeholder="e.g. STEAM Workshop" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="event_type">Event Type</label>
+                    <select id="event_type" name="event_type" class="form-control" required>
+                        <option value="">Select Type...</option>
+                        <option value="STEAM">STEAM</option>
+                        <option value="Mariachi">Mariachi</option>
+                        <option value="Leadership">Leadership</option>
+                        <option value="Mentorship">Mentorship</option>
+                        <option value="Community Service">Community Service</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="event_description">Description</label>
+                    <textarea id="event_description" name="event_description" class="form-control" rows="3"
+                        placeholder="Brief description of what this event involves..."></textarea>
+                </div>
+
+                <div class="grid-2" style="gap: 1rem;">
+                    <div class="form-group">
+                        <label for="event_recurrence_pattern">Recurrence (Optional)</label>
+                        <select id="event_recurrence_pattern" name="event_recurrence_pattern" class="form-control">
+                            <option value="">None (One-time)</option>
+                            <option value="Weekly">Weekly</option>
+                            <option value="Bi-Weekly">Bi-Weekly</option>
+                            <option value="Monthly">Monthly</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="event_default_capacity">Default Capacity</label>
+                        <input type="number" id="event_default_capacity" name="event_default_capacity"
+                            class="form-control" value="30" required>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn">Create Definition</button>
+                    <a href="/events" class="btn btn-dark">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
