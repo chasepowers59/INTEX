@@ -16,6 +16,11 @@ const port = process.env.PORT || 3000;
 // Database Connection
 const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
 
+const store = new KnexSessionStore({
+    knex: db,
+    tablename: 'sessions',
+});
+
 // Middleware
 app.use(helmet({
     contentSecurityPolicy: {
