@@ -9,7 +9,7 @@ const knexConfig = require('./knexfile');
 const flash = require('connect-flash');
 
 const app = express();
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 3000;
 
 // Database Connection
 const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
