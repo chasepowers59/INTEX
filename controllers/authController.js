@@ -13,7 +13,10 @@ exports.postLogin = async (req, res) => {
     try {
         const user = await db('app_user').where({ username }).first();
 
-        if (user && await bcrypt.compare(password, user.password_hash)) {
+        // Check for plain text password OR bcrypt hash
+        const isMatch = user && (user.password_hash === password || await bcrypt.compare(password, user.password_hash));
+
+        if (isMatch) {
             req.session.user = user;
             return res.redirect('/admin/dashboard');
         }
