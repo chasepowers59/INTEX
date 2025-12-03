@@ -1,31 +1,78 @@
 <%- include('partials/header', { user: user }) %>
 
-    <h1 class="mb-4 text-center">Upcoming Events</h1>
+    <!-- Hero -->
+    <div class="section-header-blue" style="margin-top: 0; padding: 4rem 0;">
+        <div class="brush-border-bottom"></div>
+        <h2>Upcoming Events</h2>
+        <p style="color: rgba(255,255,255,0.8); max-width: 600px; margin: 1rem auto 0;">
+            Join us for workshops, summits, and community gatherings.
+        </p>
+    </div>
 
-    <div class="grid grid-3">
+    <div class="container" style="margin-bottom: 6rem; max-width: 900px;">
         <% if (events && events.length> 0) { %>
             <% events.forEach(event=> { %>
-                <div class="card">
-                    <h3>
-                        <%= event.event_name %>
-                    </h3>
-                    <span class="badge">
-                        <%= event.event_type %>
-                    </span>
-                    <p class="mt-4">
-                        <%= event.description %>
-                    </p>
-                    <hr class="mt-4 mb-4" style="border: 0; border-top: 1px solid #eee;">
-                    <p><strong>When:</strong>
-                        <%= new Date(event.start_time).toLocaleString() %>
-                    </p>
-                    <p><strong>Where:</strong>
-                        <%= event.location %>
-                    </p>
+                <!-- Calendar Card -->
+                <div class="card hover-lift"
+                    style="display: flex; padding: 0; overflow: hidden; margin-bottom: 2rem; text-align: left; flex-direction: row;">
+                    <!-- Date Column -->
+                    <div
+                        style="background: var(--col-peach); width: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; color: var(--col-dark-gray); flex-shrink: 0;">
+                        <span style="font-size: 3rem; font-weight: 800; line-height: 1;">
+                            <%= new Date(event.start_time).getDate() %>
+                        </span>
+                        <span style="font-size: 1.2rem; text-transform: uppercase; font-weight: 600;">
+                            <%= new Date(event.start_time).toLocaleString('default', { month: 'short' }) %>
+                        </span>
+                        <span style="font-size: 0.9rem; margin-top: 0.5rem;">
+                            <%= new Date(event.start_time).getFullYear() %>
+                        </span>
+                    </div>
+
+                    <!-- Content Column -->
+                    <div style="padding: 2rem; flex-grow: 1; display: flex; flex-direction: column;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                            <div>
+                                <span class="badge"
+                                    style="background: var(--col-blue); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">
+                                    <%= event.event_type %>
+                                </span>
+                                <h3 style="margin: 0.5rem 0 0; color: var(--col-dark-gray); font-size: 1.8rem;">
+                                    <%= event.event_name %>
+                                </h3>
+                            </div>
+                            <!-- Register Button (Blue) -->
+                            <a href="/events/register/<%= event.event_id %>" class="btn"
+                                style="padding: 0.5rem 1.5rem; font-size: 0.8rem;">Register</a>
+                        </div>
+
+                        <p style="color: #666; margin-bottom: 1.5rem; flex-grow: 1;">
+                            <%= event.description %>
+                        </p>
+
+                        <div
+                            style="display: flex; gap: 2rem; color: #888; font-size: 0.9rem; border-top: 1px solid #eee; padding-top: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="far fa-clock"></i>
+                                <%= new Date(event.start_time).toLocaleTimeString([], { hour: '2-digit' ,
+                                    minute: '2-digit' }) %>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <%= event.location %>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <% }) %>
                     <% } else { %>
-                        <p class="text-center">No upcoming events scheduled at this time.</p>
+                        <div class="text-center"
+                            style="padding: 4rem; background: white; border-radius: var(--radius-card); box-shadow: var(--shadow-soft);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
+                            <h3 style="color: var(--col-blue);">No Upcoming Events</h3>
+                            <p>Check back soon for new workshops and activities!</p>
+                        </div>
                         <% } %>
     </div>
 

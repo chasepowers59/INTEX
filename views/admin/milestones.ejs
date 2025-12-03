@@ -1,60 +1,72 @@
 <%- include('../partials/header', { user: user }) %>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Milestone Maintenance</h1>
-        <div>
-            <a href="/admin/milestones/add" class="btn btn-success me-2">Add Milestone</a>
-            <a href="/admin/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Milestone Maintenance</h1>
+            <div>
+                <a href="/admin/milestones/add" class="btn btn-success me-2">Add Milestone</a>
+                <a href="/admin/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+            </div>
         </div>
-    </div>
 
-    <!-- Search Bar -->
-    <form action="/admin/milestones" method="GET" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="search" class="form-control" placeholder="Search by milestone title or participant name..." value="<%= search || '' %>">
-            <button type="submit" class="btn btn-primary">Search</button>
-        </div>
-    </form>
+        <!-- Search Bar -->
+        <form action="/admin/milestones" method="GET" class="mb-4">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control"
+                    placeholder="Search by milestone title or participant name..." value="<%= search || '' %>">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
 
-    <div class="card">
-        <div class="card-body">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Participant Name</th>
-                        <th>Milestone Title</th>
-                        <th>Milestone Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% if (milestones && milestones.length > 0) { %>
-                        <% milestones.forEach(m => { %>
-                            <tr>
-                                <td><%= m.participant_first_name %> <%= m.participant_last_name %></td>
-                                <td><%= m.milestone_title %></td>
-                                <td><%= new Date(m.milestone_date).toLocaleDateString() %></td>
-                                <td>
-                                    <a href="/admin/milestones/edit/<%= m.milestone_id %>" class="btn btn-sm btn-primary">Edit</a>
-                                    <form action="/admin/milestones/delete/<%= m.milestone_id %>" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this milestone?');">
-                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        <% }) %>
-                    <% } else { %>
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-striped table-hover">
+                    <thead>
                         <tr>
-                            <td colspan="4" class="text-center">No milestones found.</td>
+                            <th>Participant Name</th>
+                            <th>Milestone Title</th>
+                            <th>Milestone Date</th>
+                            <th>Actions</th>
                         </tr>
-                    <% } %>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <% if (milestones && milestones.length> 0) { %>
+                            <% milestones.forEach(m=> { %>
+                                <tr>
+                                    <td>
+                                        <%= m.participant_first_name %>
+                                            <%= m.participant_last_name %>
+                                    </td>
+                                    <td>
+                                        <%= m.milestone_title %>
+                                    </td>
+                                    <td>
+                                        <%= new Date(m.milestone_date).toLocaleDateString() %>
+                                    </td>
+                                    <td>
+                                        <a href="/admin/milestones/edit/<%= m.milestone_id %>"
+                                            class="btn btn-sm btn-primary">Edit</a>
+                                        <form action="/admin/milestones/delete/<%= m.milestone_id %>" method="POST"
+                                            style="display: inline;"
+                                            onsubmit="return confirm('Are you sure you want to delete this milestone?');">
+                                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="4" class="text-center">No milestones found.</td>
+                                        </tr>
+                                        <% } %>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 
-<%- include('../partials/footer') %>
+    <%- include('../partials/footer') %>
 
+        <%- include('../partials/pagination_script') %>

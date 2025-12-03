@@ -35,7 +35,7 @@
                                         <i class="fas fa-<%= mod.icon %> fa-lg"></i>
                                     </div>
                                     <h6 class="card-title mb-0 text-dark fw-bold"
-                                        style="font-size: 0.85rem; font-family: 'Montserrat', sans-serif;">
+                                        style="font-size: 0.75rem; font-family: 'Montserrat', sans-serif;">
                                         <%= mod.name %>
                                     </h6>
                                 </div>
@@ -49,7 +49,7 @@
         <div class="row g-4 mb-5">
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm h-100"
-                    style="border-radius: 20px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: white;">
+                    style="border-radius: 20px; background-color: #958EBF; color: white;">
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
@@ -68,7 +68,7 @@
             </div>
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm h-100"
-                    style="border-radius: 20px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+                    style="border-radius: 20px; background-color: #8DA9C4; color: white;">
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
@@ -87,7 +87,7 @@
             </div>
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm h-100"
-                    style="border-radius: 20px; background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%); color: white;">
+                    style="border-radius: 20px; background-color: #EE969E; color: white;">
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
@@ -115,7 +115,9 @@
                             Demographics</h5>
                     </div>
                     <div class="card-body px-4 pb-4">
-                        <canvas id="demographicsChart" height="250"></canvas>
+                        <div style="height: 300px; position: relative;">
+                            <canvas id="demographicsChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -124,8 +126,8 @@
                     <div class="card-header bg-white border-0 pt-4 px-4">
                         <h5 class="fw-bold mb-0" style="font-family: 'DM Serif Display', serif;">Program Impact</h5>
                     </div>
-                    <div class="card-body px-4 pb-4 d-flex align-items-center justify-content-center">
-                        <div style="width: 100%; max-width: 300px;">
+                    <div class="card-body px-4 pb-4">
+                        <div style="height: 300px; position: relative;">
                             <canvas id="impactChart"></canvas>
                         </div>
                     </div>
@@ -137,16 +139,14 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Data from EJS
-        const cityData = <% - JSON.stringify(charts.city || []) %>;
-        const attendanceCount = <%= kpis.attendanceCount || 0 %>;
-        const totalParticipants = <%= kpis.totalParticipants || 0 %>;
+        // Data from EJS (Safe Injection)
+        const cityLabels = <%- JSON.stringify(cityLabels || []) %>;
+        const cityData = <%- JSON.stringify(cityCounts || []) %>;
+        const impactData = <%- JSON.stringify(attendanceData || [0, 0]) %>;
 
-        // Process City Data
-        const cityLabels = cityData.map(c => c.participant_city || 'Unknown');
-        const cityCounts = cityData.map(c => c.count);
+        console.log('Chart Data:', { cityLabels, cityData, impactData });
 
-        // Demographics Chart (Bar)
+        // Demographics Chart (Vertical Bar)
         const ctxDemographics = document.getElementById('demographicsChart').getContext('2d');
         new Chart(ctxDemographics, {
             type: 'bar',
@@ -154,11 +154,10 @@
                 labels: cityLabels,
                 datasets: [{
                     label: 'Participants',
-                    data: cityCounts,
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                    borderRadius: 5
+                    data: cityData,
+                    backgroundColor: '#8DA9C4', // Brand Blue
+                    borderRadius: 5,
+                    barThickness: 30
                 }]
             },
             options: {
@@ -171,7 +170,8 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: { borderDash: [2, 4] }
+                        grid: { borderDash: [2, 4] },
+                        ticks: { stepSize: 1 }
                     },
                     x: {
                         grid: { display: false }
@@ -185,25 +185,51 @@
         new Chart(ctxImpact, {
             type: 'doughnut',
             data: {
-                labels: ['Attended', 'Inactive'],
+                labels: ['Attended', 'Missed'],
                 datasets: [{
-                    data: [attendanceCount, Math.max(0, totalParticipants - attendanceCount)],
-                    backgroundColor: ['#38ef7d', '#ff6b6b'],
+                    data: impactData,
+                    backgroundColor: ['#958EBF', '#FAD2D8'], // Brand Lavender, Brand Pink
                     borderWidth: 0,
                     hoverOffset: 4
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 cutout: '70%',
                 plugins: {
-                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { family: "'Montserrat', sans-serif" } } }
                 }
             }
         });
     </script>
 
     <style>
+        /* Brand Colors */
+        :root {
+            --brand-blue: #8DA9C4;
+            --brand-lavender: #958EBF;
+            --brand-pink: #FAD2D8;
+            --brand-cream: #FDFBF7;
+            --brand-coral: #EE969E;
+        }
+
+        body {
+            background-color: var(--brand-cream);
+        }
+
+        .text-brand-blue {
+            color: var(--brand-blue) !important;
+        }
+
+        .bg-brand-lavender {
+            background-color: var(--brand-lavender) !important;
+        }
+
+        .bg-brand-pink {
+            background-color: var(--brand-pink) !important;
+        }
+
         .hover-lift:hover {
             transform: translateY(-5px) !important;
             box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;

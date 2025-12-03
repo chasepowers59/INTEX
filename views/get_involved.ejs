@@ -1,52 +1,77 @@
 <%- include('partials/header', { user: user }) %>
 
-    <div
-        style="background-color: var(--col-blue); padding: 4rem 0; text-align: center; margin-bottom: 4rem; position: relative;">
-        <h1 style="color: white; font-size: 3rem; letter-spacing: 2px; text-transform: uppercase;">Get Involved</h1>
+    <!-- Split Screen Hero -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; min-height: 80vh;">
+        <!-- Left Image -->
+        <div style="background: url('/img/DSC_5359.jpg') center/cover no-repeat; position: relative;">
+            <div style="position: absolute; inset: 0; background: rgba(148, 170, 185, 0.4);"></div>
+        </div>
+
+        <!-- Right Content -->
         <div
-            style="position: absolute; bottom: -10px; left: 0; width: 100%; height: 20px; background: white; clip-path: polygon(0 100%, 100% 100%, 100% 0, 0 100%);">
+            style="background: var(--col-cream); display: flex; flex-direction: column; justify-content: center; padding: 6rem;">
+            <h1 style="font-size: 4rem; color: var(--col-blue); margin-bottom: 2rem;">Join the Movement</h1>
+            <p style="font-size: 1.2rem; line-height: 1.8; color: #666; margin-bottom: 3rem;">
+                There are many ways to support Ella Rises. Whether you volunteer your time, make a donation, or enroll a
+                student, you are helping us build a brighter future for Latina youth.
+            </p>
+            <div style="display: flex; gap: 1rem;">
+                <a href="#opportunities" class="btn">View Opportunities</a>
+            </div>
         </div>
     </div>
 
-    <div class="container" style="margin-bottom: 6rem;">
-        <div class="grid-3" style="gap: 3rem;">
-            <!-- Enroll Card -->
-            <div class="card"
-                style="text-align: center; padding: 2rem; display: flex; flex-direction: column; height: 100%;">
-                <div style="height: 200px; background-color: #eee; margin: -2rem -2rem 1.5rem -2rem; overflow: hidden;">
-                    <img src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                        alt="Enroll" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-                <h3 style="margin-bottom: 1rem;">Enroll a Student</h3>
-                <p style="margin-bottom: 2rem; flex-grow: 1;">Join our programs to learn, grow, and lead. Open to all
-                    students in the community.</p>
-                <a href="/contact?type=enroll" class="btn">Enroll Now</a>
-            </div>
+    <!-- Options Section -->
+    <div id="opportunities" class="container" style="margin: 6rem auto;">
+        <div class="text-center mb-4">
+            <h2 style="color: var(--col-blue); font-size: 2.5rem;">How You Can Help</h2>
+            <div style="width: 80px; height: 4px; background: var(--col-pink); margin: 1rem auto;"></div>
+        </div>
 
-            <!-- Volunteer Card -->
-            <div class="card"
-                style="text-align: center; padding: 2rem; display: flex; flex-direction: column; height: 100%;">
-                <div style="height: 200px; background-color: #eee; margin: -2rem -2rem 1.5rem -2rem; overflow: hidden;">
-                    <img src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                        alt="Volunteer" style="width: 100%; height: 100%; object-fit: cover;">
+        <div class="grid-3" style="gap: 3rem;">
+            <!-- Volunteer -->
+            <div class="card hover-lift text-center" style="padding: 3rem 2rem;">
+                <div
+                    style="width: 80px; height: 80px; background: var(--col-peach); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; font-size: 2rem; color: white;">
+                    <i class="fas fa-hands-helping"></i>
                 </div>
                 <h3 style="margin-bottom: 1rem;">Volunteer</h3>
-                <p style="margin-bottom: 2rem; flex-grow: 1;">Share your time and talents. We need mentors, event staff,
-                    and guest speakers.</p>
-                <a href="/contact?type=volunteer" class="btn">Become a Mentor</a>
+                <p style="color: #666; margin-bottom: 2rem;">
+                    Share your time and talents. We need mentors, event staff, and guest speakers to inspire our
+                    students.
+                </p>
+                <a href="/contact?type=volunteer" class="btn"
+                    style="background: white; color: var(--col-blue); border: 2px solid var(--col-blue);">Become a
+                    Mentor</a>
             </div>
 
-            <!-- Sponsor Card -->
-            <div class="card"
-                style="text-align: center; padding: 2rem; display: flex; flex-direction: column; height: 100%;">
-                <div style="height: 200px; background-color: #eee; margin: -2rem -2rem 1.5rem -2rem; overflow: hidden;">
-                    <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                        alt="Sponsor" style="width: 100%; height: 100%; object-fit: cover;">
+            <!-- Donate -->
+            <div class="card hover-lift text-center" style="padding: 3rem 2rem; border-top: 5px solid var(--col-blue);">
+                <div
+                    style="width: 80px; height: 80px; background: var(--col-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; font-size: 2rem; color: white;">
+                    <i class="fas fa-heart"></i>
                 </div>
-                <h3 style="margin-bottom: 1rem;">Sponsor</h3>
-                <p style="margin-bottom: 2rem; flex-grow: 1;">Support our mission financially. Your donations make our
-                    programs possible.</p>
+                <h3 style="margin-bottom: 1rem;">Donate</h3>
+                <p style="color: #666; margin-bottom: 2rem;">
+                    Support our mission financially. Your donations make our workshops, summits, and scholarships
+                    possible.
+                </p>
                 <a href="/donations/add" class="btn">Donate Today</a>
+            </div>
+
+            <!-- Enroll/Partner -->
+            <div class="card hover-lift text-center" style="padding: 3rem 2rem;">
+                <div
+                    style="width: 80px; height: 80px; background: var(--col-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; font-size: 2rem; color: white;">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <h3 style="margin-bottom: 1rem;">Enroll a Student</h3>
+                <p style="color: #666; margin-bottom: 2rem;">
+                    Join our programs to learn, grow, and lead. Open to all Latina students in the community.
+                </p>
+                <a href="/contact?type=enroll" class="btn"
+                    style="background: white; color: var(--col-green); border: 2px solid var(--col-green);">Enroll
+                    Now</a>
             </div>
         </div>
     </div>

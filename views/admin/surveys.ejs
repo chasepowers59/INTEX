@@ -1,89 +1,108 @@
 <%- include('../partials/header', { user: user }) %>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Survey Maintenance</h1>
-        <a href="/admin/dashboard" class="btn btn-secondary">Back to Dashboard</a>
-    </div>
-
-    <!-- Advanced Filters -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">Filters</h5>
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Survey Maintenance</h1>
+            <a href="/admin/dashboard" class="btn btn-secondary">Back to Dashboard</a>
         </div>
-        <div class="card-body">
-            <form action="/admin/surveys" method="GET" class="row g-3">
-                <div class="col-md-6">
-                    <label for="eventFilter" class="form-label">Filter by Event</label>
-                    <select name="eventFilter" id="eventFilter" class="form-select">
-                        <option value="">All Events</option>
-                        <% if (eventDefinitions && eventDefinitions.length > 0) { %>
-                            <% eventDefinitions.forEach(event => { %>
-                                <option value="<%= event.event_definition_id %>" <%= filters && filters.eventFilter === event.event_definition_id ? 'selected' : '' %>>
-                                    <%= event.event_name %>
-                                </option>
-                            <% }) %>
-                        <% } %>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label for="scoreFilter" class="form-label">Filter by Score</label>
-                    <select name="scoreFilter" id="scoreFilter" class="form-select">
-                        <option value="">All</option>
-                        <option value="detractors" <%= filters && filters.scoreFilter === 'detractors' ? 'selected' : '' %>>Detractors (0-6)</option>
-                        <option value="promoters" <%= filters && filters.scoreFilter === 'promoters' ? 'selected' : '' %>>Promoters (9-10)</option>
-                    </select>
-                </div>
-                <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Apply Filters</button>
-                    <a href="/admin/surveys" class="btn btn-secondary">Clear Filters</a>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <div class="card">
-        <div class="card-body">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Event Name</th>
-                        <th>Participant Name</th>
-                        <th>Satisfaction Score</th>
-                        <th>NPS Bucket</th>
-                        <th>Submission Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% if (surveys && surveys.length > 0) { %>
-                        <% surveys.forEach(s => { %>
-                            <tr>
-                                <td><%= s.event_name %></td>
-                                <td><%= s.participant_first_name %> <%= s.participant_last_name %></td>
-                                <td><%= s.survey_satisfaction_score !== null ? s.survey_satisfaction_score : 'N/A' %></td>
-                                <td><%= s.survey_nps_bucket || 'N/A' %></td>
-                                <td><%= s.survey_submission_date ? new Date(s.survey_submission_date).toLocaleString() : 'N/A' %></td>
-                                <td>
-                                    <a href="/admin/surveys/<%= s.survey_id %>" class="btn btn-sm btn-info">View Details</a>
-                                    <form action="/admin/surveys/delete/<%= s.survey_id %>" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this survey?');">
-                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        <% }) %>
-                    <% } else { %>
+        <!-- Advanced Filters -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Filters</h5>
+            </div>
+            <div class="card-body">
+                <form action="/admin/surveys" method="GET" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="eventFilter" class="form-label">Filter by Event</label>
+                        <select name="eventFilter" id="eventFilter" class="form-select">
+                            <option value="">All Events</option>
+                            <% if (eventDefinitions && eventDefinitions.length> 0) { %>
+                                <% eventDefinitions.forEach(event=> { %>
+                                    <option value="<%= event.event_definition_id %>" <%=filters &&
+                                        filters.eventFilter===event.event_definition_id ? 'selected' : '' %>>
+                                        <%= event.event_name %>
+                                    </option>
+                                    <% }) %>
+                                        <% } %>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="scoreFilter" class="form-label">Filter by Score</label>
+                        <select name="scoreFilter" id="scoreFilter" class="form-select">
+                            <option value="">All</option>
+                            <option value="detractors" <%=filters && filters.scoreFilter==='detractors' ? 'selected'
+                                : '' %>>Detractors (0-6)</option>
+                            <option value="promoters" <%=filters && filters.scoreFilter==='promoters' ? 'selected' : ''
+                                %>>Promoters (9-10)</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                        <a href="/admin/surveys" class="btn btn-secondary">Clear Filters</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-striped table-hover">
+                    <thead>
                         <tr>
-                            <td colspan="6" class="text-center">No surveys found.</td>
+                            <th>Event Name</th>
+                            <th>Participant Name</th>
+                            <th>Satisfaction Score</th>
+                            <th>NPS Bucket</th>
+                            <th>Submission Date</th>
+                            <th>Actions</th>
                         </tr>
-                    <% } %>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <% if (surveys && surveys.length> 0) { %>
+                            <% surveys.forEach(s=> { %>
+                                <tr>
+                                    <td>
+                                        <%= s.event_name %>
+                                    </td>
+                                    <td>
+                                        <%= s.participant_first_name %>
+                                            <%= s.participant_last_name %>
+                                    </td>
+                                    <td>
+                                        <%= s.survey_satisfaction_score !==null ? s.survey_satisfaction_score : 'N/A' %>
+                                    </td>
+                                    <td>
+                                        <%= s.survey_nps_bucket || 'N/A' %>
+                                    </td>
+                                    <td>
+                                        <%= s.survey_submission_date ? new
+                                            Date(s.survey_submission_date).toLocaleString() : 'N/A' %>
+                                    </td>
+                                    <td>
+                                        <a href="/admin/surveys/<%= s.survey_id %>" class="btn btn-sm btn-info">View
+                                            Details</a>
+                                        <form action="/admin/surveys/delete/<%= s.survey_id %>" method="POST"
+                                            style="display: inline;"
+                                            onsubmit="return confirm('Are you sure you want to delete this survey?');">
+                                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="6" class="text-center">No surveys found.</td>
+                                        </tr>
+                                        <% } %>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 
-<%- include('../partials/footer') %>
+    <%- include('../partials/footer') %>
 
+        <%- include('../partials/pagination_script') %>

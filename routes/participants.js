@@ -79,11 +79,7 @@ router.post('/add', isAuthenticated, isManager, upload, async (req, res) => {
             participant_state: req.body.participant_state,
             participant_zip: req.body.participant_zip,
             participant_school_or_employer: req.body.participant_school_or_employer,
-            participant_field_of_interest: req.body.participant_field_of_interest,
-            // college_status: req.body.college_status,
-            // degree_type: req.body.degree_type,
-            // job_status: req.body.job_status,
-            // job_field: req.body.job_field
+            participant_field_of_interest: req.body.participant_field_of_interest
         };
 
         await db('participants').insert(participantData);
@@ -100,39 +96,51 @@ router.get('/:id', isAuthenticated, async (req, res) => {
         // Access Control
         const user = req.user;
         const isAuthorized =
-            user.participant_role === 'admin' ||
+            (user.participant_role && ['admin', 'manager'].includes(user.participant_role.toLowerCase())) ||
             user.participant_id == req.params.id;
 
         if (!isAuthorized) {
             return res.status(403).render('error', {
+                user: req.user,
                 message: 'You are not authorized to view this profile.',
-                error: { status: 403, stack: '' }
+                error: { status: 403 }
             });
         }
 
         const participant = await db('participants').where({ participant_id: req.params.id }).first();
+        console.log('Fetching participant:', req.params.id); // DEBUG
+        console.log('Data found:', participant); // DEBUG
+
         if (!participant) return res.status(404).send('Participant not found');
 
         // Fetch related data
+        console.log('Fetching milestones...');
         const milestones = await db('milestones')
             .where({ participant_id: req.params.id })
-            .select('*');
+            .select('*') || [];
+        console.log('Milestones found:', milestones.length);
 
+        console.log('Fetching events...');
         const events = await db('registrations')
             .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
             .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
             .where({ participant_id: req.params.id })
-            .select('event_definitions.event_name', 'event_instances.event_date_time_start as start_time', 'event_instances.event_location as location', 'event_definitions.event_type');
+            .select('event_definitions.event_name', 'event_instances.event_date_time_start as start_time', 'event_instances.event_location as location', 'event_definitions.event_type', 'registrations.registration_id', 'registrations.registration_status') || [];
+        console.log('Events found:', events.length);
 
+        console.log('Fetching surveys...');
         const surveys = await db('surveys')
             .join('registrations', 'surveys.registration_id', 'registrations.registration_id')
             .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
             .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
             .where('registrations.participant_id', req.params.id)
-            .select('surveys.*', 'event_definitions.event_name');
+            .select('surveys.*', 'event_definitions.event_name') || [];
+        console.log('Surveys found:', surveys.length);
 
+        console.log('Fetching donations...');
         const donations = await db('donations')
-            .where({ participant_id: req.params.id });
+            .where({ participant_id: req.params.id }) || [];
+        console.log('Donations found:', donations.length);
 
         // Calculate Averages
         let avgSat = 0, avgUse = 0, avgRec = 0;
@@ -142,19 +150,25 @@ router.get('/:id', isAuthenticated, async (req, res) => {
             avgRec = surveys.reduce((acc, s) => acc + parseFloat(s.survey_recommendation_score || 0), 0) / surveys.length;
         }
 
-        res.render('participants/detail', {
-            user: req.user,
-            participant,
-            milestones,
-            registrations: events, // View expects 'registrations' for the event list
-            surveys,
-            donations,
-            averages: {
-                satisfaction: avgSat.toFixed(1),
-                usefulness: avgUse.toFixed(1),
-                recommendation: avgRec.toFixed(1)
-            }
-        });
+        console.log('Attempting to render view...');
+        try {
+            res.render('participants/detail', {
+                user: req.user,
+                participant,
+                milestones,
+                registrations: events, // View expects 'registrations' for the event list
+                surveys,
+                donations,
+                averages: {
+                    satisfaction: avgSat.toFixed(1),
+                    usefulness: avgUse.toFixed(1),
+                    recommendation: avgRec.toFixed(1)
+                }
+            });
+        } catch (renderErr) {
+            console.error('EJS RENDER ERROR:', renderErr);
+            res.status(500).send('Error rendering view: ' + renderErr.message);
+        }
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -186,11 +200,7 @@ router.post('/edit/:id', isAuthenticated, isManager, upload, async (req, res) =>
             participant_state: req.body.participant_state,
             participant_zip: req.body.participant_zip,
             participant_school_or_employer: req.body.participant_school_or_employer,
-            participant_field_of_interest: req.body.participant_field_of_interest,
-            // college_status: req.body.college_status,
-            // degree_type: req.body.degree_type,
-            // job_status: req.body.job_status,
-            // job_field: req.body.job_field
+            participant_field_of_interest: req.body.participant_field_of_interest
         };
 
         await db('participants').where({ participant_id: req.params.id }).update(participantData);

@@ -1,41 +1,81 @@
 <%- include('partials/header', { user: user }) %>
 
-    <div style="background-color: var(--col-blue); padding: 4rem 0; text-align: center; margin-bottom: 4rem;">
-        <h1 style="color: white; font-size: 3rem; letter-spacing: 2px;">PRESS + STORIES</h1>
+    <!-- Hero -->
+    <div class="section-header-blue" style="margin-top: 0; padding: 4rem 0;">
+        <div class="brush-border-bottom"></div>
+        <h2>Press & Stories</h2>
+        <p style="color: rgba(255,255,255,0.8); max-width: 600px; margin: 1rem auto 0;">
+            See what people are saying about Ella Rises.
+        </p>
     </div>
 
-    <div class="container" style="max-width: 1000px; margin-bottom: 4rem;">
-        <!-- Featured Press Item -->
-        <div style="display: flex; gap: 2rem; align-items: center; margin-bottom: 4rem;">
-            <div style="flex: 2;">
-                <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                    alt="Interview" style="width: 100%; border-radius: 10px;">
-            </div>
-            <div style="flex: 1;">
-                <h2 style="font-size: 4rem; color: #555; margin-bottom: 0;">32</h2>
-                <h3 style="color: #555; margin-top: 0;">SALT LAKE CITY</h3>
-                <p
-                    style="font-weight: bold; font-size: 1.2rem; border-bottom: 2px solid var(--col-peach); display: inline-block; padding-bottom: 0.5rem;">
-                    September 23, 2025</p>
-            </div>
-        </div>
+    <div class="container" style="margin-bottom: 6rem;">
+        <div style="column-count: 2; column-gap: 2rem;">
 
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 4rem 0;">
+            <!-- News Item 1 -->
+            <div class="card hover-lift"
+                style="display: inline-block; width: 100%; margin-bottom: 2rem; padding: 0; overflow: hidden; text-align: left;">
+                <div style="height: 250px; background: #eee;">
+                    <img src="/img/DSC_0698.JPG" alt="Interview" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="padding: 2rem;">
+                    <div
+                        style="color: var(--col-peach); font-weight: bold; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 0.5rem;">
+                        September 23, 2025
+                    </div>
+                    <h3 style="color: var(--col-dark-gray); font-size: 1.5rem; margin-bottom: 1rem;">
+                        Feature: 32 Salt Lake City
+                    </h3>
+                    <p style="color: #666; margin-bottom: 1.5rem;">
+                        Ella Rises was featured in 32 Salt Lake City's "Community Heroes" segment. Watch the full
+                        interview to learn more about our mission.
+                    </p>
+                    <a href="#"
+                        style="color: var(--col-blue); font-weight: bold; text-transform: uppercase; font-size: 0.9rem;">Read
+                        More &rarr;</a>
+                </div>
+            </div>
 
-        <!-- Secondary Press Item -->
-        <div style="display: flex; gap: 2rem; align-items: center;">
-            <div style="flex: 1;">
-                <h2
-                    style="color: #002E5D; font-family: 'Montserrat', sans-serif; font-weight: 800; text-transform: uppercase; line-height: 1;">
-                    BYU Marriott<br><span style="font-weight: 400;">School of Business</span></h2>
-                <p
-                    style="font-weight: bold; font-size: 1.2rem; border-bottom: 2px solid var(--col-peach); display: inline-block; padding-bottom: 0.5rem; margin-top: 1rem;">
-                    April 24, 2025</p>
+            <!-- News Item 2 -->
+            <div class="card hover-lift"
+                style="display: inline-block; width: 100%; margin-bottom: 2rem; padding: 0; overflow: hidden; text-align: left;">
+                <div style="height: 250px; background: #eee;">
+                    <img src="/img/DSC_0710.JPG" alt="BYU Article"
+                        style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="padding: 2rem;">
+                    <div
+                        style="color: var(--col-peach); font-weight: bold; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 0.5rem;">
+                        April 24, 2025
+                    </div>
+                    <h3 style="color: var(--col-dark-gray); font-size: 1.5rem; margin-bottom: 1rem;">
+                        BYU Marriott School of Business
+                    </h3>
+                    <p style="color: #666; margin-bottom: 1.5rem;">
+                        "Empowering the Next Generation": How Ella Rises is partnering with local universities to
+                        provide mentorship opportunities.
+                    </p>
+                    <a href="#"
+                        style="color: var(--col-blue); font-weight: bold; text-transform: uppercase; font-size: 0.9rem;">Read
+                        More &rarr;</a>
+                </div>
             </div>
-            <div style="flex: 2;">
-                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                    alt="BYU Article" style="width: 100%; border-radius: 10px;">
+
+            <!-- News Item 3 (New Placeholder) -->
+            <div class="card hover-lift"
+                style="display: inline-block; width: 100%; margin-bottom: 2rem; padding: 0; overflow: hidden; text-align: left; background: var(--col-blue); color: white;">
+                <div style="padding: 3rem 2rem;">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">📣</div>
+                    <h3 style="color: white; font-size: 1.5rem; margin-bottom: 1rem;">
+                        Press Inquiries
+                    </h3>
+                    <p style="color: rgba(255,255,255,0.9); margin-bottom: 1.5rem;">
+                        For media inquiries, interviews, or press kits, please contact our communications team.
+                    </p>
+                    <a href="/contact" class="btn" style="background: white; color: var(--col-blue);">Contact Us</a>
+                </div>
             </div>
+
         </div>
     </div>
 

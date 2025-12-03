@@ -1,155 +1,322 @@
 <%- include('../partials/header', { user: user }) %>
 
-    <div class="container mt-4">
-        <div class="row">
-            <!-- Left Column: Main Content -->
-            <div class="col-md-8">
-                <!-- Header Section -->
-                <div
-                    style="background: white; padding: 2rem; border-radius: var(--radius-card); box-shadow: var(--shadow-soft); margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h1 style="margin-bottom: 0.5rem; color: var(--col-purple);">
-                            <%= participant.participant_first_name %>
-                                <%= participant.participant_last_name %>
-                        </h1>
-                        <div style="display: flex; gap: 1rem; align-items: center;">
-                            <span
-                                style="background: var(--col-blue); color: white; padding: 0.3rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
-                                <%= participant.participant_role %>
-                            </span>
-                            <span style="color: var(--text-light);"><i class="fas fa-envelope"></i>
-                                <%= participant.participant_email %>
-                            </span>
-                        </div>
-                    </div>
-                    <% if (user.participant_role==='admin' || user.participant_role==='manager' ) { %>
-                        <a href="/admin/participants/edit/<%= participant.participant_id %>" class="btn">Edit
-                            Profile</a>
-                        <% } %>
+    <style>
+        :root {
+            --brand-blue: #8DA9C4;
+            --brand-lavender: #958EBF;
+            --brand-pink: #FAD2D8;
+            --brand-cream: #FDFBF7;
+        }
+
+        .bg-brand-blue {
+            background-color: var(--brand-blue) !important;
+        }
+
+        .bg-brand-lavender {
+            background-color: var(--brand-lavender) !important;
+        }
+
+        .bg-brand-pink {
+            background-color: var(--brand-pink) !important;
+        }
+
+        .text-brand-blue {
+            color: var(--brand-blue) !important;
+        }
+
+        .text-brand-lavender {
+            color: var(--brand-lavender) !important;
+        }
+
+        .dashboard-hero {
+            background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-lavender) 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .avatar-circle {
+            width: 80px;
+            height: 80px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .card-custom {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .card-header-custom {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+        }
+
+        .milestone-badge {
+            background-color: var(--brand-lavender);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .event-card {
+            background-color: white;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: transform 0.2s;
+        }
+
+        .event-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .status-completed {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+    </style>
+
+    <div class="container py-5">
+        <!-- Hero Section -->
+        <div class="dashboard-hero d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <div class="avatar-circle me-4">
+                    <%= participant.participant_first_name.charAt(0) %>
+                        <%= participant.participant_last_name.charAt(0) %>
                 </div>
-
-                <!-- Event History -->
-                <div class="card mb-4">
-                    <h3 class="mb-3">Event History</h3>
-                    <% if (registrations && registrations.length> 0) { %>
-                        <div style="overflow-x: auto;">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th style="color: var(--col-green);">Event</th>
-                                        <th style="color: var(--col-green);">Date</th>
-                                        <th style="color: var(--col-green);">Location</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% registrations.forEach(e=> { %>
-                                        <tr>
-                                            <td><strong>
-                                                    <%= e.event_name %>
-                                                </strong></td>
-                                            <td>
-                                                <%= new Date(e.start_time).toLocaleDateString() %>
-                                            </td>
-                                            <td>
-                                                <%= e.location %>
-                                            </td>
-                                        </tr>
-                                        <% }) %>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Survey Chart -->
-                        <% if (surveys && surveys.length> 0) { %>
-                            <div style="margin-top: 2rem; height: 300px;">
-                                <canvas id="surveyChart"></canvas>
-                            </div>
-                            <div
-                                style="margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                                <% surveys.forEach(s=> { %>
-                                    <div
-                                        style="background: var(--col-cream); padding: 1rem; border-radius: 10px; border-left: 4px solid var(--col-green);">
-                                        <strong style="font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
-                                            <%= s.event_name %>
-                                        </strong>
-                                        <div style="font-size: 0.8rem; display: flex; justify-content: space-between;">
-                                            <span>Sat: <strong>
-                                                    <%= s.survey_satisfaction_score %>
-                                                </strong></span>
-                                            <span>Use: <strong>
-                                                    <%= s.survey_usefulness_score %>
-                                                </strong></span>
-                                        </div>
-                                        <% if (s.survey_comments) { %>
-                                            <p
-                                                style="font-style: italic; font-size: 0.8rem; margin-top: 0.5rem; color: var(--text-light);">
-                                                "<%= s.survey_comments %>"</p>
-                                            <% } %>
-                                    </div>
-                                    <% }) %>
-                            </div>
-                            <% } %>
-
-                                <% } else { %>
-                                    <p style="color: var(--text-light); font-style: italic;">No events attended yet.</p>
-                                    <% } %>
+                <div>
+                    <h1 class="display-6 fw-bold mb-1">
+                        <%= participant.participant_first_name %>
+                            <%= participant.participant_last_name %>
+                    </h1>
+                    <p class="mb-0 opacity-75">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        <%= participant.participant_city || 'Unknown City' %>
+                            <span class="mx-2">|</span>
+                            <i class="fas fa-envelope me-2"></i>
+                            <%= participant.participant_email %>
+                    </p>
                 </div>
             </div>
+            <% if (user.role==='Manager' ) { %>
+                <a href="/participants/edit/<%= participant.participant_id %>" class="btn btn-light rounded-pill px-4">
+                    <i class="fas fa-edit me-2"></i>Edit Profile
+                </a>
+                <% } %>
+        </div>
 
-            <!-- Right Column: Sidebar -->
-            <div class="col-md-4">
-                <div style="display: flex; flex-direction: column; gap: 2rem;">
-
-                    <!-- Profile Details -->
-                    <div class="card" style="text-align: left;">
-                        <h4 style="color: var(--col-blue); margin-bottom: 1rem;">Profile Details</h4>
-                        <ul
-                            style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1rem;">
-                            <li>
-                                <strong
-                                    style="display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--text-light);">Location</strong>
-                                <%= participant.participant_city || 'N/A' %>, <%= participant.participant_state || '' %>
+        <div class="row g-4">
+            <!-- Left Column: Info & Milestones -->
+            <div class="col-lg-4">
+                <!-- Personal Info -->
+                <div class="card card-custom h-100">
+                    <div class="card-header-custom">
+                        <h5 class="fw-bold mb-0 text-dark">Profile Details</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-3">
+                                <small class="text-muted d-block text-uppercase fw-bold"
+                                    style="font-size: 0.7rem;">Role</small>
+                                <span class="badge bg-brand-blue rounded-pill">
+                                    <%= participant.participant_role %>
+                                </span>
+                            </li>
+                            <li class="mb-3">
+                                <small class="text-muted d-block text-uppercase fw-bold"
+                                    style="font-size: 0.7rem;">School / Employer</small>
+                                <span class="fw-medium">
+                                    <%= participant.participant_school_or_employer || 'N/A' %>
+                                </span>
+                            </li>
+                            <li class="mb-3">
+                                <small class="text-muted d-block text-uppercase fw-bold"
+                                    style="font-size: 0.7rem;">Field of Interest</small>
+                                <span class="fw-medium">
+                                    <%= participant.participant_field_of_interest || 'N/A' %>
+                                </span>
                             </li>
                             <li>
-                                <strong
-                                    style="display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--text-light);">School
-                                    / Employer</strong>
-                                <%= participant.participant_school_or_employer || 'N/A' %>
-                            </li>
-                            <li>
-                                <strong
-                                    style="display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--text-light);">Field
-                                    of Interest</strong>
-                                <%= participant.participant_field_of_interest || 'N/A' %>
-                            </li>
-                            <li>
-                                <strong
-                                    style="display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--text-light);">Date
-                                    of Birth</strong>
-                                <%= participant.participant_dob ? new
-                                    Date(participant.participant_dob).toLocaleDateString() : 'N/A' %>
+                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Date
+                                    of Birth</small>
+                                <span class="fw-medium">
+                                    <%= participant.participant_dob ? new
+                                        Date(participant.participant_dob).toLocaleDateString() : 'N/A' %>
+                                </span>
                             </li>
                         </ul>
                     </div>
-
-                    <!-- Donation History (Only if exists) -->
-                    <% if (donations && donations.length> 0) { %>
-                        <div class="card" style="text-align: left; background: var(--col-cream);">
-                            <h4 style="color: var(--col-dark-pink); margin-bottom: 1rem;">Contributions</h4>
-                            <ul style="list-style: none; padding: 0; margin: 0;">
-                                <% donations.forEach(d=> { %>
-                                    <li
-                                        style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(0,0,0,0.05);">
-                                        <span>
-                                            <%= new Date(d.donation_date).toLocaleDateString() %>
-                                        </span>
-                                        <strong>$<%= d.donation_amount %></strong>
-                                    </li>
-                                    <% }) %>
-                            </ul>
-                        </div>
-                        <% } %>
                 </div>
+            </div>
+
+            <!-- Right Column: Stats & Content -->
+            <div class="col-lg-8">
+                <!-- Stats Row -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="card card-custom bg-brand-cream h-100 mb-0">
+                            <div class="card-body text-center p-3">
+                                <h3 class="fw-bold text-brand-blue mb-0">
+                                    <%= registrations.length %>
+                                </h3>
+                                <small class="text-muted text-uppercase fw-bold"
+                                    style="font-size: 0.7rem;">Events</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-custom bg-brand-cream h-100 mb-0">
+                            <div class="card-body text-center p-3">
+                                <h3 class="fw-bold text-brand-lavender mb-0">
+                                    <%= milestones.length %>
+                                </h3>
+                                <small class="text-muted text-uppercase fw-bold"
+                                    style="font-size: 0.7rem;">Milestones</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-custom bg-brand-cream h-100 mb-0">
+                            <div class="card-body text-center p-3">
+                                <h3 class="fw-bold text-brand-pink mb-0">
+                                    <%= surveys.length %>
+                                </h3>
+                                <small class="text-muted text-uppercase fw-bold"
+                                    style="font-size: 0.7rem;">Surveys</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Milestones -->
+                <div class="card card-custom mb-4">
+                    <div class="card-header-custom d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0 text-dark">Milestones</h5>
+                        <% if (user.role==='Manager' ) { %>
+                            <button class="btn btn-sm btn-outline-primary rounded-pill" data-bs-toggle="modal"
+                                data-bs-target="#addMilestoneModal">
+                                <i class="fas fa-plus me-1"></i>Add
+                            </button>
+                            <% } %>
+                    </div>
+                    <div class="card-body p-4">
+                        <% if (milestones && milestones.length> 0) { %>
+                            <% milestones.forEach(m=> { %>
+                                <div class="d-flex align-items-center mb-3 pb-3 border-bottom last-no-border">
+                                    <div class="me-3 text-brand-lavender">
+                                        <i class="fas fa-check-circle fa-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">
+                                            <%= m.milestone_title %>
+                                        </h6>
+                                        <small class="text-muted">
+                                            <%= m.milestone_date ? new Date(m.milestone_date).toLocaleDateString()
+                                                : 'No Date' %>
+                                        </small>
+                                    </div>
+                                </div>
+                                <% }); %>
+                                    <% } else { %>
+                                        <p class="text-muted mb-0">No milestones recorded yet.</p>
+                                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Event History -->
+                <div class="card card-custom">
+                    <div class="card-header-custom">
+                        <h5 class="fw-bold mb-0 text-dark">Event History</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <% if (registrations && registrations.length> 0) { %>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Event
+                                            </th>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Date</th>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Status
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% registrations.forEach(reg=> { %>
+                                            <tr>
+                                                <td>
+                                                    <span class="fw-medium">
+                                                        <%= reg.event_name %>
+                                                    </span><br>
+                                                    <small class="text-muted">
+                                                        <%= reg.event_type %>
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    <%= reg.start_time ? new Date(reg.start_time).toLocaleDateString()
+                                                        : 'TBD' %>
+                                                </td>
+                                                <td>
+                                                    <% if (reg.registration_attended_flag) { %>
+                                                        <span class="badge bg-success rounded-pill">Attended</span>
+                                                        <% } else { %>
+                                                            <span class="badge bg-secondary rounded-pill">
+                                                                <%= reg.registration_status || 'Registered' %>
+                                                            </span>
+                                                            <% } %>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <% } else { %>
+                                <p class="text-muted mb-0">No event registrations found.</p>
+                                <% } %>
+                    </div>
+                </div>
+
+                <!-- Surveys Chart (If data exists) -->
+                <% if (surveys && surveys.length> 0) { %>
+                    <div class="card card-custom mt-4">
+                        <div class="card-header-custom">
+                            <h5 class="fw-bold mb-0 text-dark">Survey Feedback</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div style="height: 300px;">
+                                <canvas id="surveyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+
             </div>
         </div>
     </div>
@@ -157,40 +324,49 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const surveyData = <% - JSON.stringify(surveys || []) %>;
+        const surveyData = <%- JSON.stringify(surveys || []) %>;
 
-            if (surveyData.length > 0) {
-                const ctx = document.getElementById('surveyChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: surveyData.map(s => s.event_name),
-                        datasets: [{
-                            label: 'Satisfaction',
-                            data: surveyData.map(s => s.survey_satisfaction_score),
-                            borderColor: '#978EC4',
-                            tension: 0.1
-                        }, {
-                            label: 'Usefulness',
-                            data: surveyData.map(s => s.survey_usefulness_score),
-                            borderColor: '#9AB59D',
-                            tension: 0.1
-                        }]
+        if (surveyData.length > 0) {
+            const ctx = document.getElementById('surveyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: surveyData.map(s => s.event_name),
+                    datasets: [{
+                        label: 'Satisfaction',
+                        data: surveyData.map(s => s.survey_satisfaction_score),
+                        borderColor: '#958EBF', // Brand Lavender
+                        backgroundColor: 'rgba(149, 142, 191, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }, {
+                        label: 'Usefulness',
+                        data: surveyData.map(s => s.survey_usefulness_score),
+                        borderColor: '#8DA9C4', // Brand Blue
+                        backgroundColor: 'rgba(141, 169, 196, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                max: 10
-                            }
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            grid: { borderDash: [2, 4] }
+                        },
+                        x: {
+                            grid: { display: false }
                         }
                     }
-                });
-            }
-        });
+                }
+            });
+        }
     </script>
 
     <%- include('../partials/footer') %>

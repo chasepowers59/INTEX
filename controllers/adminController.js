@@ -93,7 +93,7 @@ exports.getDashboard = async (req, res) => {
 
         // KPI 6: Attendance Count
         const attendanceResult = await knex('registrations')
-            .where('registration_attended_flag', 1)
+            .where('registration_attended_flag', true)
             .count('registration_id as count')
             .first();
         const attendanceCount = parseInt(attendanceResult.count || 0);
@@ -112,7 +112,28 @@ exports.getDashboard = async (req, res) => {
             .whereIn('participant_id', pIds)
             .select('participant_city')
             .count('participant_id as count')
-            .groupBy('participant_city');
+            .groupBy('participant_city')
+            .orderBy('count', 'desc')
+            .limit(5);
+
+        // Impact Data (Attended vs Missed)
+        const impactStats = await knex('registrations')
+            .whereIn('registration_id', rIds)
+            .select(
+                knex.raw("SUM(CASE WHEN registration_attended_flag = true THEN 1 ELSE 0 END) as attended"),
+                knex.raw("SUM(CASE WHEN registration_attended_flag = false THEN 1 ELSE 0 END) as missed")
+            )
+            .first();
+
+        const impactData = [
+            parseInt(impactStats ? impactStats.attended : 0) || 0,
+            parseInt(impactStats ? impactStats.missed : 0) || 0
+        ];
+
+        // Prepare Chart Data
+        const cityLabels = cityDistribution.map(c => c.participant_city);
+        const cityCounts = cityDistribution.map(c => parseInt(c.count));
+        const attendanceData = impactData;
 
         res.render('admin/dashboard', {
             user: req.user,
@@ -126,9 +147,14 @@ exports.getDashboard = async (req, res) => {
                 steamEducationRate: 0,
                 steamJobRate: 0
             },
-            charts: {
+            // Pass specific chart variables as requested
+            cityLabels,
+            cityCounts,
+            attendanceData,
+            charts: { // Keep for backward compatibility if needed, or remove if fully replacing
                 satisfaction: satisfactionByType,
-                city: cityDistribution
+                city: cityDistribution,
+                impact: impactData
             },
             filters: { eventType, city, role },
             options: { cities, roles, eventTypes }
@@ -179,19 +205,18 @@ exports.updateUserRole = async (req, res) => {
 exports.resetUserPassword = async (req, res) => {
     try {
         const { participant_id } = req.params;
+        const { new_password } = req.body;
+
         const participant = await knex('participants').where({ participant_id }).first();
 
         if (!participant) {
             return res.status(404).send('User not found');
         }
 
-        // Generate password from first name + last name
-        const newPassword = participant.participant_first_name + participant.participant_last_name;
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-
+        // Store password as PLAIN TEXT per requirements
         await knex('participants')
             .where({ participant_id })
-            .update({ participant_password: hashedPassword });
+            .update({ participant_password: new_password });
 
         res.redirect('/admin/users');
     } catch (err) {
