@@ -23,13 +23,7 @@ exports.postLogin = (req, res, next) => {
                 return res.render('login', { user: null, error: 'An error occurred during login' });
             }
 
-            // Redirect based on participant_role
-            if (user.participant_role === 'admin') {
-                return res.redirect('/admin/dashboard');
-            } else if (user.participant_role === 'participant') {
-                return res.redirect(`/participants/${user.participant_id}`);
-            }
-            // Fallback redirect
+            // Redirect all users to root page after login
             return res.redirect('/');
         });
     })(req, res, next);
@@ -79,13 +73,15 @@ exports.postRegister = async (req, res) => {
         const participantId = generateId();
 
         // Insert into participants table
+        // Business Logic: All new user registrations default to 'participant' role
+        // Only admins can change roles through the User Maintenance interface
         await db('participants').insert({
             participant_id: participantId,
             participant_first_name,
             participant_last_name,
             participant_email,
             participant_password: participant_password, // Plain text
-            participant_role: 'participant' // Hardcoded to 'participant'
+            participant_role: 'participant' // Hardcoded to 'participant' - never 'admin' for new registrations
         });
 
         req.flash('success', 'Registration successful! Please login.');

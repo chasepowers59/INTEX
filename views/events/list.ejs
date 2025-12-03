@@ -84,32 +84,117 @@
                                                 👥 <%= event.event_capacity %> spots
                                         </div>
 
+                                        <% 
+                                            // Business Logic: Determine what action buttons to show
+                                            const now = new Date();
+                                            // Parse event date - handle both Date objects and strings from PostgreSQL
+                                            let eventDate = null;
+                                            if (event.event_date_time_start) {
+                                                try {
+                                                    // If it's already a Date object (from Knex), use it directly
+                                                    // Otherwise, parse it as a string
+                                                    if (event.event_date_time_start instanceof Date) {
+                                                        eventDate = event.event_date_time_start;
+                                                    } else {
+                                                        // Parse the date string - handle ISO format from PostgreSQL
+                                                        eventDate = new Date(event.event_date_time_start);
+                                                    }
+                                                    // Validate the date was parsed correctly
+                                                    if (isNaN(eventDate.getTime())) {
+                                                        eventDate = null;
+                                                    }
+                                                } catch (e) {
+                                                    eventDate = null;
+                                                }
+                                            }
+                                            // Compare dates: if event date is less than now, it's in the past
+                                            // If event date is greater than or equal to now, it's in the future
+                                            // Use direct timestamp comparison for reliability
+                                            const eventTime = eventDate ? eventDate.getTime() : 0;
+                                            const nowTime = now.getTime();
+                                            const isPastEvent = eventDate && !isNaN(eventTime) && eventTime < nowTime;
+                                            const registrationId = userRegistrations && userRegistrations[event.event_instance_id] ? userRegistrations[event.event_instance_id] : null;
+                                            const hasSurvey = registrationId && userSurveys && userSurveys[registrationId];
+                                            const isRegistered = !!registrationId;
+                                        %>
+                                        
                                         <% if (user) { %>
-                                            <div style="display: flex; gap: 0.5rem;">
+                                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                                                 <% if (user.role==='Manager' ) { %>
-                                                    <a href="/events/edit/<%= event.event_instance_id %>" class="btn"
-                                                        style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Edit</a>
-                                                    <form action="/events/delete/<%= event.event_instance_id %>"
-                                                        method="POST" class="delete-event-form"
-                                                        style="display: inline;">
-                                                        <button type="submit" class="btn delete-event-btn"
-                                                            style="padding: 0.3rem 0.8rem; font-size: 0.8rem; background-color: #dc3545;">Del</button>
-                                                    </form>
-                                                    <% } else { %>
-                                                        <form action="/events/register/<%= event.event_instance_id %>"
-                                                            method="POST">
-                                                            <button type="submit" class="btn"
-                                                                style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background-color: var(--col-green);">Register
-                                                                for This Date</button>
+                                                    <!-- Manager Actions: Always show Edit/Delete -->
+                                                    <div style="display: flex; gap: 0.5rem;">
+                                                        <a href="/events/edit/<%= event.event_instance_id %>" class="btn"
+                                                            style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Edit</a>
+                                                        <form action="/events/delete/<%= event.event_instance_id %>"
+                                                            method="POST" class="delete-event-form"
+                                                            style="display: inline;">
+                                                            <button type="submit" class="btn delete-event-btn"
+                                                                style="padding: 0.3rem 0.8rem; font-size: 0.8rem; background-color: #dc3545;">Del</button>
                                                         </form>
+                                                    </div>
+                                                    <% if (isPastEvent && isRegistered && !hasSurvey) { %>
+                                                        <!-- Manager can also submit surveys for past events -->
+                                                        <a href="/surveys/new/<%= registrationId %>" class="btn"
+                                                            style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background-color: var(--col-blue); color: white;">
+                                                            Submit Survey
+                                                        </a>
+                                                    <% } else if (isPastEvent && isRegistered && hasSurvey) { %>
+                                                        <div style="padding: 0.5rem; font-size: 0.85rem; color: #666; text-align: center; background: #f0f0f0; border-radius: 4px;">
+                                                            Survey Submitted ✓
+                                                        </div>
+                                                    <% } else if (isPastEvent) { %>
+                                                        <div style="padding: 0.5rem; font-size: 0.85rem; color: #666; text-align: center; background: #f0f0f0; border-radius: 4px;">
+                                                            Event Passed
+                                                        </div>
+                                                    <% } %>
+                                                <% } else { %>
+                                                    <!-- Common User Actions -->
+                                                    <% if (isPastEvent) { %>
+                                                        <!-- Past Event: Show survey button if registered and no survey, otherwise show status -->
+                                                        <% if (isRegistered && !hasSurvey) { %>
+                                                            <a href="/surveys/new/<%= registrationId %>" class="btn"
+                                                                style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background-color: var(--col-blue); color: white;">
+                                                                Submit Survey
+                                                            </a>
+                                                        <% } else if (isRegistered && hasSurvey) { %>
+                                                            <div style="padding: 0.5rem; font-size: 0.85rem; color: #666; text-align: center; background: #f0f0f0; border-radius: 4px;">
+                                                                Survey Submitted ✓
+                                                            </div>
+                                                        <% } else { %>
+                                                            <div style="padding: 0.5rem; font-size: 0.85rem; color: #666; text-align: center; background: #f0f0f0; border-radius: 4px;">
+                                                                Event Passed
+                                                            </div>
                                                         <% } %>
+                                                    <% } else { %>
+                                                        <!-- Future Event: Show register button if not already registered -->
+                                                        <% if (!isRegistered) { %>
+                                                            <form action="/events/register/<%= event.event_instance_id %>"
+                                                                method="POST">
+                                                                <button type="submit" class="btn"
+                                                                    style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background-color: var(--col-green);">Register
+                                                                    for This Date</button>
+                                                            </form>
+                                                        <% } else { %>
+                                                            <div style="padding: 0.5rem; font-size: 0.85rem; color: var(--col-blue); text-align: center; background: #e8f4f8; border-radius: 4px; font-weight: 600;">
+                                                                Registered ✓
+                                                            </div>
+                                                        <% } %>
+                                                    <% } %>
+                                                <% } %>
                                             </div>
+                                        <% } else { %>
+                                            <!-- Visitor Actions: Only show register for future events -->
+                                            <% if (isPastEvent) { %>
+                                                <div style="padding: 0.5rem; font-size: 0.85rem; color: #666; text-align: center; background: #f0f0f0; border-radius: 4px;">
+                                                    Event Passed
+                                                </div>
                                             <% } else { %>
                                                 <button class="btn open-register-modal-btn"
                                                     data-event-id="<%= event.event_instance_id %>"
                                                     data-event-name="<%= event.event_name %>"
                                                     style="width: 100%; padding: 0.5rem; font-size: 0.9rem;">Register</button>
-                                                <% } %>
+                                            <% } %>
+                                        <% } %>
                                     </div>
                                     <% }); %>
                             </div>

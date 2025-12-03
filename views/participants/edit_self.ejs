@@ -1,0 +1,126 @@
+<%- include('../partials/header', { user: user }) %>
+
+    <style>
+        :root {
+            --brand-blue: #8DA9C4;
+            --brand-lavender: #958EBF;
+            --brand-pink: #FAD2D8;
+            --brand-cream: #FDFBF7;
+        }
+
+        .card-custom {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header-custom {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+        }
+    </style>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card card-custom">
+                    <div class="card-header-custom">
+                        <h3 class="fw-bold mb-0">Edit My Profile</h3>
+                        <p class="text-muted mb-0" style="font-size: 0.9rem;">Update your personal information</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <% if (typeof messages !== 'undefined' && messages) { %>
+                            <% if (messages.error && messages.error.length > 0) { %>
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <%= messages.error[0] %>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            <% } %>
+                            <% if (messages.success && messages.success.length > 0) { %>
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <%= messages.success[0] %>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            <% } %>
+                        <% } %>
+
+                        <form action="/participants/edit-self" method="POST">
+                            <input type="hidden" name="participant_id" value="<%= participant.participant_id %>">
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="participant_first_name" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="participant_first_name" name="participant_first_name"
+                                        value="<%= participant.participant_first_name || '' %>" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="participant_last_name" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="participant_last_name" name="participant_last_name"
+                                        value="<%= participant.participant_last_name || '' %>" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="participant_email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="participant_email" name="participant_email"
+                                    value="<%= participant.participant_email || '' %>" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="participant_phone" class="form-label">Phone</label>
+                                <input type="text" class="form-control" id="participant_phone" name="participant_phone"
+                                    value="<%= participant.participant_phone || '' %>">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="participant_dob" class="form-label">Date of Birth</label>
+                                <input type="date" class="form-control" id="participant_dob" name="participant_dob"
+                                    value="<%= participant.participant_dob ? new Date(participant.participant_dob).toISOString().split('T')[0] : '' %>">
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="participant_city" class="form-label">City</label>
+                                    <input type="text" class="form-control" id="participant_city" name="participant_city"
+                                        value="<%= participant.participant_city || '' %>">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="participant_state" class="form-label">State</label>
+                                    <input type="text" class="form-control" id="participant_state" name="participant_state"
+                                        value="<%= participant.participant_state || '' %>">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="participant_zip" class="form-label">Zip Code</label>
+                                    <input type="text" class="form-control" id="participant_zip" name="participant_zip"
+                                        value="<%= participant.participant_zip || '' %>">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="participant_school_or_employer" class="form-label">School / Employer</label>
+                                <input type="text" class="form-control" id="participant_school_or_employer" name="participant_school_or_employer"
+                                    value="<%= participant.participant_school_or_employer || '' %>">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="participant_field_of_interest" class="form-label">Field of Interest</label>
+                                <input type="text" class="form-control" id="participant_field_of_interest" name="participant_field_of_interest"
+                                    value="<%= participant.participant_field_of_interest || '' %>"
+                                    placeholder="e.g., Computer Science, Medicine, Education">
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <a href="/participants/<%= participant.participant_id %>" class="btn btn-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+

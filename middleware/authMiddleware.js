@@ -10,8 +10,9 @@ exports.isAuthenticated = (req, res, next) => {
 // Manager-Only Middleware: Restricts access to admin role only
 // Note: In this system, 'admin' role represents the "Manager" role mentioned in the rubric
 // Common users have 'participant' role and should have read-only access
+// Security: Explicitly check for 'admin' role and reject null/undefined/empty values
 exports.isManager = (req, res, next) => {
-    if (req.user && req.user.participant_role === 'admin') {
+    if (req.user && req.user.participant_role && req.user.participant_role === 'admin') {
         return next();
     }
     res.status(403).send('Access Denied: Admin Only');
@@ -35,7 +36,8 @@ exports.isReadOnlyOrManager = (req, res, next) => {
     
     // POST/PUT/DELETE requests: Only allow managers (admin role)
     // This ensures common users can view but cannot modify data
-    if (req.user.participant_role === 'admin') {
+    // Security: Explicitly check for 'admin' role and reject null/undefined/empty values
+    if (req.user.participant_role && req.user.participant_role === 'admin') {
         return next();
     }
     

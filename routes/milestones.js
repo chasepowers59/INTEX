@@ -7,6 +7,11 @@ const { isAuthenticated, isManager } = require('../middleware/authMiddleware');
 
 const { generateId } = require('../utils/idGenerator');
 
+// Debug route to verify milestone routes are loaded
+router.get('/test', (req, res) => {
+    res.send('Milestone routes are working!');
+});
+
 // Add Milestone Form
 router.get('/add', isAuthenticated, isManager, async (req, res) => {
     try {
@@ -22,11 +27,20 @@ router.get('/add', isAuthenticated, isManager, async (req, res) => {
 // Handle Add Milestone
 router.post('/add', isAuthenticated, async (req, res) => {
     try {
+        console.log('POST /milestones/add - Request received');
+        console.log('User:', req.user ? req.user.participant_id : 'No user');
+        console.log('Body:', req.body);
+        
         const { participant_id, milestone_title, milestone_date } = req.body;
+
+        if (!participant_id || !milestone_title || !milestone_date) {
+            return res.status(400).send('Missing required fields: participant_id, milestone_title, milestone_date');
+        }
 
         // Access Control: Admin or Owner
         if (req.user.participant_role !== 'admin' && req.user.participant_role !== 'manager' && req.user.participant_id != participant_id) {
-            return res.status(403).send('Unauthorized');
+            console.log('Access denied - user ID mismatch');
+            return res.status(403).send('Unauthorized: You can only add milestones for yourself');
         }
 
         const milestoneId = generateId();
@@ -38,11 +52,14 @@ router.post('/add', isAuthenticated, async (req, res) => {
             milestone_date: milestone_date
         });
 
-        // Redirect back to referring page
-        res.redirect(req.get('referer'));
+        console.log('Milestone added successfully:', milestoneId);
+        
+        // Redirect back to referring page, or to participant profile if no referer
+        const referer = req.get('referer') || `/participants/${participant_id}`;
+        res.redirect(referer);
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error');
+        console.error('Add Milestone Error:', err);
+        res.status(500).send('Server Error: ' + err.message);
     }
 });
 

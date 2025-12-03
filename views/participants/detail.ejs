@@ -104,6 +104,22 @@
     </style>
 
     <div class="container py-5">
+        <!-- Flash Messages -->
+        <% if (typeof messages !== 'undefined' && messages) { %>
+            <% if (messages.success && messages.success.length > 0) { %>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <%= messages.success[0] %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+            <% if (messages.error && messages.error.length > 0) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <%= messages.error[0] %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+        <% } %>
+
         <!-- Hero Section -->
         <div class="dashboard-hero d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
@@ -125,11 +141,20 @@
                     </p>
                 </div>
             </div>
-            <% if (user.role==='Manager' ) { %>
-                <a href="/participants/edit/<%= participant.participant_id %>" class="btn btn-light rounded-pill px-4">
-                    <i class="fas fa-edit me-2"></i>Edit Profile
-                </a>
+            <div>
+                <% if (user.role==='Manager' ) { %>
+                    <a href="/participants/edit/<%= participant.participant_id %>" class="btn btn-light rounded-pill px-4">
+                        <i class="fas fa-edit me-2"></i>Edit Profile
+                    </a>
+                <% } else if (user.participant_id && user.participant_id == participant.participant_id) { %>
+                    <a href="/participants/edit-self" class="btn btn-light rounded-pill px-4">
+                        <i class="fas fa-edit me-2"></i>Edit Profile
+                    </a>
+                    <a href="/participants/change-password" class="btn btn-outline-light rounded-pill px-4 ms-2">
+                        <i class="fas fa-key me-2"></i>Change Password
+                    </a>
                 <% } %>
+            </div>
         </div>
 
         <div class="row g-4">
@@ -219,7 +244,7 @@
                 <div class="card card-custom mb-4">
                     <div class="card-header-custom d-flex justify-content-between align-items-center">
                         <h5 class="fw-bold mb-0 text-dark">Milestones</h5>
-                        <% if (user.role==='Manager' ) { %>
+                        <% if (user.role==='Manager' || (user.participant_id && user.participant_id == participant.participant_id)) { %>
                             <button class="btn btn-sm btn-outline-primary rounded-pill" data-bs-toggle="modal"
                                 data-bs-target="#addMilestoneModal">
                                 <i class="fas fa-plus me-1"></i>Add
@@ -250,6 +275,51 @@
                     </div>
                 </div>
 
+                <!-- Upcoming Events -->
+                <% if (upcomingEvents && upcomingEvents.length> 0) { %>
+                    <div class="card card-custom mb-4">
+                        <div class="card-header-custom">
+                            <h5 class="fw-bold mb-0 text-dark">Upcoming Events</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Event</th>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Date & Time</th>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Location</th>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% upcomingEvents.forEach(reg=> { %>
+                                            <tr>
+                                                <td>
+                                                    <span class="fw-medium"><%= reg.event_name %></span><br>
+                                                    <small class="text-muted"><%= reg.event_type %></small>
+                                                </td>
+                                                <td>
+                                                    <%= reg.start_time ? new Date(reg.start_time).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : 'TBD' %>
+                                                    <% if (reg.start_time) { %>
+                                                        <br><small class="text-muted"><%= new Date(reg.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) %></small>
+                                                    <% } %>
+                                                </td>
+                                                <td><%= reg.location || 'TBD' %></td>
+                                                <td>
+                                                    <span class="badge bg-primary rounded-pill">
+                                                        <%= reg.registration_status || 'Registered' %>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+
                 <!-- Event History -->
                 <div class="card card-custom">
                     <div class="card-header-custom">
@@ -261,11 +331,10 @@
                                 <table class="table table-hover align-middle">
                                     <thead class="table-light">
                                         <tr>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Event
-                                            </th>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Event</th>
                                             <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Date</th>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Status
-                                            </th>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Status</th>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -292,81 +361,162 @@
                                                             </span>
                                                             <% } %>
                                                 </td>
+                                                <td>
+                                                    <% 
+                                                        const hasSurvey = surveyRegistrationIds && surveyRegistrationIds.includes(reg.registration_id);
+                                                        // Check if event is in the past
+                                                        const now = new Date();
+                                                        const eventDate = reg.start_time ? new Date(reg.start_time) : null;
+                                                        const isPastEvent = eventDate && !isNaN(eventDate.getTime()) && eventDate.getTime() < now.getTime();
+                                                        // Show survey button for past events where user is registered and hasn't submitted a survey
+                                                        const canSubmitSurvey = isPastEvent && !hasSurvey;
+                                                    %>
+                                                    <% if (canSubmitSurvey) { %>
+                                                        <a href="/surveys/new/<%= reg.registration_id %>" class="btn btn-sm btn-outline-success" style="padding: 0.375rem 0.75rem; font-size: 0.875rem;">
+                                                            <i class="fas fa-clipboard-check me-1"></i>Take Survey
+                                                        </a>
+                                                    <% } else if (hasSurvey) { %>
+                                                        <span class="badge bg-info" style="padding: 0.375rem 0.75rem; font-size: 0.875rem;">Survey Submitted</span>
+                                                    <% } %>
+                                                </td>
                                             </tr>
                                             <% }); %>
                                     </tbody>
                                 </table>
                             </div>
                             <% } else { %>
-                                <p class="text-muted mb-0">No event registrations found.</p>
+                                <p class="text-muted mb-0">No past event registrations found.</p>
                                 <% } %>
                     </div>
                 </div>
 
-                <!-- Surveys Chart (If data exists) -->
-                <% if (surveys && surveys.length> 0) { %>
-                    <div class="card card-custom mt-4">
-                        <div class="card-header-custom">
-                            <h5 class="fw-bold mb-0 text-dark">Survey Feedback</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <div style="height: 300px;">
-                                <canvas id="surveyChart"></canvas>
-                            </div>
-                        </div>
+                <!-- Donation History -->
+                <div class="card card-custom mt-4">
+                    <div class="card-header-custom">
+                        <h5 class="fw-bold mb-0 text-dark">Donation History</h5>
                     </div>
-                    <% } %>
+                    <div class="card-body p-4">
+                        <% if (donations && donations.length> 0) { %>
+                            <% 
+                                const totalDonated = donations.reduce((sum, d) => sum + parseFloat(d.donation_amount || 0), 0);
+                            %>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Total Donated:</span>
+                                    <span class="fw-bold text-brand-blue" style="font-size: 1.2rem;">$<%= totalDonated.toFixed(2) %></span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span class="text-muted">Number of Donations:</span>
+                                    <span class="fw-bold"><%= donations.length %></span>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Date</th>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% donations.forEach(donation=> { %>
+                                            <tr>
+                                                <td>
+                                                    <%= donation.donation_date ? new Date(donation.donation_date).toLocaleDateString('en-US') : 'N/A' %>
+                                                </td>
+                                                <td class="fw-bold text-brand-blue">$<%= parseFloat(donation.donation_amount || 0).toFixed(2) %></td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <% } else { %>
+                            <p class="text-muted mb-0">No donation history found.</p>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Surveys Table -->
+                <div class="card card-custom mt-4">
+                    <div class="card-header-custom">
+                        <h5 class="fw-bold mb-0 text-dark">Survey Feedback</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <% if (surveys && surveys.length> 0) { %>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Event</th>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Satisfaction</th>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Usefulness</th>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Instructor</th>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Recommend</th>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Overall</th>
+                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% surveys.forEach(survey=> { %>
+                                            <tr>
+                                                <td>
+                                                    <span class="fw-medium"><%= survey.event_name %></span>
+                                                    <% if (survey.survey_comments) { %>
+                                                        <br><small class="text-muted" style="font-size: 0.8rem;">"<%= survey.survey_comments.substring(0, 50) %><%= survey.survey_comments.length > 50 ? '...' : '' %>"</small>
+                                                    <% } %>
+                                                </td>
+                                                <td><span class="badge bg-info"><%= survey.survey_satisfaction_score || 'N/A' %></span></td>
+                                                <td><span class="badge bg-info"><%= survey.survey_usefulness_score || 'N/A' %></span></td>
+                                                <td><span class="badge bg-info"><%= survey.survey_instructor_score || 'N/A' %></span></td>
+                                                <td><span class="badge bg-info"><%= survey.survey_recommendation_score || 'N/A' %></span></td>
+                                                <td><span class="badge bg-primary"><%= survey.survey_overall_score ? parseFloat(survey.survey_overall_score).toFixed(1) : 'N/A' %></span></td>
+                                                <td>
+                                                    <%= survey.survey_submission_date ? new Date(survey.survey_submission_date).toLocaleDateString('en-US') : 'N/A' %>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <% } else { %>
+                            <p class="text-muted mb-0">No surveys submitted yet.</p>
+                        <% } %>
+                    </div>
+                </div>
 
             </div>
         </div>
     </div>
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const surveyData = <%- JSON.stringify(surveys || []) %>;
 
-        if (surveyData.length > 0) {
-            const ctx = document.getElementById('surveyChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: surveyData.map(s => s.event_name),
-                    datasets: [{
-                        label: 'Satisfaction',
-                        data: surveyData.map(s => s.survey_satisfaction_score),
-                        borderColor: '#958EBF', // Brand Lavender
-                        backgroundColor: 'rgba(149, 142, 191, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    }, {
-                        label: 'Usefulness',
-                        data: surveyData.map(s => s.survey_usefulness_score),
-                        borderColor: '#8DA9C4', // Brand Blue
-                        backgroundColor: 'rgba(141, 169, 196, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 10,
-                            grid: { borderDash: [2, 4] }
-                        },
-                        x: {
-                            grid: { display: false }
-                        }
-                    }
-                }
-            });
-        }
-    </script>
+    <!-- Add Milestone Modal -->
+    <div class="modal fade" id="addMilestoneModal" tabindex="-1" aria-labelledby="addMilestoneModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMilestoneModalLabel">Add Milestone</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/milestones/add" method="POST" id="addMilestoneForm">
+                    <div class="modal-body">
+                        <input type="hidden" name="participant_id" value="<%= participant.participant_id %>">
+                        <div class="mb-3">
+                            <label for="milestone_title" class="form-label">Milestone Title</label>
+                            <input type="text" class="form-control" id="milestone_title" name="milestone_title" required
+                                placeholder="e.g., High School Graduation, College Acceptance">
+                        </div>
+                        <div class="mb-3">
+                            <label for="milestone_date" class="form-label">Date Achieved</label>
+                            <input type="date" class="form-control" id="milestone_date" name="milestone_date" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Milestone</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <%- include('../partials/footer') %>

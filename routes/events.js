@@ -81,10 +81,12 @@ router.get('/insights', isAuthenticated, isManager, async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         const { search, eventType } = req.query;
+        const now = new Date();
         let query = db('event_instances')
             .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
             .select('*')
-            // .where('event_date_time_start', '>=', new Date())
+            // Business Logic: Only show future events on the events list page
+            .where('event_instances.event_date_time_start', '>', now)
             .orderBy('event_date_time_start', 'asc');
 
         if (search) {
@@ -123,7 +125,44 @@ router.get('/', async (req, res) => {
 
         console.log('Grouped into', Object.keys(groupedEvents).length, 'event definitions');
 
-        res.render('events/list', { user: req.user, groupedEvents, search, eventType });
+        // Business Logic: Fetch user registrations and surveys for logged-in users
+        // This enables showing survey buttons for past events where user is registered
+        let userRegistrations = {};
+        let userSurveys = {};
+        
+        if (req.user && req.user.participant_id) {
+            // Fetch all registrations for this user
+            const registrations = await db('registrations')
+                .where('participant_id', req.user.participant_id)
+                .select('event_instance_id', 'registration_id', 'registration_status');
+            
+            // Create a map: event_instance_id -> registration_id
+            registrations.forEach(reg => {
+                userRegistrations[reg.event_instance_id] = reg.registration_id;
+            });
+            
+            // Fetch all surveys for this user's registrations
+            const registrationIds = registrations.map(r => r.registration_id);
+            if (registrationIds.length > 0) {
+                const surveys = await db('surveys')
+                    .whereIn('registration_id', registrationIds)
+                    .select('registration_id');
+                
+                // Create a set of registration_ids that have surveys
+                surveys.forEach(survey => {
+                    userSurveys[survey.registration_id] = true;
+                });
+            }
+        }
+
+        res.render('events/list', { 
+            user: req.user, 
+            groupedEvents, 
+            search, 
+            eventType,
+            userRegistrations,  // Map: event_instance_id -> registration_id
+            userSurveys         // Map: registration_id -> true (if survey exists)
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -243,16 +282,41 @@ router.post('/register/:id', isAuthenticated, async (req, res) => {
             return res.status(400).send('Your account is not linked to a participant profile. Please contact an admin.');
         }
 
-        const registrationId = generateId();
-
         // Check if already registered
         const existing = await db('registrations')
             .where({ participant_id: user.participant_id, event_instance_id: req.params.id })
             .first();
 
         if (existing) {
-            return res.send('<script>alert("You are already registered for this event!"); window.location.href="/events";</script>');
+            req.flash('error', 'You are already registered for this event!');
+            return res.redirect('/events');
         }
+
+        // Fetch event details before registration
+        const eventDetails = await db('event_instances')
+            .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
+            .where('event_instances.event_instance_id', req.params.id)
+            .select(
+                'event_definitions.event_name',
+                'event_definitions.event_type',
+                'event_instances.event_date_time_start',
+                'event_instances.event_date_time_end',
+                'event_instances.event_location'
+            )
+            .first();
+
+        if (!eventDetails) {
+            return res.status(404).send('Event not found');
+        }
+
+        // Business Logic: Prevent registration for past events
+        // Check if event has already occurred
+        if (eventDetails.event_date_time_start && new Date(eventDetails.event_date_time_start) < new Date()) {
+            req.flash('error', 'You cannot register for events that have already occurred.');
+            return res.redirect('/events');
+        }
+
+        const registrationId = generateId();
 
         await db('registrations').insert({
             registration_id: registrationId,
@@ -262,7 +326,22 @@ router.post('/register/:id', isAuthenticated, async (req, res) => {
             registration_created_at: new Date()
         });
 
-        res.send('<script>alert("Successfully registered!"); window.location.href="/events";</script>');
+        // Get participant name for personalized message
+        const participant = await db('participants')
+            .where('participant_id', user.participant_id)
+            .select('participant_first_name', 'participant_last_name')
+            .first();
+
+        const participantName = participant 
+            ? `${participant.participant_first_name} ${participant.participant_last_name}`
+            : null;
+
+        // Redirect to confirmation page with event details
+        res.render('events/registration_confirmation', {
+            user: req.user,
+            event: eventDetails,
+            participantName: participantName
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -278,6 +357,30 @@ router.post('/register-visitor', async (req, res) => {
 
         if (!event_instance_id || !first_name || !last_name || !email) {
             return res.status(400).send('All fields are required.');
+        }
+
+        // Fetch event details before registration
+        const eventDetails = await db('event_instances')
+            .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
+            .where('event_instances.event_instance_id', event_instance_id)
+            .select(
+                'event_definitions.event_name',
+                'event_definitions.event_type',
+                'event_instances.event_date_time_start',
+                'event_instances.event_date_time_end',
+                'event_instances.event_location'
+            )
+            .first();
+
+        if (!eventDetails) {
+            return res.status(404).send('Event not found');
+        }
+
+        // Business Logic: Prevent registration for past events
+        // Check if event has already occurred
+        if (eventDetails.event_date_time_start && new Date(eventDetails.event_date_time_start) < new Date()) {
+            req.flash('error', 'You cannot register for events that have already occurred.');
+            return res.redirect('/events');
         }
 
         // Check if participant exists by email
@@ -307,7 +410,8 @@ router.post('/register-visitor', async (req, res) => {
             .first();
 
         if (existingRegistration) {
-            return res.send('<script>alert("You are already registered for this event!"); window.location.href="/events";</script>');
+            req.flash('error', 'You are already registered for this event!');
+            return res.redirect('/events');
         }
 
         // Create registration
@@ -320,7 +424,15 @@ router.post('/register-visitor', async (req, res) => {
             registration_created_at: new Date()
         });
 
-        res.send('<script>alert("Successfully registered! You can now log in with your email to manage your registrations."); window.location.href="/events";</script>');
+        // Create participant name for personalized message
+        const participantName = `${first_name} ${last_name}`;
+
+        // Redirect to confirmation page with event details
+        res.render('events/registration_confirmation', {
+            user: null, // Visitor is not logged in
+            event: eventDetails,
+            participantName: participantName
+        });
     } catch (err) {
         console.error('Visitor Registration Error:', err);
         res.status(500).send('Error processing registration. Please try again.');

@@ -66,7 +66,13 @@ app.use((req, res, next) => {
     // res.locals.csrfToken = req.csrfToken(); // DISABLED
     res.locals.csrfToken = 'disabled'; // Dummy token
     res.locals.messages = req.flash();
-    res.locals.user = req.user || null; // Use Passport's req.user
+    // Use Passport's req.user and add role alias for backward compatibility
+    if (req.user) {
+        // Map participant_role to role for views that use the old property name
+        // 'admin' maps to 'Manager', 'participant' maps to 'participant'
+        req.user.role = req.user.participant_role === 'admin' ? 'Manager' : (req.user.participant_role || 'participant');
+    }
+    res.locals.user = req.user || null;
     next();
 });
 

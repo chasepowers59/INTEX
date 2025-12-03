@@ -1,0 +1,417 @@
+<%- include('../partials/header', { user: user }) %>
+
+    <style>
+        :root {
+            --col-peach: #FFD1C7;
+            --col-blue: #94AAB9;
+            --col-purple: #978EC4;
+            --col-green: #9AB59D;
+            --col-dark-gray: #3A3F3B;
+            --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.1);
+            --radius-card: 20px;
+        }
+
+        .confirmation-container {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 1rem;
+            background: linear-gradient(135deg, var(--col-peach) 0%, #FFE5DF 100%);
+        }
+
+        .confirmation-card {
+            background: white;
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-soft);
+            max-width: 700px;
+            width: 100%;
+            padding: 3rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .confirmation-card::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            background: var(--col-peach);
+            border-radius: 50%;
+            opacity: 0.3;
+        }
+
+        .confirmation-card::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: -30px;
+            width: 150px;
+            height: 150px;
+            background: var(--col-blue);
+            border-radius: 50%;
+            opacity: 0.2;
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--col-green) 0%, #7FA382 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 10px 30px rgba(154, 181, 157, 0.3);
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-icon i {
+            font-size: 3rem;
+            color: white;
+        }
+
+        .confirmation-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--col-dark-gray);
+            margin-bottom: 1rem;
+            font-family: 'DM Serif Display', serif;
+            position: relative;
+            z-index: 1;
+        }
+
+        .confirmation-message {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .event-details-card {
+            background: #F9F5EA;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            text-align: left;
+            position: relative;
+            z-index: 1;
+            border: 2px solid var(--col-peach);
+        }
+
+        .event-details-card h3 {
+            color: var(--col-blue);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-family: 'DM Serif Display', serif;
+            text-align: center;
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .detail-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--col-peach);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .detail-icon i {
+            color: var(--col-blue);
+            font-size: 1.1rem;
+        }
+
+        .detail-content {
+            flex: 1;
+        }
+
+        .detail-label {
+            font-size: 0.85rem;
+            color: #999;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
+            color: var(--col-dark-gray);
+            font-weight: 600;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-btn {
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .nav-btn-primary {
+            background: var(--col-blue);
+            color: white;
+        }
+
+        .nav-btn-primary:hover {
+            background: #7A8FA0;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(148, 170, 185, 0.3);
+        }
+
+        .nav-btn-secondary {
+            background: white;
+            color: var(--col-blue);
+            border: 2px solid var(--col-blue);
+        }
+
+        .nav-btn-secondary:hover {
+            background: var(--col-peach);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn-accent {
+            background: var(--col-green);
+            color: white;
+        }
+
+        .nav-btn-accent:hover {
+            background: #7FA382;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(154, 181, 157, 0.3);
+        }
+
+        .next-steps {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px dashed var(--col-peach);
+            position: relative;
+            z-index: 1;
+        }
+
+        .next-steps h4 {
+            color: var(--col-blue);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            font-family: 'DM Serif Display', serif;
+        }
+
+        .next-steps ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .next-steps li {
+            padding: 0.5rem 0;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .next-steps li::before {
+            content: '✓';
+            color: var(--col-green);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .confirmation-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .confirmation-title {
+                font-size: 2rem;
+            }
+
+            .navigation-buttons {
+                flex-direction: column;
+            }
+
+            .nav-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+
+    <div class="confirmation-container">
+        <div class="confirmation-card">
+            <!-- Success Icon -->
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+
+            <!-- Title -->
+            <h1 class="confirmation-title">You're All Set!</h1>
+
+            <!-- Personalized Message -->
+            <p class="confirmation-message">
+                <% if (participantName) { %>
+                    <%= participantName %>, your registration has been confirmed!
+                <% } else { %>
+                    Thank you! Your registration has been confirmed!
+                <% } %>
+            </p>
+
+            <!-- Event Details Card -->
+            <div class="event-details-card">
+                <h3><%= event.event_name %></h3>
+
+                <div class="detail-row">
+                    <div class="detail-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Date</div>
+                        <div class="detail-value">
+                            <%= event.event_date_time_start ? new Date(event.event_date_time_start).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'TBD' %>
+                        </div>
+                    </div>
+                </div>
+
+                <% if (event.event_date_time_start) { %>
+                    <div class="detail-row">
+                        <div class="detail-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-label">Time</div>
+                            <div class="detail-value">
+                                <%= new Date(event.event_date_time_start).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) %>
+                                <% if (event.event_date_time_end) { %>
+                                    - <%= new Date(event.event_date_time_end).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) %>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+
+                <% if (event.event_location) { %>
+                    <div class="detail-row">
+                        <div class="detail-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-label">Location</div>
+                            <div class="detail-value"><%= event.event_location %></div>
+                        </div>
+                    </div>
+                <% } %>
+
+                <% if (event.event_type) { %>
+                    <div class="detail-row">
+                        <div class="detail-icon">
+                            <i class="fas fa-tag"></i>
+                        </div>
+                        <div class="detail-content">
+                            <div class="detail-label">Event Type</div>
+                            <div class="detail-value"><%= event.event_type %></div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="navigation-buttons">
+                <a href="/events" class="nav-btn nav-btn-primary">
+                    <i class="fas fa-calendar"></i>
+                    View All Events
+                </a>
+                <a href="/" class="nav-btn nav-btn-secondary">
+                    <i class="fas fa-home"></i>
+                    Return Home
+                </a>
+                <% if (user && user.participant_id) { %>
+                    <a href="/participants/<%= user.participant_id %>" class="nav-btn nav-btn-accent">
+                        <i class="fas fa-user"></i>
+                        View My Profile
+                    </a>
+                <% } %>
+            </div>
+
+            <!-- Next Steps (for visitors) -->
+            <% if (!user || !user.participant_id) { %>
+                <div class="next-steps">
+                    <h4>What's Next?</h4>
+                    <ul>
+                        <li>Check your email for a confirmation message</li>
+                        <li>Create an account to manage all your registrations</li>
+                        <li>Join us on the day of the event!</li>
+                    </ul>
+                    <div style="margin-top: 1.5rem;">
+                        <a href="/auth/register" class="nav-btn nav-btn-accent" style="display: inline-flex;">
+                            <i class="fas fa-user-plus"></i>
+                            Create Account
+                        </a>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="next-steps">
+                    <h4>What's Next?</h4>
+                    <ul>
+                        <li>Check your email for a confirmation message</li>
+                        <li>Add this event to your calendar</li>
+                        <li>Join us on the day of the event!</li>
+                    </ul>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+

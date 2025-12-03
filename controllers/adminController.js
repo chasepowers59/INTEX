@@ -192,9 +192,13 @@ exports.listUsers = async (req, res) => {
     try {
         const { search } = req.query;
         // Query Strategy: Select only essential fields for the user list view
+        // Business Logic: Only show participants who have passwords (actual user accounts)
+        // This excludes participant records created from visitor registrations/donations that don't have passwords yet
         // We don't need full participant details here, just user account information
         let query = knex('participants')
             .select('participant_id', 'participant_email', 'participant_role')
+            .whereNotNull('participant_password') // Only show users with passwords (actual accounts)
+            .where('participant_password', '!=', '') // Exclude empty passwords
             .orderBy('participant_email', 'asc');
 
         // Search Logic: Case-insensitive email search

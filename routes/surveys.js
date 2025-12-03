@@ -7,17 +7,27 @@ const { isAuthenticated } = require('../middleware/authMiddleware');
 const { generateId } = require('../utils/idGenerator');
 
 // Get Survey Form (for a specific registration)
-router.get('/new/:registrationId', async (req, res) => {
+router.get('/new/:registrationId', isAuthenticated, async (req, res) => {
     try {
         const registration = await db('registrations')
             .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
             .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
             .where('registrations.registration_id', req.params.registrationId)
-            .select('event_definitions.event_name', 'registrations.registration_id')
+            .select('event_definitions.event_name', 'registrations.registration_id', 'registrations.participant_id')
             .first();
 
         if (!registration) {
             return res.status(404).send('Registration not found');
+        }
+
+        // Authorization: Ensure participant can only submit surveys for their own registrations
+        // Managers/admins can submit for any registration
+        const isAuthorized = 
+            (req.user.participant_role && ['admin', 'manager'].includes(req.user.participant_role.toLowerCase())) ||
+            req.user.participant_id == registration.participant_id;
+
+        if (!isAuthorized) {
+            return res.status(403).send('Unauthorized: You can only submit surveys for your own registrations');
         }
 
         res.render('surveys/form', { user: req.user, registration });
@@ -28,9 +38,38 @@ router.get('/new/:registrationId', async (req, res) => {
 });
 
 // Post Survey
-router.post('/new', async (req, res) => {
+router.post('/new', isAuthenticated, async (req, res) => {
     try {
         const { registration_id, satisfaction, usefulness, instructor, recommendation, comments } = req.body;
+        
+        // Verify registration exists and user has permission
+        const registration = await db('registrations')
+            .where('registration_id', registration_id)
+            .first();
+
+        if (!registration) {
+            return res.status(404).send('Registration not found');
+        }
+
+        // Authorization: Ensure participant can only submit surveys for their own registrations
+        const isAuthorized = 
+            (req.user.participant_role && ['admin', 'manager'].includes(req.user.participant_role.toLowerCase())) ||
+            req.user.participant_id == registration.participant_id;
+
+        if (!isAuthorized) {
+            return res.status(403).send('Unauthorized: You can only submit surveys for your own registrations');
+        }
+
+        // Check if survey already exists
+        const existingSurvey = await db('surveys')
+            .where('registration_id', registration_id)
+            .first();
+
+        if (existingSurvey) {
+            req.flash('error', 'A survey has already been submitted for this event.');
+            return res.redirect(`/participants/${req.user.participant_id}`);
+        }
+
         const surveyId = generateId();
 
         // Calculate overall score (simple average)
@@ -48,10 +87,12 @@ router.post('/new', async (req, res) => {
             survey_submission_date: new Date()
         });
 
-        res.redirect('/'); // Redirect to home or a "Thank You" page
+        req.flash('success', 'Survey submitted successfully! Thank you for your feedback.');
+        res.redirect(`/participants/${req.user.participant_id}`);
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server Error');
+        req.flash('error', 'Error submitting survey. Please try again.');
+        res.redirect(`/participants/${req.user.participant_id}`);
     }
 });
 
