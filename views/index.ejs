@@ -1,58 +1,100 @@
 <%- include('partials/header') %>
 
-    <!-- Mission Section -->
-    <div class="section-header-blue">
-        <div class="brush-border-top"></div>
-        <h2>OUR MISSION</h2>
-        <div class="brush-border-bottom"></div>
-    </div>
-
-    <!-- Main Content Section -->
-    <div class="container text-center" style="padding: 4rem 0; position: relative;">
-        <!-- Butterfly/Floral Accents -->
-        <div style="position: absolute; top: 2rem; left: 10%; font-size: 3rem; color: var(--col-pink);">🦋</div>
-        <div style="position: absolute; bottom: 2rem; right: 10%; font-size: 3rem; color: var(--col-green);">🌸</div>
-
-        <!-- Team Section Header -->
-        <div class="section-header-blue">
-            <div class="brush-border-top"></div>
-            <h2>MEET THE TEAM</h2>
-            <div class="brush-border-bottom"></div>
+    <!-- Hero Split Section -->
+    <div class="hero-split" style="min-height: auto !important; max-height: 60vh;">
+        <!-- Left: Hero Image -->
+        <div class="hero-image" style="background-image: url('/img/ER Summer Summit 2022-165.jpg');">
+            <div style="position: absolute; inset: 0; background: rgba(255, 209, 199, 0.2);"></div>
         </div>
 
-        <!-- Team Section Content -->
-        <div style="background-color: var(--col-light-pink); padding: 4rem 0;">
-            <div class="container">
-                <div class="grid-3">
-                    <!-- Team Member 1 -->
-                    <div class="card" style="padding: 0; overflow: hidden;">
-                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
-                            alt="Team Member" style="width: 100%; height: 300px; object-fit: cover;">
-                        <div style="padding: 1.5rem;">
-                            <h3>Maria Garcia</h3>
-                            <p>Founder & CEO</p>
-                        </div>
-                    </div>
-                    <!-- Team Member 2 -->
-                    <div class="card" style="padding: 0; overflow: hidden;">
-                        <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
-                            alt="Team Member" style="width: 100%; height: 300px; object-fit: cover;">
-                        <div style="padding: 1.5rem;">
-                            <h3>Sarah Johnson</h3>
-                            <p>Program Director</p>
-                        </div>
-                    </div>
-                    <!-- Team Member 3 -->
-                    <div class="card" style="padding: 0; overflow: hidden;">
-                        <img src="https://images.unsplash.com/photo-1590650153855-d9e808231d41?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
-                            alt="Team Member" style="width: 100%; height: 300px; object-fit: cover;">
-                        <div style="padding: 1.5rem;">
-                            <h3>Elena Rodriguez</h3>
-                            <p>Community Outreach</p>
-                        </div>
-                    </div>
+        <!-- Right: Mission Content -->
+        <div class="hero-content" style="padding: 2rem;">
+            <h1 style="font-size: 2.5rem; color: var(--col-dark-gray); margin-bottom: 1rem; font-family: 'DM Serif Display', serif;">
+                Empowering Latina Youth
+            </h1>
+            <p style="font-size: 1.1rem; line-height: 1.6; color: var(--col-dark-gray); margin-bottom: 2rem; font-family: 'Montserrat', sans-serif;">
+                Inspiring the next generation of leaders through heritage, education, and sisterhood. We believe that when a young woman rises, she lifts her entire community with her.
+            </p>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="/donate" class="btn" style="background: var(--col-blue); color: white; padding: 0.8rem 2rem; font-size: 1rem;">
+                    Donate Now
+                </a>
+                <a href="/get-involved" class="btn" style="background: white; color: var(--col-blue); border: 2px solid var(--col-blue); padding: 0.8rem 2rem; font-size: 1rem;">
+                    Get Involved
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Impact Stats Section -->
+    <div style="background: white; padding: 4rem 0;">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2 style="color: var(--col-blue); font-size: 2.5rem; margin-bottom: 1rem; font-family: 'DM Serif Display', serif;">Our Impact</h2>
+                <p style="color: var(--text-light); font-size: 1.1rem;">Making a difference in the lives of Latina youth</p>
+            </div>
+            <div class="grid-3" style="margin-top: 3rem;">
+                <div class="stat-card" style="background-image: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url('/img/ER STEM Workshop Aug 2022-31.jpg'); background-size: cover; background-position: center;">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Students Served</div>
+                </div>
+                <div class="stat-card" style="background-image: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url('/img/ER Summer Summit 2022-068.jpg'); background-size: cover; background-position: center;">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Events Hosted</div>
+                </div>
+                <div class="stat-card" style="background-image: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url('/img/ER Animation Workshop Feb 2021_043.jpg'); background-size: cover; background-position: center;">
+                    <div class="stat-number">100+</div>
+                    <div class="stat-label">Volunteers</div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <%- include('partials/footer') %>
+    <!-- Core Values Section -->
+    <div style="background: var(--col-cream); padding: 6rem 0;">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2 style="color: var(--col-blue); font-size: 2.5rem; margin-bottom: 1rem; font-family: 'DM Serif Display', serif;">Our Core Values</h2>
+                <div style="width: 80px; height: 4px; background: var(--col-pink); margin: 1rem auto;"></div>
+            </div>
+            <div class="grid-3">
+                <div class="card hover-lift" style="border-top: 5px solid var(--col-pink);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🦋</div>
+                    <h3 style="color: var(--col-blue);">Heritage</h3>
+                    <p style="color: var(--text-light);">Celebrating our roots and finding strength in our culture.</p>
+                </div>
+                <div class="card hover-lift" style="border-top: 5px solid var(--col-blue);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📚</div>
+                    <h3 style="color: var(--col-blue);">Education</h3>
+                    <p style="color: var(--text-light);">Prioritizing learning as the key to unlocking opportunity.</p>
+                </div>
+                <div class="card hover-lift" style="border-top: 5px solid var(--col-green);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🤝</div>
+                    <h3 style="color: var(--col-blue);">Sisterhood</h3>
+                    <p style="color: var(--text-light);">Supporting one another through mentorship and community.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action Strip -->
+    <div style="background: var(--col-peach); padding: 4rem 0;">
+        <div class="container text-center">
+            <h2 style="font-size: 3rem; color: var(--col-dark-gray); margin-bottom: 1.5rem; font-family: 'DM Serif Display', serif;">
+                Join Us in Making a Difference
+            </h2>
+            <p style="font-size: 1.3rem; color: var(--col-dark-gray); margin-bottom: 2.5rem; max-width: 700px; margin-left: auto; margin-right: auto;">
+                Your support helps us empower the next generation of Latina leaders. Together, we rise.
+            </p>
+            <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+                <a href="/donate" class="btn" style="background: var(--col-blue); color: white; padding: 1.2rem 3rem; font-size: 1.1rem;">
+                    Donate Today
+                </a>
+                <a href="/get-involved" class="btn" style="background: white; color: var(--col-blue); border: 2px solid var(--col-blue); padding: 1.2rem 3rem; font-size: 1.1rem;">
+                    Get Involved
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>

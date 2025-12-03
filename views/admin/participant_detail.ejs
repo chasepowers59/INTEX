@@ -80,7 +80,7 @@
                                     <%= reg.event_name %>
                                 </h4>
                                 <p style="color: #666; font-size: 0.9rem;">
-                                    <%= new Date(reg.start_time).toLocaleDateString() %> | <%= reg.event_type %>
+                                    <%= reg.start_time ? new Date(reg.start_time).toLocaleDateString('en-US') : 'TBD' %> | <%= reg.event_type %>
                                 </p>
                                 <p style="margin-top: 0.5rem;">
                                     <%= reg.location %>
@@ -105,7 +105,7 @@
                                             <%= m.title %>
                                         </strong><br>
                                         <small style="color: #666;">
-                                            <%= new Date(m.date_achieved).toLocaleDateString() %>
+                                            <%= m.date_achieved ? new Date(m.date_achieved).toLocaleDateString('en-US') : 'N/A' %>
                                         </small>
                                     </li>
                                     <% }) %>

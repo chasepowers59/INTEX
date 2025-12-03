@@ -50,8 +50,26 @@ exports.postRegister = async (req, res) => {
 
         // Check if email already exists
         const existing = await db('participants').where({ participant_email }).first();
+        
         if (existing) {
-            return res.render('register', { user: null, error: 'Email already registered' });
+            // If participant exists but has no password (created from visitor registration/donation)
+            // Update the existing record with the password to complete account creation
+            if (!existing.participant_password) {
+                await db('participants')
+                    .where({ participant_id: existing.participant_id })
+                    .update({
+                        participant_first_name: participant_first_name || existing.participant_first_name,
+                        participant_last_name: participant_last_name || existing.participant_last_name,
+                        participant_password: participant_password, // Plain text
+                        participant_role: existing.participant_role || 'participant'
+                    });
+                
+                req.flash('success', 'Account created successfully! You can now login with your email and password.');
+                return res.redirect('/auth/login');
+            } else {
+                // Participant exists and already has a password - account already exists
+                return res.render('register', { user: null, error: 'Email already registered. Please login instead.' });
+            }
         }
 
         // Hash password

@@ -9,8 +9,8 @@
                 <select id="participant_id" name="participant_id" class="form-control" required>
                     <% participants.forEach(p=> { %>
                         <option value="<%= p.participant_id %>">
-                            <%= p.first_name %>
-                                <%= p.last_name %>
+                            <%= p.participant_first_name %>
+                                <%= p.participant_last_name %>
                         </option>
                         <% }) %>
                 </select>

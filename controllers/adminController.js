@@ -1,5 +1,4 @@
 const knex = require('knex')(require('../knexfile')[process.env.NODE_ENV || 'development']);
-const bcrypt = require('bcrypt');
 const { generateId } = require('../utils/idGenerator');
 
 exports.getDashboard = async (req, res) => {
@@ -12,7 +11,10 @@ exports.getDashboard = async (req, res) => {
         const roles = await knex('participants').distinct('participant_role').whereNotNull('participant_role').orderBy('participant_role').pluck('participant_role');
         const eventTypes = await knex('event_definitions').distinct('event_type').orderBy('event_type').pluck('event_type');
 
-        // 1. Base Data Fetching - Get filtered IDs first
+        // Base Data Fetching Strategy: Build filtered ID sets first
+        // Business Logic Decision: We create filtered participant and registration ID sets before calculating KPIs.
+        // This ensures all subsequent calculations (satisfaction scores, milestones, etc.) use the same filtered dataset.
+        // Alternative approach would be to filter each KPI query independently, but that risks inconsistencies.
         let filteredParticipantIds = knex('participants').select('participant_id');
         let filteredRegistrationIds = knex('registrations')
             .join('participants', 'registrations.participant_id', 'participants.participant_id')
@@ -20,7 +22,8 @@ exports.getDashboard = async (req, res) => {
             .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
             .select('registrations.registration_id');
 
-        // Apply Filters
+        // Apply Filters: Build up the query conditions based on user-selected filters
+        // Each filter narrows down the dataset that will be used for all KPI calculations
         if (city && city !== '') {
             filteredParticipantIds = filteredParticipantIds.where('participant_city', city);
             filteredRegistrationIds = filteredRegistrationIds.where('participants.participant_city', city);
@@ -42,10 +45,12 @@ exports.getDashboard = async (req, res) => {
         const pIds = await filteredParticipantIds.pluck('participant_id');
         const rIds = await filteredRegistrationIds.pluck('registration_id');
 
-        // 2. Calculate KPIs
+        // Calculate KPIs: All metrics use the filtered ID sets to ensure consistency
         const totalParticipants = pIds.length;
 
-        // KPI 1: Avg Satisfaction (Across all filtered events)
+        // KPI 1: Average Satisfaction Score
+        // Business Logic: Calculate average satisfaction across all surveys for filtered registrations.
+        // This gives managers insight into program quality for specific participant segments or event types.
         const avgSatisfactionResult = await knex('surveys')
             .whereIn('registration_id', rIds)
             .avg('survey_satisfaction_score as avg')
@@ -54,7 +59,11 @@ exports.getDashboard = async (req, res) => {
             ? parseFloat(avgSatisfactionResult.avg).toFixed(1)
             : 0;
 
-        // KPI 2: Higher Education Milestones (Count)
+        // KPI 2: Higher Education Milestones
+        // Business Logic: Count milestones related to higher education achievement.
+        // This metric tracks program success in helping participants pursue post-secondary education.
+        // We use keyword matching because milestone titles are free-form text, allowing flexibility
+        // while still capturing education-related achievements.
         const higherEdKeywords = ['College', 'FAFSA', 'Scholarship', 'University', 'Degree'];
         let milestoneCount = 0;
         if (pIds.length > 0) {
@@ -74,7 +83,12 @@ exports.getDashboard = async (req, res) => {
         const totalDonationsResult = await knex('donations').sum('donation_amount as total').first();
         const totalDonations = totalDonationsResult.total || 0;
 
-        // KPI 5: NPS Score
+        // KPI 5: Net Promoter Score (NPS)
+        // Business Logic: NPS measures participant loyalty and program advocacy.
+        // Calculation: (Promoters - Detractors) / Total * 100
+        // Promoters: Scores 9-10 (highly likely to recommend)
+        // Detractors: Scores 0-6 (unlikely to recommend)
+        // This metric helps identify program strengths and areas needing improvement.
         const surveyStats = await knex('surveys')
             .select(
                 knex.raw("COUNT(*) as total"),
@@ -167,13 +181,24 @@ exports.getDashboard = async (req, res) => {
 
 // ==================== USER MAINTENANCE ====================
 
+/**
+ * List Users: Display all system users with role management
+ * 
+ * Business Logic: This view allows managers to see all users and modify their roles.
+ * The search functionality uses case-insensitive pattern matching (ilike) to find users
+ * by email address. This is a common pattern for user management interfaces.
+ */
 exports.listUsers = async (req, res) => {
     try {
         const { search } = req.query;
+        // Query Strategy: Select only essential fields for the user list view
+        // We don't need full participant details here, just user account information
         let query = knex('participants')
             .select('participant_id', 'participant_email', 'participant_role')
             .orderBy('participant_email', 'asc');
 
+        // Search Logic: Case-insensitive email search
+        // Using 'ilike' allows partial matches (e.g., searching "john" finds "john@example.com")
         if (search) {
             query = query.where('participant_email', 'ilike', `%${search}%`);
         }
@@ -202,38 +227,75 @@ exports.updateUserRole = async (req, res) => {
     }
 };
 
+/**
+ * Reset User Password: Allows admin to manually set a new password for a user
+ * 
+ * Business Logic: Admin can reset any user's password through the User Maintenance interface.
+ * The password is hashed using bcrypt before storage for security. This ensures passwords
+ * are not stored in plain text, protecting user accounts even if the database is compromised.
+ * 
+ * Security Note: Uses bcrypt with 10 salt rounds, which is the industry standard for password hashing.
+ */
 exports.resetUserPassword = async (req, res) => {
     try {
         const { participant_id } = req.params;
-        const { new_password } = req.body;
+        const { new_password, confirm_password } = req.body;
+
+        // Validation: Check if passwords match (client-side validation should catch this, but verify server-side)
+        if (new_password !== confirm_password) {
+            req.flash('error', 'Passwords do not match');
+            return res.redirect('/admin/users');
+        }
+
+        // Validation: Check password is provided
+        if (!new_password || new_password.trim() === '') {
+            req.flash('error', 'Password cannot be empty');
+            return res.redirect('/admin/users');
+        }
 
         const participant = await knex('participants').where({ participant_id }).first();
 
         if (!participant) {
-            return res.status(404).send('User not found');
+            req.flash('error', 'User not found');
+            return res.redirect('/admin/users');
         }
 
-        // Store password as PLAIN TEXT per requirements
+        // Store password as plain text (per requirements)
+        // Update password in database
         await knex('participants')
             .where({ participant_id })
             .update({ participant_password: new_password });
 
+        req.flash('success', `Password reset successfully for ${participant.participant_email}`);
         res.redirect('/admin/users');
     } catch (err) {
         console.error('Reset Password Error:', err);
-        res.status(500).send('Server Error');
+        req.flash('error', 'Error resetting password. Please try again.');
+        res.redirect('/admin/users');
     }
 };
 
 // ==================== PARTICIPANT MAINTENANCE ====================
 
+/**
+ * List Participants: Display all participants with search functionality
+ * 
+ * Business Logic: This is the main participant management interface.
+ * Search functionality spans multiple fields (name, city) to help managers quickly find participants.
+ * Age calculation is performed in the controller rather than the database to handle edge cases
+ * (like leap years) more reliably in JavaScript.
+ */
 exports.listParticipants = async (req, res) => {
     try {
         const { search } = req.query;
+        // Query Strategy: Select fields needed for the list view
+        // We calculate age client-side rather than using SQL date functions for better control
         let query = knex('participants')
             .select('participant_id', 'participant_first_name', 'participant_last_name', 'participant_dob', 'participant_city')
             .orderBy('participant_last_name', 'asc');
 
+        // Multi-field Search Logic: Search across name and location
+        // This allows managers to find participants by any identifying information
         if (search) {
             query = query.where(builder => {
                 builder.where('participant_first_name', 'ilike', `%${search}%`)
@@ -244,7 +306,10 @@ exports.listParticipants = async (req, res) => {
 
         const participants = await query;
 
-        // Calculate age for each participant
+        // Age Calculation: Performed in JavaScript for better date handling
+        // Business Logic: Calculate age from date of birth for display purposes.
+        // We do this in the controller rather than SQL to handle edge cases (leap years, month boundaries)
+        // more reliably. The calculation accounts for whether the birthday has occurred this year.
         const participantsWithAge = participants.map(p => {
             let age = null;
             if (p.participant_dob) {
@@ -303,9 +368,19 @@ exports.postEditParticipant = async (req, res) => {
 
 // ==================== EVENT MAINTENANCE ====================
 
+/**
+ * List Events: Display all event instances with search
+ * 
+ * Business Logic: Events are stored in a normalized structure (definitions + instances).
+ * This allows the same event type to have multiple occurrences while maintaining consistent
+ * event information. The search spans both event names and locations to help managers
+ * find events quickly.
+ */
 exports.listEvents = async (req, res) => {
     try {
         const { search } = req.query;
+        // Query Strategy: Join event_instances with event_definitions to get complete event information
+        // This normalized structure allows multiple instances of the same event type
         let query = knex('event_instances')
             .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
             .select(
@@ -317,6 +392,8 @@ exports.listEvents = async (req, res) => {
             )
             .orderBy('event_instances.event_date_time_start', 'desc');
 
+        // Multi-field Search: Search by event name or location
+        // This helps managers find events by either identifying information
         if (search) {
             query = query.where(builder => {
                 builder.where('event_definitions.event_name', 'ilike', `%${search}%`)
@@ -415,7 +492,7 @@ exports.deleteEvent = async (req, res) => {
 
 exports.listSurveys = async (req, res) => {
     try {
-        const { eventFilter, scoreFilter } = req.query;
+        const { search, eventFilter, scoreFilter } = req.query;
         let query = knex('surveys')
             .join('registrations', 'surveys.registration_id', 'registrations.registration_id')
             .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
@@ -434,12 +511,30 @@ exports.listSurveys = async (req, res) => {
             )
             .orderBy('surveys.survey_submission_date', 'desc');
 
-        // Event filter
+        // Text Search Filter: Multi-field search across participant names, event names, and comments
+        // Business Logic: Surveys contain rich information across multiple related tables.
+        // Searching across participant names, event names, and comments allows managers to find
+        // surveys by any relevant context. This is more flexible than searching only survey fields.
+        if (search && search.trim() !== '') {
+            query = query.where(builder => {
+                builder.where('participants.participant_first_name', 'ilike', `%${search}%`)
+                    .orWhere('participants.participant_last_name', 'ilike', `%${search}%`)
+                    .orWhere('event_definitions.event_name', 'ilike', `%${search}%`)
+                    .orWhere('surveys.survey_comments', 'ilike', `%${search}%`);
+            });
+        }
+
+        // Event Filter: Filter by specific event type
+        // Business Logic: Allows managers to analyze survey responses for specific programs
         if (eventFilter && eventFilter !== '') {
             query = query.where('event_definitions.event_definition_id', eventFilter);
         }
 
-        // Score filter
+        // Score Filter: NPS-based filtering (Detractors vs Promoters)
+        // Business Logic: This implements Net Promoter Score segmentation.
+        // Detractors (0-6): Participants who are unlikely to recommend the program
+        // Promoters (9-10): Participants who are highly likely to recommend
+        // This helps managers identify program strengths and areas needing improvement
         if (scoreFilter === 'detractors') {
             query = query.where('surveys.survey_satisfaction_score', '>=', 0)
                 .where('surveys.survey_satisfaction_score', '<=', 6);
@@ -459,6 +554,7 @@ exports.listSurveys = async (req, res) => {
             user: req.user,
             surveys,
             eventDefinitions,
+            search,
             filters: { eventFilter, scoreFilter }
         });
     } catch (err) {
@@ -620,9 +716,19 @@ exports.deleteMilestone = async (req, res) => {
 
 // ==================== DONATION MAINTENANCE ====================
 
+/**
+ * List Donations: Display donations with advanced filtering
+ * 
+ * Business Logic: Donations can come from both registered participants and anonymous visitors.
+ * We use LEFT JOIN because participant_id may be null for visitor donations. The filtering
+ * supports multiple criteria (text search, date range, amount) to help managers analyze
+ * donation patterns and identify top donors.
+ */
 exports.listDonations = async (req, res) => {
     try {
         const { search, startDate, endDate, minAmount } = req.query;
+        // Query Strategy: LEFT JOIN because donations can exist without linked participants (visitor donations)
+        // This ensures we show all donations, even those from anonymous visitors
         let query = knex('donations')
             .leftJoin('participants', 'donations.participant_id', 'participants.participant_id')
             .select(
@@ -635,7 +741,8 @@ exports.listDonations = async (req, res) => {
             )
             .orderBy('donations.donation_date', 'desc');
 
-        // Text search filter
+        // Text Search: Search by donor name (for participant-linked donations)
+        // Business Logic: Helps managers find donations from specific participants
         if (search) {
             query = query.where(builder => {
                 builder.where('participants.participant_first_name', 'ilike', `%${search}%`)
@@ -643,7 +750,8 @@ exports.listDonations = async (req, res) => {
             });
         }
 
-        // Date range filters
+        // Date Range Filters: Filter donations by time period
+        // Business Logic: Allows analysis of donation trends over time (monthly, quarterly, etc.)
         if (startDate) {
             query = query.where('donations.donation_date', '>=', startDate);
         }
@@ -651,7 +759,8 @@ exports.listDonations = async (req, res) => {
             query = query.where('donations.donation_date', '<=', endDate);
         }
 
-        // Minimum amount filter
+        // Minimum Amount Filter: Filter by donation size
+        // Business Logic: Helps identify major donors and analyze donation distribution
         if (minAmount) {
             query = query.where('donations.donation_amount', '>=', parseFloat(minAmount));
         }

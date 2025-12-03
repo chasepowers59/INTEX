@@ -463,3 +463,134 @@ tr:last-child td {
 tr:hover {
     background-color: #f9f9f9;
 }
+
+/* Hero Split Layout */
+.hero-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+    background-color: var(--col-peach);
+}
+
+.hero-split .hero-image {
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.hero-split .hero-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem;
+    background-color: var(--col-peach);
+}
+
+/* Calendar Card */
+.calendar-card {
+    display: flex;
+    padding: 0;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+    background: white;
+}
+
+.calendar-card .date-column {
+    background: var(--col-peach);
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: var(--col-dark-gray);
+    flex-shrink: 0;
+}
+
+.calendar-card .content-column {
+    padding: 2rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-card .thumbnail {
+    width: 200px;
+    height: 100%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* Stat Card */
+.stat-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.stat-card .stat-number {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--col-blue);
+    margin-bottom: 0.5rem;
+}
+
+.stat-card .stat-label {
+    font-size: 1rem;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Zigzag Section */
+.zigzag-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    margin: 4rem 0;
+}
+
+.zigzag-section.reverse {
+    direction: rtl;
+}
+
+.zigzag-section.reverse > * {
+    direction: ltr;
+}
+
+.zigzag-section .zigzag-image {
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+}
+
+.zigzag-section .zigzag-image img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+}
+
+.zigzag-section .zigzag-content {
+    padding: 2rem;
+}
+
+/* Grid Utilities */
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}

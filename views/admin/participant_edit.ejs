@@ -55,8 +55,8 @@
                                         <%= m.milestone_title %>
                                     </td>
                                     <td>
-                                        <%= new Date(m.milestone_date).toLocaleDateString('en-US', { year: 'numeric' ,
-                                            month: 'short' , day: 'numeric' }) %>
+                                        <%= m.milestone_date ? new Date(m.milestone_date).toLocaleDateString('en-US', { year: 'numeric' ,
+                                            month: 'short' , day: 'numeric' }) : 'N/A' %>
                                     </td>
                                     <td>
                                         <form action="/milestones/delete/<%= m.milestone_id %>" method="POST"

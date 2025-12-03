@@ -1,91 +1,118 @@
 <%- include('partials/header', { user: user }) %>
 
     <!-- Hero Section -->
-    <div class="hero"
-        style="background: var(--col-peach); position: relative; overflow: hidden; padding-top: 120px; padding-bottom: 6rem;">
+    <div
+        style="background: var(--col-peach); position: relative; overflow: hidden; padding: 1rem 0; margin-top: 0; min-height: auto !important;">
         <div class="container text-center" style="position: relative; z-index: 2;">
-            <h1 style="font-size: 4rem; color: var(--col-dark-gray); margin-bottom: 1rem;">Empowering Latina Youth</h1>
-            <p style="font-size: 1.5rem; max-width: 700px; margin: 0 auto; color: var(--col-dark-gray);">
+            <h1 style="font-size: 2.5rem; color: var(--col-dark-gray); margin-bottom: 0.5rem; font-family: 'DM Serif Display', serif;">About Ella Rises</h1>
+            <p style="font-size: 1.1rem; max-width: 700px; margin: 0 auto; color: var(--col-dark-gray); font-family: 'Montserrat', sans-serif;">
                 Inspiring the next generation of leaders through heritage, education, and sisterhood.
             </p>
         </div>
         <!-- Decorative Circle -->
         <div
-            style="position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: rgba(255,255,255,0.3); border-radius: 50%;">
+            style="position: absolute; top: -30px; right: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.3); border-radius: 50%;">
         </div>
         <div
-            style="position: absolute; bottom: -50px; left: -50px; width: 200px; height: 200px; background: var(--col-blue); border-radius: 50%; opacity: 0.2;">
+            style="position: absolute; bottom: -20px; left: -20px; width: 80px; height: 80px; background: var(--col-blue); border-radius: 50%; opacity: 0.2;">
         </div>
     </div>
 
-    <!-- Our Story & Collage -->
-    <div class="container" style="margin-top: -3rem; position: relative; z-index: 10;">
-        <div class="card shadow-soft" style="padding: 4rem; background: white; border-radius: var(--radius-card);">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
-                <div>
-                    <h2 style="color: var(--col-blue); margin-bottom: 2rem; font-size: 2.5rem;">Our Story</h2>
-                    <p style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1.5rem;">
-                        Ella Rises is dedicated to empowering Latina youth by providing them with the tools, mentorship,
-                        and experiences needed to embrace their heritage and become leaders in their communities.
-                    </p>
-                    <p style="font-size: 1.1rem; line-height: 1.8;">
-                        We believe that when a young woman rises, she lifts her entire community with her. Through our
-                        workshops and summits, we are building a network of strong, resilient, and ambitious women.
-                    </p>
-                </div>
+    <!-- Zigzag Section 1: Our Story (Text Left, Image Right) -->
+    <div class="container" style="margin: 3rem auto;">
+        <div class="zigzag-section">
+            <div class="zigzag-content">
+                <h2 style="color: var(--col-blue); margin-bottom: 2rem; font-size: 2.5rem; font-family: 'DM Serif Display', serif;">Our Story</h2>
+                <p style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1.5rem; color: var(--text-main);">
+                    Ella Rises is dedicated to empowering Latina youth by providing them with the tools, mentorship,
+                    and experiences needed to embrace their heritage and become leaders in their communities.
+                </p>
+                <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-main);">
+                    We believe that when a young woman rises, she lifts her entire community with her. Through our
+                    workshops and summits, we are building a network of strong, resilient, and ambitious women.
+                </p>
+            </div>
+            <div class="zigzag-image">
+                <img src="/img/ER UMFA Mural_049.jpg" alt="Community Mural">
+            </div>
+        </div>
+    </div>
 
-                <!-- Polaroid Collage -->
-                <div style="position: relative; height: 400px;">
-                    <div class="polaroid"
-                        style="position: absolute; top: 0; left: 0; width: 220px; transform: rotate(-5deg);">
-                        <img src="/img/ER Animation Workshop Feb 2021_029.jpg" alt="Workshop"
-                            style="width: 100%; height: 180px; object-fit: cover; background: #eee;">
-                    </div>
-                    <div class="polaroid"
-                        style="position: absolute; top: 40px; right: 0; width: 220px; transform: rotate(5deg);">
-                        <img src="/img/ER STEM Workshop Aug 2022-09.jpg" alt="Mentorship"
-                            style="width: 100%; height: 180px; object-fit: cover; background: #eee;">
-                    </div>
-                    <div class="polaroid"
-                        style="position: absolute; bottom: 0; left: 60px; width: 220px; transform: rotate(-2deg);">
-                        <img src="/img/ER Summer Summit 2022-165.jpg" alt="Community"
-                            style="width: 100%; height: 180px; object-fit: cover; background: #eee;">
-                    </div>
+    <!-- Zigzag Section 2: Our Programs (Image Left, Text Right) -->
+    <div style="background: var(--col-cream); padding: 6rem 0;">
+        <div class="container">
+            <div class="zigzag-section reverse">
+                <div class="zigzag-image">
+                    <img src="/img/ER Animation Workshop Feb 2021_043.jpg" alt="Animation Workshop">
                 </div>
+                <div class="zigzag-content">
+                    <h2 style="color: var(--col-blue); margin-bottom: 2rem; font-size: 2.5rem; font-family: 'DM Serif Display', serif;">Our Programs</h2>
+                    <p style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1.5rem; color: var(--text-main);">
+                        From STEAM workshops to cultural celebrations, our programs are designed to inspire, educate, and connect.
+                        We offer hands-on learning experiences that combine technical skills with cultural pride.
+                    </p>
+                    <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-main);">
+                        Each program is carefully crafted to provide mentorship, build confidence, and create lasting connections
+                        within our community of Latina leaders.
+                    </p>
+                    <a href="/programs" class="btn" style="margin-top: 2rem;">Explore Programs</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zigzag Section 3: Our Impact (Text Left, Image Right) -->
+    <div class="container" style="margin: 6rem auto;">
+        <div class="zigzag-section">
+            <div class="zigzag-content">
+                <h2 style="color: var(--col-blue); margin-bottom: 2rem; font-size: 2.5rem; font-family: 'DM Serif Display', serif;">Our Impact</h2>
+                <p style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1.5rem; color: var(--text-main);">
+                    Through partnerships with universities like BYU and community organizations, we've created pathways
+                    for hundreds of young women to pursue higher education and meaningful careers.
+                </p>
+                <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-main);">
+                    Our alumni network continues to grow, with graduates now serving as mentors and leaders in their
+                    own communities, creating a ripple effect of empowerment.
+                </p>
+            </div>
+            <div class="zigzag-image">
+                <img src="/img/ER BYU Tour 2022-042.jpg" alt="BYU Tour">
             </div>
         </div>
     </div>
 
     <!-- Core Values -->
-    <div class="container" style="margin: 6rem auto;">
-        <div class="text-center mb-4">
-            <h2 style="color: var(--col-blue); font-size: 2.5rem;">Our Core Values</h2>
-        </div>
-        <div class="grid-3 text-center">
-            <div class="card hover-lift" style="border-top: 5px solid var(--col-pink);">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🦋</div>
-                <h3 style="color: var(--col-blue);">Heritage</h3>
-                <p>Celebrating our roots and finding strength in our culture.</p>
+    <div style="background: var(--col-cream); padding: 6rem 0;">
+        <div class="container">
+            <div class="text-center mb-4">
+                <h2 style="color: var(--col-blue); font-size: 2.5rem; font-family: 'DM Serif Display', serif;">Our Core Values</h2>
             </div>
-            <div class="card hover-lift" style="border-top: 5px solid var(--col-blue);">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">📚</div>
-                <h3 style="color: var(--col-blue);">Education</h3>
-                <p>Prioritizing learning as the key to unlocking opportunity.</p>
-            </div>
-            <div class="card hover-lift" style="border-top: 5px solid var(--col-green);">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🤝</div>
-                <h3 style="color: var(--col-blue);">Sisterhood</h3>
-                <p>Supporting one another through mentorship and community.</p>
+            <div class="grid-3 text-center">
+                <div class="card hover-lift" style="border-top: 5px solid var(--col-pink);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🦋</div>
+                    <h3 style="color: var(--col-blue);">Heritage</h3>
+                    <p style="color: var(--text-light);">Celebrating our roots and finding strength in our culture.</p>
+                </div>
+                <div class="card hover-lift" style="border-top: 5px solid var(--col-blue);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📚</div>
+                    <h3 style="color: var(--col-blue);">Education</h3>
+                    <p style="color: var(--text-light);">Prioritizing learning as the key to unlocking opportunity.</p>
+                </div>
+                <div class="card hover-lift" style="border-top: 5px solid var(--col-green);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🤝</div>
+                    <h3 style="color: var(--col-blue);">Sisterhood</h3>
+                    <p style="color: var(--text-light);">Supporting one another through mentorship and community.</p>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Leadership Team -->
-    <div style="background: var(--col-cream); padding: 6rem 0;">
+    <div style="background: white; padding: 6rem 0;">
         <div class="container">
             <div class="text-center mb-4">
-                <h2 style="color: var(--col-blue); font-size: 2.5rem;">Meet Our Team</h2>
-                <p style="color: #666;">The passionate individuals working behind the scenes.</p>
+                <h2 style="color: var(--col-blue); font-size: 2.5rem; margin-bottom: 0.5rem; font-family: 'DM Serif Display', serif;">Meet Our Team</h2>
+                <p style="color: var(--text-light);">The passionate individuals working behind the scenes.</p>
             </div>
 
             <div class="grid-3">
@@ -96,8 +123,8 @@
                         <img src="/img/IMG_6354.jpeg" alt="Maria Gonzalez"
                             style="width: 100%; height: 100%; object-fit: cover; background: #ddd;">
                     </div>
-                    <h4 style="color: var(--col-dark-gray); margin-bottom: 0.5rem;">Maria Gonzalez</h4>
-                    <p style="color: var(--col-blue); font-weight: bold; font-size: 0.9rem; text-transform: uppercase;">
+                    <h4 style="color: var(--col-dark-gray); margin-bottom: 0.5rem; font-family: 'DM Serif Display', serif;">Maria Gonzalez</h4>
+                    <p style="color: var(--col-blue); font-weight: bold; font-size: 0.9rem; text-transform: uppercase; font-family: 'Montserrat', sans-serif;">
                         Executive Director</p>
                 </div>
 
@@ -108,8 +135,8 @@
                         <img src="/img/IMG_6363.jpeg" alt="Sofia Rodriguez"
                             style="width: 100%; height: 100%; object-fit: cover; background: #ddd;">
                     </div>
-                    <h4 style="color: var(--col-dark-gray); margin-bottom: 0.5rem;">Sofia Rodriguez</h4>
-                    <p style="color: var(--col-blue); font-weight: bold; font-size: 0.9rem; text-transform: uppercase;">
+                    <h4 style="color: var(--col-dark-gray); margin-bottom: 0.5rem; font-family: 'DM Serif Display', serif;">Sofia Rodriguez</h4>
+                    <p style="color: var(--col-blue); font-weight: bold; font-size: 0.9rem; text-transform: uppercase; font-family: 'Montserrat', sans-serif;">
                         Program Coordinator</p>
                 </div>
 
@@ -120,8 +147,8 @@
                         <img src="/img/IMG_7888.jpeg" alt="Elena Torres"
                             style="width: 100%; height: 100%; object-fit: cover; background: #ddd;">
                     </div>
-                    <h4 style="color: var(--col-dark-gray); margin-bottom: 0.5rem;">Elena Torres</h4>
-                    <p style="color: var(--col-blue); font-weight: bold; font-size: 0.9rem; text-transform: uppercase;">
+                    <h4 style="color: var(--col-dark-gray); margin-bottom: 0.5rem; font-family: 'DM Serif Display', serif;">Elena Torres</h4>
+                    <p style="color: var(--col-blue); font-weight: bold; font-size: 0.9rem; text-transform: uppercase; font-family: 'Montserrat', sans-serif;">
                         Outreach Director</p>
                 </div>
             </div>

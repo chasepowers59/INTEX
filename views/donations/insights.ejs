@@ -57,7 +57,7 @@
                                 </span>
                             </td>
                             <td>
-                                <%= new Date(d.last_donation).toLocaleDateString() %>
+                                <%= d.last_donation ? new Date(d.last_donation).toLocaleDateString('en-US') : 'N/A' %>
                             </td>
                         </tr>
                         <% }) %>

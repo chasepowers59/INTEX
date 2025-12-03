@@ -80,7 +80,7 @@ router.get('/insights', isAuthenticated, isManager, async (req, res) => {
 // List Events
 router.get('/', async (req, res) => {
     try {
-        const { search } = req.query;
+        const { search, eventType } = req.query;
         let query = db('event_instances')
             .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
             .select('*')
@@ -91,7 +91,18 @@ router.get('/', async (req, res) => {
             query = query.where('event_definitions.event_name', 'ilike', `%${search}%`);
         }
 
+        // Filter by event type if provided (from programs page)
+        if (eventType) {
+            query = query.where('event_definitions.event_type', eventType);
+        }
+
         const events = await query;
+
+        // Debug: Log what we found
+        console.log('Events query returned:', events.length, 'events');
+        if (eventType) {
+            console.log('Filtered by eventType:', eventType);
+        }
 
         // Group events by definition
         const groupedEvents = {};
@@ -110,7 +121,9 @@ router.get('/', async (req, res) => {
             groupedEvents[event.event_definition_id].instances.push(event);
         });
 
-        res.render('events/list', { user: req.user, groupedEvents, search });
+        console.log('Grouped into', Object.keys(groupedEvents).length, 'event definitions');
+
+        res.render('events/list', { user: req.user, groupedEvents, search, eventType });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -253,6 +266,64 @@ router.post('/register/:id', isAuthenticated, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
+    }
+});
+
+// Register for Event (Visitor - Not Logged In)
+// Business Logic: Similar to visitor donations, allow visitors to register for events
+// by creating a participant record if needed, then registering them for the event
+router.post('/register-visitor', async (req, res) => {
+    try {
+        const { event_instance_id, first_name, last_name, email } = req.body;
+
+        if (!event_instance_id || !first_name || !last_name || !email) {
+            return res.status(400).send('All fields are required.');
+        }
+
+        // Check if participant exists by email
+        let participantId = null;
+        const existingParticipant = await db('participants')
+            .where('participant_email', email)
+            .first();
+
+        if (existingParticipant) {
+            participantId = existingParticipant.participant_id;
+        } else {
+            // Create new participant record for visitor
+            participantId = generateId();
+            await db('participants').insert({
+                participant_id: participantId,
+                participant_email: email,
+                participant_first_name: first_name,
+                participant_last_name: last_name,
+                participant_role: 'participant', // Default role for visitor-created accounts
+                // Other fields left null as visitor only provides registration info
+            });
+        }
+
+        // Check if already registered for this event
+        const existingRegistration = await db('registrations')
+            .where({ participant_id: participantId, event_instance_id: event_instance_id })
+            .first();
+
+        if (existingRegistration) {
+            return res.send('<script>alert("You are already registered for this event!"); window.location.href="/events";</script>');
+        }
+
+        // Create registration
+        const registrationId = generateId();
+        await db('registrations').insert({
+            registration_id: registrationId,
+            participant_id: participantId,
+            event_instance_id: event_instance_id,
+            registration_status: 'Registered',
+            registration_created_at: new Date()
+        });
+
+        res.send('<script>alert("Successfully registered! You can now log in with your email to manage your registrations."); window.location.href="/events";</script>');
+    } catch (err) {
+        console.error('Visitor Registration Error:', err);
+        res.status(500).send('Error processing registration. Please try again.');
     }
 });
 

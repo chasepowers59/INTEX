@@ -5,80 +5,112 @@
         <div class="brush-border-bottom"></div>
         <h2>Our Programs</h2>
         <p style="color: rgba(255,255,255,0.8); max-width: 600px; margin: 1rem auto 0;">
-            Discover how we are making a difference in the lives of Latina youth.
+            Discover our program topics and find the perfect fit for you.
         </p>
     </div>
 
     <div class="container" style="margin-bottom: 6rem;">
+        <% if (!programs || programs.length === 0) { %>
+            <div class="text-center" style="padding: 4rem 0;">
+                <p style="color: var(--text-light); font-size: 1.2rem;">No programs available at this time.</p>
+            </div>
+        <% } else { %>
         <div class="grid-3">
-            <% programs.forEach(program=> { %>
+            <% programs.forEach(function(program) { %>
                 <div class="card hover-lift"
-                    style="padding: 0; overflow: hidden; text-align: left; display: flex; flex-direction: column;">
-                    <!-- Placeholder Image -->
-                    <div style="height: 200px; background: #eee; position: relative;">
-                        <img src="/img/ER STEM Workshop Aug 2022-31.jpg" alt="<%= program.event_name %>"
+                    style="padding: 0; overflow: hidden; text-align: left; display: flex; flex-direction: column; border-radius: var(--radius-card); box-shadow: var(--shadow-soft);">
+                    <!-- Program Image with Smart Assignment -->
+                    <div style="height: 200px; background: #eee; position: relative; overflow: hidden;">
+                        <% 
+                            // Smart image assignment based on program type
+                            let programImage = '/img/ER STEM Workshop Aug 2022-31.jpg'; // default
+                            if (program.program_type && (program.program_type.toLowerCase().includes('stem') || program.program_type.toLowerCase().includes('steam'))) {
+                                programImage = '/img/ER STEM Workshop Aug 2022-42.jpg';
+                            } else if (program.program_type && (program.program_type.toLowerCase().includes('heritage') || program.program_type.toLowerCase().includes('mariachi') || program.program_type.toLowerCase().includes('día') || program.program_type.toLowerCase().includes('muertos'))) {
+                                programImage = '/img/ER Día de Muertos Show at NAC 2022-11.jpg';
+                            } else if (program.program_type && (program.program_type.toLowerCase().includes('leadership') || program.program_type.toLowerCase().includes('summit'))) {
+                                programImage = '/img/ER Summer Summit 2022-068.jpg';
+                            } else if (program.program_type && (program.program_type.toLowerCase().includes('animation') || program.program_type.toLowerCase().includes('arts'))) {
+                                programImage = '/img/ER Animation Workshop Feb 2021_029.jpg';
+                            } else if (program.program_type && (program.program_type.toLowerCase().includes('annual') || program.program_type.toLowerCase().includes('conference'))) {
+                                programImage = '/img/ER Summer Summit 2022-165.jpg';
+                            }
+                        %>
+                        <img src="<%= programImage %>" alt="<%= program.program_type %>"
                             style="width: 100%; height: 100%; object-fit: cover;">
                         <div
                             style="position: absolute; top: 1rem; right: 1rem; background: var(--col-peach); padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; color: var(--col-dark-gray);">
-                            <%= program.event_type %>
+                            <%= program.program_type %>
                         </div>
                     </div>
 
                     <div style="padding: 2rem; display: flex; flex-direction: column; flex-grow: 1;">
-                        <h3 style="color: var(--col-blue); margin-bottom: 1rem; font-size: 1.5rem;">
-                            <%= program.event_name %>
+                        <h3 style="color: var(--col-blue); margin-bottom: 1rem; font-size: 1.5rem; font-family: 'DM Serif Display', serif;">
+                            <%= program.program_type %>
                         </h3>
-                        <p style="color: #666; margin-bottom: 2rem; flex-grow: 1;">
-                            <%= program.event_description %>
+                        <p style="color: var(--text-light); margin-bottom: 1rem; flex-grow: 1; line-height: 1.6;">
+                            <%= program.description %>
                         </p>
+                        <div style="margin-bottom: 1.5rem;">
+                            <span style="color: var(--col-blue); font-weight: 600; font-size: 0.9rem;">
+                                <%= program.event_count %> <%= parseInt(program.event_count) === 1 ? 'Program' : 'Programs' %> Available
+                            </span>
+                        </div>
                         <div style="margin-top: auto;">
-                            <a href="/events?search=<%= encodeURIComponent(program.event_name) %>" class="btn"
-                                style="width: 100%; text-align: center;">View Schedule</a>
+                            <a href="/events?eventType=<%= encodeURIComponent(program.program_type) %>" class="btn"
+                                style="width: 100%; text-align: center; border-radius: var(--radius-pill);">
+                                View <%= program.program_type %> Events
+                            </a>
                         </div>
                     </div>
                 </div>
-                <% }); %>
+            <% }); %>
         </div>
+        <% } %>
     </div>
 
     <!-- Success Stories -->
     <div style="background: var(--col-cream); padding: 6rem 0; position: relative;">
         <div class="container">
             <div class="text-center mb-4">
-                <h2 style="color: var(--col-blue); font-size: 2.5rem;">Success Stories</h2>
+                <h2 style="color: var(--col-blue); font-size: 2.5rem; font-family: 'DM Serif Display', serif;">Success Stories</h2>
                 <div style="width: 80px; height: 4px; background: var(--col-pink); margin: 1rem auto;"></div>
             </div>
 
             <div class="grid-2" style="gap: 4rem; align-items: center;">
-                <div class="card shadow-soft" style="padding: 3rem; position: relative;">
+                <div class="card shadow-soft" style="padding: 3rem; position: relative; border-radius: var(--radius-card);">
                     <div
                         style="font-size: 4rem; color: var(--col-peach); position: absolute; top: 1rem; left: 2rem; opacity: 0.5;">
                         "</div>
-                    <p style="font-size: 1.2rem; font-style: italic; color: #555; position: relative; z-index: 2;">
+                    <p style="font-size: 1.2rem; font-style: italic; color: var(--text-main); position: relative; z-index: 2; line-height: 1.8;">
                         The mentorship program changed my life. I never thought I could go to college, but now I'm the
                         first in my family to attend university.
                     </p>
                     <div style="margin-top: 2rem; display: flex; align-items: center; gap: 1rem;">
-                        <div style="width: 50px; height: 50px; background: #ccc; border-radius: 50%;"></div>
+                        <div style="width: 50px; height: 50px; background: var(--col-peach); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                            IM
+                        </div>
                         <div>
-                            <h4 style="margin: 0; font-size: 1rem;">Isabella M.</h4>
-                            <span style="font-size: 0.8rem; color: #888;">Alumni, Class of 2023</span>
+                            <h4 style="margin: 0; font-size: 1rem; font-family: 'DM Serif Display', serif;">Isabella M.</h4>
+                            <span style="font-size: 0.8rem; color: var(--text-light);">Alumni, Class of 2023</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="card shadow-soft" style="padding: 3rem; position: relative;">
+                <div class="card shadow-soft" style="padding: 3rem; position: relative; border-radius: var(--radius-card);">
                     <div
                         style="font-size: 4rem; color: var(--col-peach); position: absolute; top: 1rem; left: 2rem; opacity: 0.5;">
                         "</div>
-                    <p style="font-size: 1.2rem; font-style: italic; color: #555; position: relative; z-index: 2;">
+                    <p style="font-size: 1.2rem; font-style: italic; color: var(--text-main); position: relative; z-index: 2; line-height: 1.8;">
                         I found my voice here. The workshops taught me that my heritage is my superpower.
                     </p>
                     <div style="margin-top: 2rem; display: flex; align-items: center; gap: 1rem;">
-                        <div style="width: 50px; height: 50px; background: #ccc; border-radius: 50%;"></div>
+                        <div style="width: 50px; height: 50px; background: var(--col-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                            CR
+                        </div>
                         <div>
-                            <h4 style="margin: 0; font-size: 1rem;">Camila R.</h4>
-                            <span style="font-size: 0.8rem; color: #888;">Current Student</span>
+                            <h4 style="margin: 0; font-size: 1rem; font-family: 'DM Serif Display', serif;">Camila R.</h4>
+                            <span style="font-size: 0.8rem; color: var(--text-light);">Current Student</span>
                         </div>
                     </div>
                 </div>

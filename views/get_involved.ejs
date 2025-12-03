@@ -1,77 +1,75 @@
 <%- include('partials/header', { user: user }) %>
 
-    <!-- Split Screen Hero -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; min-height: 80vh;">
-        <!-- Left Image -->
-        <div style="background: url('/img/DSC_5359.jpg') center/cover no-repeat; position: relative;">
-            <div style="position: absolute; inset: 0; background: rgba(148, 170, 185, 0.4);"></div>
-        </div>
-
-        <!-- Right Content -->
-        <div
-            style="background: var(--col-cream); display: flex; flex-direction: column; justify-content: center; padding: 6rem;">
-            <h1 style="font-size: 4rem; color: var(--col-blue); margin-bottom: 2rem;">Join the Movement</h1>
-            <p style="font-size: 1.2rem; line-height: 1.8; color: #666; margin-bottom: 3rem;">
+    <!-- Full-Width Hero Banner -->
+    <div style="position: relative; min-height: 70vh; background-image: url('/img/IMG_8439.jpeg'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center;">
+        <div style="position: absolute; inset: 0; background: rgba(148, 170, 185, 0.6);"></div>
+        <div class="container" style="position: relative; z-index: 2; text-align: center; color: white; padding: 4rem 2rem;">
+            <h1 style="font-size: 4rem; color: white; margin-bottom: 2rem; font-family: 'DM Serif Display', serif; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                Join the Movement
+            </h1>
+            <p style="font-size: 1.5rem; line-height: 1.8; color: white; max-width: 700px; margin: 0 auto 3rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
                 There are many ways to support Ella Rises. Whether you volunteer your time, make a donation, or enroll a
                 student, you are helping us build a brighter future for Latina youth.
             </p>
-            <div style="display: flex; gap: 1rem;">
-                <a href="#opportunities" class="btn">View Opportunities</a>
-            </div>
+            <a href="#opportunities" class="btn" style="background: white; color: var(--col-blue); padding: 1rem 2.5rem; font-size: 1.1rem; border-radius: var(--radius-pill);">
+                View Opportunities
+            </a>
         </div>
     </div>
 
     <!-- Options Section -->
     <div id="opportunities" class="container" style="margin: 6rem auto;">
         <div class="text-center mb-4">
-            <h2 style="color: var(--col-blue); font-size: 2.5rem;">How You Can Help</h2>
+            <h2 style="color: var(--col-blue); font-size: 2.5rem; font-family: 'DM Serif Display', serif;">How You Can Help</h2>
             <div style="width: 80px; height: 4px; background: var(--col-pink); margin: 1rem auto;"></div>
         </div>
 
         <div class="grid-3" style="gap: 3rem;">
             <!-- Volunteer -->
-            <div class="card hover-lift text-center" style="padding: 3rem 2rem;">
+            <div class="card hover-lift text-center" style="padding: 3rem 2rem; border-radius: var(--radius-card); box-shadow: var(--shadow-soft); background: white;">
                 <div
                     style="width: 80px; height: 80px; background: var(--col-peach); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; font-size: 2rem; color: white;">
                     <i class="fas fa-hands-helping"></i>
                 </div>
-                <h3 style="margin-bottom: 1rem;">Volunteer</h3>
-                <p style="color: #666; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem; font-family: 'DM Serif Display', serif; color: var(--col-blue); font-size: 1.8rem;">Volunteer</h3>
+                <p style="color: var(--text-light); margin-bottom: 2rem; line-height: 1.6; font-size: 1rem;">
                     Share your time and talents. We need mentors, event staff, and guest speakers to inspire our
                     students.
                 </p>
                 <a href="/contact?type=volunteer" class="btn"
-                    style="background: white; color: var(--col-blue); border: 2px solid var(--col-blue);">Become a
-                    Mentor</a>
+                    style="width: 100%; background: var(--col-peach); color: var(--col-dark-gray); border: none; border-radius: var(--radius-pill); padding: 0.8rem 1.5rem; font-weight: 600; text-align: center; display: inline-block;">
+                    Become a Mentor
+                </a>
             </div>
 
             <!-- Donate -->
-            <div class="card hover-lift text-center" style="padding: 3rem 2rem; border-top: 5px solid var(--col-blue);">
+            <div class="card hover-lift text-center" style="padding: 3rem 2rem; border-radius: var(--radius-card); box-shadow: var(--shadow-soft); background: white;">
                 <div
                     style="width: 80px; height: 80px; background: var(--col-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; font-size: 2rem; color: white;">
                     <i class="fas fa-heart"></i>
                 </div>
-                <h3 style="margin-bottom: 1rem;">Donate</h3>
-                <p style="color: #666; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem; font-family: 'DM Serif Display', serif; color: var(--col-blue); font-size: 1.8rem;">Donate</h3>
+                <p style="color: var(--text-light); margin-bottom: 2rem; line-height: 1.6; font-size: 1rem;">
                     Support our mission financially. Your donations make our workshops, summits, and scholarships
                     possible.
                 </p>
-                <a href="/donations/add" class="btn">Donate Today</a>
+                <a href="/donate" class="btn" style="width: 100%; background: var(--col-blue); color: white; border: none; border-radius: var(--radius-pill); padding: 0.8rem 1.5rem; font-weight: 600; text-align: center; display: inline-block;">Donate Today</a>
             </div>
 
             <!-- Enroll/Partner -->
-            <div class="card hover-lift text-center" style="padding: 3rem 2rem;">
+            <div class="card hover-lift text-center" style="padding: 3rem 2rem; border-radius: var(--radius-card); box-shadow: var(--shadow-soft); background: white;">
                 <div
                     style="width: 80px; height: 80px; background: var(--col-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; font-size: 2rem; color: white;">
                     <i class="fas fa-user-graduate"></i>
                 </div>
-                <h3 style="margin-bottom: 1rem;">Enroll a Student</h3>
-                <p style="color: #666; margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem; font-family: 'DM Serif Display', serif; color: var(--col-blue); font-size: 1.8rem;">Enroll a Student</h3>
+                <p style="color: var(--text-light); margin-bottom: 2rem; line-height: 1.6; font-size: 1rem;">
                     Join our programs to learn, grow, and lead. Open to all Latina students in the community.
                 </p>
                 <a href="/contact?type=enroll" class="btn"
-                    style="background: white; color: var(--col-green); border: 2px solid var(--col-green);">Enroll
-                    Now</a>
+                    style="width: 100%; background: var(--col-green); color: white; border: none; border-radius: var(--radius-pill); padding: 0.8rem 1.5rem; font-weight: 600; text-align: center; display: inline-block;">
+                    Enroll Now
+                </a>
             </div>
         </div>
     </div>

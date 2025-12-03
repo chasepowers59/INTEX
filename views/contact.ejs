@@ -1,13 +1,17 @@
 <%- include('partials/header', { user: user }) %>
 
     <div
-        style="background-color: var(--col-peach); min-height: 90vh; display: flex; align-items: center; justify-content: center; padding: 4rem 1rem;">
+        style="background-color: var(--col-peach); min-height: 90vh; display: flex; align-items: center; justify-content: center; padding: 4rem 1rem; position: relative; overflow: hidden;">
+        
+        <!-- Blurred Background Image -->
+        <div style="position: absolute; inset: 0; background-image: url('/img/ER Summer Summit 2022-068.jpg'); background-size: cover; background-position: center; filter: blur(10px); opacity: 0.3; z-index: 0;"></div>
+        <div style="position: absolute; inset: 0; background: rgba(255, 209, 199, 0.7); z-index: 1;"></div>
 
         <div class="card shadow-soft"
-            style="background: white; padding: 3rem; width: 100%; max-width: 700px; border-radius: var(--radius-card);">
+            style="background: white; padding: 3rem; width: 100%; max-width: 700px; border-radius: var(--radius-card); position: relative; z-index: 2; box-shadow: var(--shadow-hover);">
             <div class="text-center mb-4">
-                <h1 style="color: var(--col-blue); font-size: 2.5rem; margin-bottom: 0.5rem;">Get in Touch</h1>
-                <p style="color: #666;">We'd love to hear from you. Fill out the form below.</p>
+                <h1 style="color: var(--col-blue); font-size: 2.5rem; margin-bottom: 0.5rem; font-family: 'DM Serif Display', serif;">Get in Touch</h1>
+                <p style="color: var(--text-light);">We'd love to hear from you. Fill out the form below.</p>
             </div>
 
             <form action="/contact" method="POST">
@@ -15,7 +19,7 @@
                 <!-- Option Select -->
                 <div class="floating-label">
                     <select name="type" class="form-control"
-                        style="appearance: none; -webkit-appearance: none; background: white url('data:image/svg+xml;utf8,<svg fill=%2394AAB9 height=24 viewBox=0 0 24 24 width=24 xmlns=http://www.w3.org/2000/svg><path d=M7 10l5 5 5-5z/></svg>') no-repeat right 1rem center;">
+                        style="appearance: none; -webkit-appearance: none; background: white url('data:image/svg+xml;utf8,<svg fill=%2394AAB9 height=24 viewBox=0 0 24 24 width=24 xmlns=http://www.w3.org/2000/svg><path d=M7 10l5 5 5-5z/></svg>') no-repeat right 1rem center; border-radius: 10px;">
                         <option value="" disabled selected>Select an option</option>
                         <option value="general">General Inquiry</option>
                         <option value="volunteer">Volunteer</option>
@@ -50,7 +54,7 @@
                     <label>Phone Number (Optional)</label>
                 </div>
 
-                <p style="font-size: 0.8rem; color: #999; margin-bottom: 2rem; line-height: 1.4;">
+                <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 2rem; line-height: 1.4;">
                     By providing your phone number, you agree to receive text messages from Ella Rises. Message and data
                     rates may apply. Reply STOP to cancel.
                 </p>
@@ -58,11 +62,12 @@
                 <div
                     style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <div
-                        style="background: #f9f9f9; padding: 0.8rem 1.5rem; border-radius: 4px; color: #999; font-size: 0.9rem; border: 1px dashed #ccc;">
+                        style="background: #f9f9f9; padding: 0.8rem 1.5rem; border-radius: 4px; color: var(--text-light); font-size: 0.9rem; border: 1px dashed #ccc;">
                         I'm not a robot
                     </div>
-                    <button type="submit" class="btn hover-lift" style="padding: 1rem 3rem; font-size: 1rem;">Send
-                        Message</button>
+                    <button type="submit" class="btn hover-lift" style="padding: 1rem 3rem; font-size: 1rem; border-radius: var(--radius-pill);">
+                        Send Message
+                    </button>
                 </div>
             </form>
         </div>

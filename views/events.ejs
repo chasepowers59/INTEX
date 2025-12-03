@@ -11,13 +11,16 @@
 
     <div class="container" style="margin-bottom: 6rem; max-width: 900px;">
         <% if (events && events.length> 0) { %>
-            <% events.forEach(event=> { %>
-                <!-- Calendar Card -->
-                <div class="card hover-lift"
-                    style="display: flex; padding: 0; overflow: hidden; margin-bottom: 2rem; text-align: left; flex-direction: row;">
+            <% events.forEach((event, index)=> { %>
+                <!-- Calendar Card with Thumbnail -->
+                <div class="calendar-card hover-lift">
+                    <!-- Thumbnail Image -->
+                    <img src="<%= index % 2 === 0 ? '/img/DSC_5359.jpg' : '/img/IMG_8012.jpeg' %>" 
+                         alt="<%= event.event_name %>" 
+                         class="thumbnail">
+                    
                     <!-- Date Column -->
-                    <div
-                        style="background: var(--col-peach); width: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; color: var(--col-dark-gray); flex-shrink: 0;">
+                    <div class="date-column">
                         <span style="font-size: 3rem; font-weight: 800; line-height: 1;">
                             <%= new Date(event.start_time).getDate() %>
                         </span>
@@ -30,7 +33,7 @@
                     </div>
 
                     <!-- Content Column -->
-                    <div style="padding: 2rem; flex-grow: 1; display: flex; flex-direction: column;">
+                    <div class="content-column">
                         <div
                             style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                             <div>
@@ -38,21 +41,23 @@
                                     style="background: var(--col-blue); color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">
                                     <%= event.event_type %>
                                 </span>
-                                <h3 style="margin: 0.5rem 0 0; color: var(--col-dark-gray); font-size: 1.8rem;">
+                                <h3 style="margin: 0.5rem 0 0; color: var(--col-dark-gray); font-size: 1.8rem; font-family: 'DM Serif Display', serif;">
                                     <%= event.event_name %>
                                 </h3>
                             </div>
                             <!-- Register Button (Blue) -->
                             <a href="/events/register/<%= event.event_id %>" class="btn"
-                                style="padding: 0.5rem 1.5rem; font-size: 0.8rem;">Register</a>
+                                style="padding: 0.5rem 1.5rem; font-size: 0.8rem; border-radius: var(--radius-pill);">
+                                Register
+                            </a>
                         </div>
 
-                        <p style="color: #666; margin-bottom: 1.5rem; flex-grow: 1;">
+                        <p style="color: var(--text-light); margin-bottom: 1.5rem; flex-grow: 1; line-height: 1.6;">
                             <%= event.description %>
                         </p>
 
                         <div
-                            style="display: flex; gap: 2rem; color: #888; font-size: 0.9rem; border-top: 1px solid #eee; padding-top: 1rem;">
+                            style="display: flex; gap: 2rem; color: var(--text-light); font-size: 0.9rem; border-top: 1px solid #eee; padding-top: 1rem;">
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
                                 <i class="far fa-clock"></i>
                                 <%= new Date(event.start_time).toLocaleTimeString([], { hour: '2-digit' ,
@@ -70,8 +75,8 @@
                         <div class="text-center"
                             style="padding: 4rem; background: white; border-radius: var(--radius-card); box-shadow: var(--shadow-soft);">
                             <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
-                            <h3 style="color: var(--col-blue);">No Upcoming Events</h3>
-                            <p>Check back soon for new workshops and activities!</p>
+                            <h3 style="color: var(--col-blue); font-family: 'DM Serif Display', serif;">No Upcoming Events</h3>
+                            <p style="color: var(--text-light);">Check back soon for new workshops and activities!</p>
                         </div>
                         <% } %>
     </div>

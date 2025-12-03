@@ -1,13 +1,21 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-// const bcrypt = require('bcrypt'); // REMOVED
 const knex = require('knex');
 const knexConfig = require('../knexfile');
 
 const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
 
-// Configure LocalStrategy
-// Configure LocalStrategy
+/**
+ * Passport Local Strategy Configuration
+ * 
+ * Business Logic: Handles user authentication by comparing provided credentials
+ * with stored user data. Passwords are stored as plain text.
+ * 
+ * Authentication Flow:
+ * 1. Look up user by email
+ * 2. Compare password using direct string comparison
+ * 3. Return user object if credentials match, otherwise return false
+ */
 passport.use(new LocalStrategy({
     usernameField: 'participant_email',
     passwordField: 'participant_password'
@@ -21,11 +29,10 @@ passport.use(new LocalStrategy({
             return done(null, false, { message: 'Invalid email or password' });
         }
 
-        // DEBUG: Log passwords for comparison
-        console.log("Input Password: " + participant_password + " | Stored Password: " + user.participant_password);
-
-        // Check for plain text password (Direct string comparison)
+        // Password Comparison Logic
+        // Direct string comparison for plain text passwords
         const isMatch = user.participant_password === participant_password;
+
         console.log('Password match result?', isMatch);
 
         if (isMatch) {

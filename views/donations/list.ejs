@@ -31,7 +31,7 @@
                         <% donations.forEach(d=> { %>
                             <tr>
                                 <td>
-                                    <%= new Date(d.donation_date).toLocaleDateString() %>
+                                    <%= d.donation_date ? new Date(d.donation_date).toLocaleDateString('en-US') : 'N/A' %>
                                 </td>
                                 <td style="font-weight: bold; color: var(--accent-blue);">$<%= d.donation_amount %>
                                 </td>

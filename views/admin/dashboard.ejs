@@ -1,8 +1,42 @@
 <%- include('../partials/header', { user: user }) %>
 
+    <style>
+        /* Dashboard Background - Peach */
+        body {
+            background-color: #FFD1C7;
+        }
+
+        /* Brand Colors */
+        :root {
+            --brand-blue: #8DA9C4;
+            --brand-lavender: #958EBF;
+            --brand-pink: #FAD2D8;
+            --brand-cream: #FDFBF7;
+            --brand-coral: #EE969E;
+            --brand-peach: #FFD1C7;
+        }
+
+        .text-brand-blue {
+            color: var(--brand-blue) !important;
+        }
+
+        .bg-brand-lavender {
+            background-color: var(--brand-lavender) !important;
+        }
+
+        .bg-brand-pink {
+            background-color: var(--brand-pink) !important;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-5px) !important;
+            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+        }
+    </style>
+
     <div class="container py-5">
         <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h1 class="display-5 fw-bold text-dark mb-0" style="font-family: 'DM Serif Display', serif;">Admin
                     Dashboard</h1>
@@ -17,8 +51,8 @@
             </div>
         </div>
 
-        <!-- Management Quick Links (Top Row) -->
-        <div class="row g-3 mb-5">
+        <!-- 1. Quick Actions Navigation (Top Row) -->
+        <div class="row g-2 mb-4">
             <% const modules=[ { name: 'Users' , icon: 'users' , color: 'primary' , link: '/admin/users' }, {
                 name: 'Participants' , icon: 'user-graduate' , color: 'success' , link: '/admin/participants' }, {
                 name: 'Events' , icon: 'calendar-alt' , color: 'warning' , link: '/admin/events' }, { name: 'Surveys' ,
@@ -26,16 +60,16 @@
                 color: 'danger' , link: '/admin/milestones' }, { name: 'Donations' , icon: 'donate' , color: 'secondary'
                 , link: '/admin/donations' } ]; %>
                 <% modules.forEach(mod=> { %>
-                    <div class="col-6 col-md-2">
+                    <div class="col-4 col-sm-3 col-md-2">
                         <a href="<%= mod.link %>" class="text-decoration-none">
-                            <div class="card h-100 border-0 shadow-sm hover-lift text-center py-3"
-                                style="border-radius: 15px; transition: transform 0.2s;">
+                            <div class="card h-100 border-0 shadow-sm hover-lift text-center py-2"
+                                style="border-radius: 15px; transition: transform 0.2s; background: white;">
                                 <div class="card-body p-2">
-                                    <div class="icon-box mb-2 text-<%= mod.color %>">
+                                    <div class="icon-box mb-1 text-<%= mod.color %>">
                                         <i class="fas fa-<%= mod.icon %> fa-lg"></i>
                                     </div>
                                     <h6 class="card-title mb-0 text-dark fw-bold"
-                                        style="font-size: 0.75rem; font-family: 'Montserrat', sans-serif;">
+                                        style="font-size: 0.7rem; font-family: 'Montserrat', sans-serif;">
                                         <%= mod.name %>
                                     </h6>
                                 </div>
@@ -45,8 +79,8 @@
                     <% }); %>
         </div>
 
-        <!-- KPI Cards -->
-        <div class="row g-4 mb-5">
+        <!-- 2. KPI Stats Cards (Second Row) -->
+        <div class="row g-4 mb-4">
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm h-100"
                     style="border-radius: 20px; background-color: #958EBF; color: white;">
@@ -54,8 +88,8 @@
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h6 class="text-uppercase mb-1 opacity-75"
-                                    style="font-size: 0.8rem; letter-spacing: 1px;">Total Participants</h6>
-                                <h2 class="display-4 fw-bold mb-0">
+                                    style="font-size: 0.8rem; letter-spacing: 1px; font-family: 'Montserrat', sans-serif;">Total Participants</h6>
+                                <h2 class="display-4 fw-bold mb-0" style="font-family: 'Montserrat', sans-serif;">
                                     <%= kpis.totalParticipants %>
                                 </h2>
                             </div>
@@ -73,8 +107,8 @@
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h6 class="text-uppercase mb-1 opacity-75"
-                                    style="font-size: 0.8rem; letter-spacing: 1px;">Avg Satisfaction</h6>
-                                <h2 class="display-4 fw-bold mb-0">
+                                    style="font-size: 0.8rem; letter-spacing: 1px; font-family: 'Montserrat', sans-serif;">Avg Satisfaction</h6>
+                                <h2 class="display-4 fw-bold mb-0" style="font-family: 'Montserrat', sans-serif;">
                                     <%= kpis.satisfactionScore %>
                                 </h2>
                             </div>
@@ -92,8 +126,8 @@
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h6 class="text-uppercase mb-1 opacity-75"
-                                    style="font-size: 0.8rem; letter-spacing: 1px;">Milestones</h6>
-                                <h2 class="display-4 fw-bold mb-0">
+                                    style="font-size: 0.8rem; letter-spacing: 1px; font-family: 'Montserrat', sans-serif;">Milestones</h6>
+                                <h2 class="display-4 fw-bold mb-0" style="font-family: 'Montserrat', sans-serif;">
                                     <%= kpis.milestoneCount %>
                                 </h2>
                             </div>
@@ -106,10 +140,72 @@
             </div>
         </div>
 
-        <!-- Charts Section -->
+        <!-- 3. Filter Bar (Control Panel) -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; background: white;">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <h5 class="fw-bold mb-0" style="font-family: 'DM Serif Display', serif;">Filter Dashboard Data</h5>
+                <p class="text-muted mb-0" style="font-size: 0.9rem; font-family: 'Montserrat', sans-serif;">Filter analytics by event type and participant demographics</p>
+            </div>
+            <div class="card-body px-4 pb-4">
+                <form action="/admin/dashboard" method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="eventType" class="form-label fw-bold" style="font-family: 'Montserrat', sans-serif;">Event Type</label>
+                        <select name="eventType" id="eventType" class="form-select">
+                            <option value="">All Event Types</option>
+                            <% if (options && options.eventTypes && options.eventTypes.length > 0) { %>
+                                <% options.eventTypes.forEach(type => { %>
+                                    <option value="<%= type %>" <%= filters && filters.eventType === type ? 'selected' : '' %>>
+                                        <%= type %>
+                                    </option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="city" class="form-label fw-bold" style="font-family: 'Montserrat', sans-serif;">Participant City</label>
+                        <select name="city" id="city" class="form-select">
+                            <option value="">All Cities</option>
+                            <% if (options && options.cities && options.cities.length > 0) { %>
+                                <% options.cities.forEach(city => { %>
+                                    <option value="<%= city %>" <%= filters && filters.city === city ? 'selected' : '' %>>
+                                        <%= city %>
+                                    </option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="role" class="form-label fw-bold" style="font-family: 'Montserrat', sans-serif;">Participant Role</label>
+                        <select name="role" id="role" class="form-select">
+                            <option value="">All Roles</option>
+                            <% if (options && options.roles && options.roles.length > 0) { %>
+                                <% options.roles.forEach(role => { %>
+                                    <option value="<%= role %>" <%= filters && filters.role === role ? 'selected' : '' %>>
+                                        <%= role %>
+                                    </option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary me-2">Apply Filters</button>
+                        <a href="/admin/dashboard" class="btn btn-secondary">Clear Filters</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 4. Tableau Dashboard Image -->
+        <div class="card shadow-sm p-2 mb-4" style="border-radius: 20px; background: white;">
+            <img src="/img/tableau_full.png" alt="Ella Rises Analytics Dashboard" 
+                 class="img-fluid rounded" 
+                 style="width: 100%; border: 1px solid #ddd;">
+        </div>
+
+        <!-- 5. Charts Section (Additional Analytics) -->
         <div class="row g-4">
             <div class="col-md-8">
-                <div class="card border-0 shadow-sm h-100" style="border-radius: 20px;">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 20px; background: white;">
                     <div class="card-header bg-white border-0 pt-4 px-4">
                         <h5 class="fw-bold mb-0" style="font-family: 'DM Serif Display', serif;">Participant
                             Demographics</h5>
@@ -122,7 +218,7 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100" style="border-radius: 20px;">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 20px; background: white;">
                     <div class="card-header bg-white border-0 pt-4 px-4">
                         <h5 class="fw-bold mb-0" style="font-family: 'DM Serif Display', serif;">Program Impact</h5>
                     </div>
@@ -203,37 +299,5 @@
             }
         });
     </script>
-
-    <style>
-        /* Brand Colors */
-        :root {
-            --brand-blue: #8DA9C4;
-            --brand-lavender: #958EBF;
-            --brand-pink: #FAD2D8;
-            --brand-cream: #FDFBF7;
-            --brand-coral: #EE969E;
-        }
-
-        body {
-            background-color: var(--brand-cream);
-        }
-
-        .text-brand-blue {
-            color: var(--brand-blue) !important;
-        }
-
-        .bg-brand-lavender {
-            background-color: var(--brand-lavender) !important;
-        }
-
-        .bg-brand-pink {
-            background-color: var(--brand-pink) !important;
-        }
-
-        .hover-lift:hover {
-            transform: translateY(-5px) !important;
-            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
-        }
-    </style>
 
     <%- include('../partials/footer') %>

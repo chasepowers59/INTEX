@@ -36,7 +36,7 @@
                                 <%= e.event_type %>
                             </td>
                             <td>
-                                <%= new Date(e.event_date_time_start).toLocaleString() %>
+                                <%= e.event_date_time_start ? new Date(e.event_date_time_start).toLocaleString('en-US') : 'N/A' %>
                             </td>
                             <td>
                                 <%= e.event_location %>
