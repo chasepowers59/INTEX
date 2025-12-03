@@ -1,0 +1,98 @@
+<%- include('../partials/header', { user: user }) %>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Survey Details</h1>
+        <a href="/admin/surveys" class="btn btn-secondary">Back to Surveys</a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="mb-0">Survey Response</h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>Event:</strong> <%= survey.event_name %>
+                </div>
+                <div class="col-md-6">
+                    <strong>Participant:</strong> <%= survey.participant_first_name %> <%= survey.participant_last_name %>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>Survey ID:</strong> <%= survey.survey_id %>
+                </div>
+                <div class="col-md-6">
+                    <strong>Submission Date:</strong> <%= survey.survey_submission_date ? new Date(survey.survey_submission_date).toLocaleString() : 'N/A' %>
+                </div>
+            </div>
+
+            <hr>
+
+            <h5 class="mb-3">Scores</h5>
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <strong>Satisfaction Score:</strong><br>
+                    <span class="badge bg-primary" style="font-size: 1.2rem; padding: 0.5rem 1rem;">
+                        <%= survey.survey_satisfaction_score !== null ? survey.survey_satisfaction_score : 'N/A' %>
+                    </span>
+                </div>
+                <div class="col-md-3">
+                    <strong>Usefulness Score:</strong><br>
+                    <span class="badge bg-info" style="font-size: 1.2rem; padding: 0.5rem 1rem;">
+                        <%= survey.survey_usefulness_score !== null ? survey.survey_usefulness_score : 'N/A' %>
+                    </span>
+                </div>
+                <div class="col-md-3">
+                    <strong>Instructor Score:</strong><br>
+                    <span class="badge bg-success" style="font-size: 1.2rem; padding: 0.5rem 1rem;">
+                        <%= survey.survey_instructor_score !== null ? survey.survey_instructor_score : 'N/A' %>
+                    </span>
+                </div>
+                <div class="col-md-3">
+                    <strong>Recommendation Score:</strong><br>
+                    <span class="badge bg-warning" style="font-size: 1.2rem; padding: 0.5rem 1rem;">
+                        <%= survey.survey_recommendation_score !== null ? survey.survey_recommendation_score : 'N/A' %>
+                    </span>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>Overall Score:</strong>
+                    <span class="badge bg-secondary" style="font-size: 1.1rem; padding: 0.4rem 0.8rem;">
+                        <%= survey.survey_overall_score !== null ? parseFloat(survey.survey_overall_score).toFixed(2) : 'N/A' %>
+                    </span>
+                </div>
+                <div class="col-md-6">
+                    <strong>NPS Bucket:</strong>
+                    <span class="badge bg-dark" style="font-size: 1.1rem; padding: 0.4rem 0.8rem;">
+                        <%= survey.survey_nps_bucket || 'N/A' %>
+                    </span>
+                </div>
+            </div>
+
+            <hr>
+
+            <h5 class="mb-3">Comments</h5>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <%= survey.survey_comments ? survey.survey_comments : '<em>No comments provided</em>' %>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <form action="/admin/surveys/delete/<%= survey.survey_id %>" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this survey?');">
+                    <button type="submit" class="btn btn-danger">Delete Survey</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+

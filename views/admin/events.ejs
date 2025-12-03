@@ -1,0 +1,62 @@
+<%- include('../partials/header', { user: user }) %>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Event Maintenance</h1>
+        <div>
+            <a href="/admin/events/add" class="btn btn-success me-2">Create Event</a>
+            <a href="/admin/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <form action="/admin/events" method="GET" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Search by event name or location..." value="<%= search || '' %>">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Event Name</th>
+                        <th>Location</th>
+                        <th>Capacity</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (events && events.length > 0) { %>
+                        <% events.forEach(e => { %>
+                            <tr>
+                                <td><%= new Date(e.event_date_time_start).toLocaleString() %></td>
+                                <td><%= e.event_name %></td>
+                                <td><%= e.event_location || 'N/A' %></td>
+                                <td><%= e.event_capacity || 'N/A' %></td>
+                                <td>
+                                    <a href="/admin/events/edit/<%= e.event_instance_id %>" class="btn btn-sm btn-primary">Edit</a>
+                                    <form action="/admin/events/delete/<%= e.event_instance_id %>" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this event?');">
+                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="5" class="text-center">No events found.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+

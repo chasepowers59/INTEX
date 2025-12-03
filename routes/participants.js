@@ -46,7 +46,7 @@ router.get('/', isAuthenticated, async (req, res) => {
         const cities = await db('participants').distinct('participant_city').pluck('participant_city');
 
         res.render('participants/list', {
-            user: req.session.user,
+            user: req.user,
             participants,
             search,
             filters: { role, city, sort },
@@ -60,7 +60,7 @@ router.get('/', isAuthenticated, async (req, res) => {
 
 // Add Participant Form
 router.get('/add', isAuthenticated, isManager, (req, res) => {
-    res.render('participants/form', { user: req.session.user, participant: null });
+    res.render('participants/form', { user: req.user, participant: null });
 });
 
 // Handle Add with Photo
@@ -98,10 +98,9 @@ router.post('/add', isAuthenticated, isManager, upload, async (req, res) => {
 router.get('/:id', isAuthenticated, async (req, res) => {
     try {
         // Access Control
-        const user = req.session.user;
+        const user = req.user;
         const isAuthorized =
-            user.role === 'Admin' ||
-            user.role === 'Manager' ||
+            user.participant_role === 'admin' ||
             user.participant_id == req.params.id;
 
         if (!isAuthorized) {
@@ -144,7 +143,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
         }
 
         res.render('participants/detail', {
-            user: req.session.user,
+            user: req.user,
             participant,
             milestones,
             registrations: events, // View expects 'registrations' for the event list
@@ -166,7 +165,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
 router.get('/edit/:id', isAuthenticated, isManager, async (req, res) => {
     try {
         const participant = await db('participants').where({ participant_id: req.params.id }).first();
-        res.render('participants/form', { user: req.session.user, participant });
+        res.render('participants/form', { user: req.user, participant });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');

@@ -66,7 +66,7 @@ router.get('/insights', isAuthenticated, isManager, async (req, res) => {
             .slice(0, 5);
 
         res.render('events/insights', {
-            user: req.session.user,
+            user: req.user,
             correlationData,
             needsEncouragement,
             successStories
@@ -110,7 +110,7 @@ router.get('/', async (req, res) => {
             groupedEvents[event.event_definition_id].instances.push(event);
         });
 
-        res.render('events/list', { user: req.session.user, groupedEvents, search });
+        res.render('events/list', { user: req.user, groupedEvents, search });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -119,7 +119,7 @@ router.get('/', async (req, res) => {
 
 // Create Definition Form
 router.get('/definitions/add', isAuthenticated, isManager, (req, res) => {
-    res.render('events/definition_form', { user: req.session.user });
+    res.render('events/definition_form', { user: req.user });
 });
 
 // Handle Create Definition
@@ -148,7 +148,7 @@ router.post('/definitions/add', isAuthenticated, isManager, async (req, res) => 
 router.get('/add', isAuthenticated, isManager, async (req, res) => {
     try {
         const templates = await db('event_definitions').select('*');
-        res.render('events/form', { user: req.session.user, templates, event: null });
+        res.render('events/form', { user: req.user, templates, event: null });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -182,7 +182,7 @@ router.get('/edit/:id', isAuthenticated, isManager, async (req, res) => {
     try {
         const event = await db('event_instances').where({ event_instance_id: req.params.id }).first();
         const templates = await db('event_definitions').select('*');
-        res.render('events/form', { user: req.session.user, templates, event });
+        res.render('events/form', { user: req.user, templates, event });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -223,12 +223,10 @@ router.post('/delete/:id', isAuthenticated, isManager, async (req, res) => {
 // Register for Event (Logged-in User)
 router.post('/register/:id', isAuthenticated, async (req, res) => {
     try {
-        const user = req.session.user;
+        const user = req.user;
 
-        // Check if user is linked to a participant
-        const appUser = await db('app_user').where('user_id', user.user_id).first();
-
-        if (!appUser || !appUser.participant_id) {
+        // User is now a participant, so use participant_id directly
+        if (!user.participant_id) {
             return res.status(400).send('Your account is not linked to a participant profile. Please contact an admin.');
         }
 
@@ -236,7 +234,7 @@ router.post('/register/:id', isAuthenticated, async (req, res) => {
 
         // Check if already registered
         const existing = await db('registrations')
-            .where({ participant_id: appUser.participant_id, event_instance_id: req.params.id })
+            .where({ participant_id: user.participant_id, event_instance_id: req.params.id })
             .first();
 
         if (existing) {
@@ -245,7 +243,7 @@ router.post('/register/:id', isAuthenticated, async (req, res) => {
 
         await db('registrations').insert({
             registration_id: registrationId,
-            participant_id: appUser.participant_id,
+            participant_id: user.participant_id,
             event_instance_id: req.params.id,
             registration_status: 'Registered',
             registration_created_at: new Date()

@@ -35,7 +35,7 @@ router.get('/insights', isAuthenticated, isManager, async (req, res) => {
         const avgDonation = totalDonations > 0 ? (totalRaised / totalDonations).toFixed(2) : 0;
 
         res.render('donations/insights', {
-            user: req.session.user,
+            user: req.user,
             topDonors,
             totalRaised,
             totalDonations,
@@ -63,7 +63,7 @@ router.get('/', isAuthenticated, isManager, async (req, res) => {
 
         const donations = await query;
 
-        res.render('donations/list', { user: req.session.user, donations, search });
+        res.render('donations/list', { user: req.user, donations, search });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -74,7 +74,7 @@ router.get('/', isAuthenticated, isManager, async (req, res) => {
 router.get('/add', isAuthenticated, isManager, async (req, res) => {
     try {
         const participants = await db('participants').select('participant_id', 'participant_first_name', 'participant_last_name');
-        res.render('donations/form', { user: req.session.user, participants });
+        res.render('donations/form', { user: req.user, participants });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');

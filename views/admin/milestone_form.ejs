@@ -1,0 +1,43 @@
+<%- include('../partials/header', { user: user }) %>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container mt-4">
+    <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <div class="card-header">
+            <h2><%= milestone ? 'Edit' : 'Add' %> Milestone</h2>
+        </div>
+        <div class="card-body">
+            <form action="<%= milestone ? '/admin/milestones/edit/' + milestone.milestone_id : '/admin/milestones/add' %>" method="POST">
+                <div class="mb-3">
+                    <label for="participant_id" class="form-label">Participant</label>
+                    <select id="participant_id" name="participant_id" class="form-select" required>
+                        <option value="">Select Participant...</option>
+                        <% participants.forEach(p => { %>
+                            <option value="<%= p.participant_id %>" <%= milestone && milestone.participant_id === p.participant_id ? 'selected' : '' %>>
+                                <%= p.participant_first_name %> <%= p.participant_last_name %>
+                            </option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="milestone_title" class="form-label">Milestone Title</label>
+                    <input type="text" id="milestone_title" name="milestone_title" class="form-control" 
+                        value="<%= milestone ? milestone.milestone_title : '' %>" required>
+                </div>
+                <div class="mb-3">
+                    <label for="milestone_date" class="form-label">Milestone Date</label>
+                    <input type="date" id="milestone_date" name="milestone_date" class="form-control" 
+                        value="<%= milestone ? new Date(milestone.milestone_date).toISOString().split('T')[0] : '' %>" required>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Save Milestone</button>
+                    <a href="/admin/milestones" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+

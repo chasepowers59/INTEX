@@ -1,0 +1,24 @@
+<%- include('partials/header', { user: user }) %>
+
+<div style="background-color: #D8E2DC; min-height: 90vh; padding: 4rem 0; display: flex; align-items: center; justify-content: center;">
+    <div class="container" style="max-width: 600px;">
+        <div style="background: white; border-radius: 20px; padding: 4rem; box-shadow: var(--shadow-soft); text-align: center;">
+            <div style="font-size: 4rem; color: #9AB59D; margin-bottom: 1rem;">✓</div>
+            <h1 style="font-family: 'DM Serif Display'; color: var(--col-dark-gray); margin-bottom: 1rem;">Thank You!</h1>
+            <p style="font-size: 1.2rem; color: #666; margin-bottom: 2rem;">
+                Your generous donation<% if (amount) { %> of <strong style="color: #00A86B;">$<%= parseFloat(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong><% } %> helps us empower Latina youth and create brighter futures.
+            </p>
+            <p style="color: #666; margin-bottom: 2rem;">
+                We truly appreciate your support of Ella Rises. Your contribution makes a real difference in the lives of our participants.
+            </p>
+            <div style="margin-top: 3rem;">
+                <a href="/" class="btn" style="background-color: #C8D6C9; color: white; padding: 1rem 2rem; font-size: 1.1rem; text-decoration: none; border-radius: 8px; display: inline-block;">
+                    Return Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
+

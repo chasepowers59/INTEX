@@ -12,7 +12,7 @@ router.get('/add', isAuthenticated, isManager, async (req, res) => {
     try {
         const participants = await db('participants').select('participant_id', 'participant_first_name', 'participant_last_name');
         const templates = await db('milestone_templates').orderBy('title', 'asc');
-        res.render('milestones/form', { user: req.session.user, participants, templates });
+        res.render('milestones/form', { user: req.user, participants, templates });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -45,7 +45,7 @@ router.post('/add', isAuthenticated, isManager, async (req, res) => {
 router.get('/templates', isAuthenticated, isManager, async (req, res) => {
     try {
         const templates = await db('milestone_templates').orderBy('created_at', 'desc');
-        res.render('milestones/templates', { user: req.session.user, templates });
+        res.render('milestones/templates', { user: req.user, templates });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -54,7 +54,7 @@ router.get('/templates', isAuthenticated, isManager, async (req, res) => {
 
 // Add Template Form
 router.get('/templates/add', isAuthenticated, isManager, (req, res) => {
-    res.render('milestones/add_template', { user: req.session.user });
+    res.render('milestones/add_template', { user: req.user });
 });
 
 // Handle Add Template

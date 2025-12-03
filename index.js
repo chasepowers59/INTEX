@@ -52,6 +52,12 @@ app.use(session({
 }));
 
 app.use(flash());
+
+// Initialize Passport
+const passport = require('./config/passport-config');
+app.use(passport.initialize());
+app.use(passport.session());
+
 // CSRF protection - must be after session and body parser
 // app.use(csrf()); // DISABLED
 
@@ -60,7 +66,7 @@ app.use((req, res, next) => {
     // res.locals.csrfToken = req.csrfToken(); // DISABLED
     res.locals.csrfToken = 'disabled'; // Dummy token
     res.locals.messages = req.flash();
-    res.locals.user = req.session.user || null;
+    res.locals.user = req.user || null; // Use Passport's req.user
     next();
 });
 

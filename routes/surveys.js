@@ -20,7 +20,7 @@ router.get('/new/:registrationId', async (req, res) => {
             return res.status(404).send('Registration not found');
         }
 
-        res.render('surveys/form', { user: req.session.user, registration });
+        res.render('surveys/form', { user: req.user, registration });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');

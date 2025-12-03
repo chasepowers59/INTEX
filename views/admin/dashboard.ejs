@@ -58,7 +58,7 @@
         </div>
 
         <!-- KPI Cards -->
-        <div class="grid-3" style="margin-bottom: 4rem;">
+        <div class="grid-3" style="margin-bottom: 2rem;">
             <div class="card">
                 <h3 style="font-size: 3rem; color: var(--col-blue);">
                     <%= kpis.totalParticipants %>
@@ -76,6 +76,27 @@
                     <%= kpis.milestoneCount %>
                 </h3>
                 <p>Higher Ed Milestones</p>
+            </div>
+        </div>
+
+        <!-- Long-Term Program Impact -->
+        <div style="margin-bottom: 2rem;">
+            <h2 style="margin-bottom: 1.5rem; font-family: 'DM Serif Display'; color: var(--col-dark-gray);">Long-Term Program Impact</h2>
+            <div class="grid-2" style="gap: 2rem;">
+                <div class="card" style="background: linear-gradient(135deg, var(--col-blue) 0%, #7a9fb8 100%); color: white;">
+                    <h3 style="font-size: 3rem; color: white; margin-bottom: 0.5rem;">
+                        <%= kpis.steamEducationRate !== undefined ? kpis.steamEducationRate : '0' %>%
+                    </h3>
+                    <p style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600;">Post-Secondary STEAM Rate</p>
+                    <p style="font-size: 0.9rem; opacity: 0.9;">Percentage of participants pursuing STEAM fields in post-secondary education</p>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, var(--col-green) 0%, #7ba37e 100%); color: white;">
+                    <h3 style="font-size: 3rem; color: white; margin-bottom: 0.5rem;">
+                        <%= kpis.steamJobRate !== undefined ? kpis.steamJobRate : '0' %>%
+                    </h3>
+                    <p style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600;">Post-College STEAM Job Rate</p>
+                    <p style="font-size: 0.9rem; opacity: 0.9;">Percentage of participants working in STEAM careers after college</p>
+                </div>
             </div>
         </div>
 
