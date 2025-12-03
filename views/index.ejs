@@ -1,84 +1,621 @@
 <%- include('partials/header') %>
 
-    <!-- Hero Split Section -->
-    <div class="hero-split" style="min-height: auto !important; max-height: 60vh;">
-        <!-- Left: Hero Image -->
-        <div class="hero-image" style="background-image: url('/img/ER Summer Summit 2022-165.jpg');">
-            <div style="position: absolute; inset: 0; background: rgba(255, 209, 199, 0.2);"></div>
-        </div>
+<style>
+    /* Landing Page Custom Styles */
+    .landing-hero {
+        min-height: 100vh;
+        background: linear-gradient(135deg, rgba(255, 209, 199, 0.9) 0%, rgba(148, 170, 185, 0.8) 100%);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        padding: 2rem 0;
+    }
 
-        <!-- Right: Mission Content -->
-        <div class="hero-content" style="padding: 2rem;">
-            <h1 style="font-size: 2.5rem; color: var(--col-dark-gray); margin-bottom: 1rem; font-family: 'DM Serif Display', serif;">
-                Empowering Latina Youth
-            </h1>
-            <p style="font-size: 1.1rem; line-height: 1.6; color: var(--col-dark-gray); margin-bottom: 2rem; font-family: 'Montserrat', sans-serif;">
-                Inspiring the next generation of leaders through heritage, education, and sisterhood. We believe that when a young woman rises, she lifts her entire community with her.
-            </p>
+    .landing-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url('/img/ER Summer Summit 2022-165.jpg');
+        background-size: cover;
+        background-position: center;
+        opacity: 0.3;
+        z-index: 0;
+    }
+
+    .landing-hero::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 100px;
+        background: var(--col-cream);
+        clip-path: polygon(0 30%, 100% 0%, 100% 100%, 0% 100%);
+        z-index: 1;
+    }
+
+    .hero-content-wrapper {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        max-width: 900px;
+        padding: 0 2rem;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .hero-title {
+        font-family: 'DM Serif Display', serif;
+        font-size: clamp(3rem, 8vw, 5.5rem);
+        color: var(--col-dark-gray);
+        margin-bottom: 1.5rem;
+        line-height: 1.1;
+        text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+    }
+
+    .hero-subtitle {
+        font-family: 'Montserrat', sans-serif;
+        font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+        color: var(--col-dark-gray);
+        margin-bottom: 2.5rem;
+        line-height: 1.6;
+        font-weight: 500;
+    }
+
+    .hero-cta-buttons {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+
+    .btn-hero-primary {
+        background: var(--col-blue);
+        color: white;
+        padding: 1rem 2.5rem;
+        border-radius: 50px;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(148, 170, 185, 0.3);
+        display: inline-block;
+    }
+
+    .btn-hero-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(148, 170, 185, 0.4);
+        background: #7a95a5;
+    }
+
+    .btn-hero-secondary {
+        background: white;
+        color: var(--col-dark-gray);
+        padding: 1rem 2.5rem;
+        border-radius: 50px;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        display: inline-block;
+        border: 2px solid var(--col-blue);
+    }
+
+    .btn-hero-secondary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        background: var(--col-cream);
+    }
+
+    /* Animated Stats Section */
+    .stats-section {
+        background: white;
+        padding: 6rem 0;
+        position: relative;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 3rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .stat-card-modern {
+        text-align: center;
+        padding: 2.5rem;
+        background: linear-gradient(135deg, rgba(255, 209, 199, 0.1) 0%, rgba(148, 170, 185, 0.1) 100%);
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card-modern::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 209, 199, 0.2) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .stat-card-modern:hover::before {
+        opacity: 1;
+    }
+
+    .stat-card-modern:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-number {
+        font-family: 'DM Serif Display', serif;
+        font-size: 4rem;
+        color: var(--col-blue);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.2rem;
+        color: var(--col-dark-gray);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    /* Features Section */
+    .features-section {
+        background: var(--col-cream);
+        padding: 6rem 0;
+        position: relative;
+    }
+
+    .section-title {
+        text-align: center;
+        font-family: 'DM Serif Display', serif;
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
+        color: var(--col-blue);
+        margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+        text-align: center;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.2rem;
+        color: var(--text-light);
+        margin-bottom: 4rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .feature-card {
+        background: white;
+        padding: 3rem;
+        border-radius: 25px;
+        box-shadow: var(--shadow-soft);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, var(--col-pink), var(--col-blue), var(--col-green));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover::after {
+        transform: scaleX(1);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--col-pink), var(--col-blue));
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 10px 30px rgba(148, 170, 185, 0.2);
+    }
+
+    .feature-title {
+        font-family: 'DM Serif Display', serif;
+        font-size: 1.8rem;
+        color: var(--col-blue);
+        margin-bottom: 1rem;
+    }
+
+    .feature-description {
+        font-family: 'Montserrat', sans-serif;
+        color: var(--text-light);
+        line-height: 1.7;
+        font-size: 1rem;
+    }
+
+    /* Story Section */
+    .story-section {
+        background: linear-gradient(135deg, rgba(255, 209, 199, 0.3) 0%, rgba(148, 170, 185, 0.2) 100%);
+        padding: 6rem 0;
+        position: relative;
+    }
+
+    .story-content {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        text-align: center;
+    }
+
+    .story-quote {
+        font-family: 'DM Serif Display', serif;
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+        color: var(--col-dark-gray);
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        font-style: italic;
+        position: relative;
+    }
+
+    .story-quote::before,
+    .story-quote::after {
+        content: '"';
+        font-size: 4rem;
+        color: var(--col-pink);
+        opacity: 0.3;
+        position: absolute;
+    }
+
+    .story-quote::before {
+        top: -20px;
+        left: -30px;
+    }
+
+    .story-quote::after {
+        bottom: -40px;
+        right: -30px;
+    }
+
+    .story-author {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.1rem;
+        color: var(--col-blue);
+        font-weight: 600;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        background: linear-gradient(135deg, var(--col-blue) 0%, var(--col-pink) 100%);
+        padding: 6rem 0;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .cta-content {
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .cta-title {
+        font-family: 'DM Serif Display', serif;
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
+        margin-bottom: 1.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .cta-text {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.3rem;
+        margin-bottom: 2.5rem;
+        line-height: 1.7;
+        opacity: 0.95;
+    }
+
+    .btn-cta {
+        background: white;
+        color: var(--col-blue);
+        padding: 1.2rem 3rem;
+        border-radius: 50px;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 1.2rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        display: inline-block;
+    }
+
+    .btn-cta:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .hero-cta-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-hero-primary,
+        .btn-hero-secondary {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .stats-grid,
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="landing-hero">
+    <div class="hero-content-wrapper">
+        <h1 class="hero-title">When She Rises,<br>We All Rise</h1>
+        <p class="hero-subtitle">
+            Empowering Latina youth through heritage, education, and sisterhood. 
+            Building the next generation of leaders, one student at a time.
+        </p>
+        <div class="hero-cta-buttons">
+            <a href="/events" class="btn-hero-primary">Explore Events</a>
+            <a href="/get-involved" class="btn-hero-secondary">Get Involved</a>
         </div>
     </div>
+</section>
 
-    <!-- Impact Stats Section -->
-    <div style="background: white; padding: 4rem 0;">
-        <div class="container">
-            <div class="text-center mb-4">
-                <h2 style="color: var(--col-blue); font-size: 2.5rem; margin-bottom: 1rem; font-family: 'DM Serif Display', serif;">Our Impact</h2>
-                <p style="color: var(--text-light); font-size: 1.1rem;">Making a difference in the lives of Latina youth</p>
+<!-- Impact Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <h2 class="section-title">Our Impact</h2>
+        <p class="section-subtitle">Making a measurable difference in the lives of Latina youth</p>
+        <div class="stats-grid">
+            <div class="stat-card-modern">
+                <span class="stat-icon">👥</span>
+                <div class="stat-number" data-count="500">0</div>
+                <div class="stat-label">Students Served</div>
             </div>
-            <div class="grid-3" style="margin-top: 3rem;">
-                <div class="stat-card" style="background-image: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url('/img/ER STEM Workshop Aug 2022-31.jpg'); background-size: cover; background-position: center;">
-                    <div class="stat-number">500+</div>
-                    <div class="stat-label">Students Served</div>
-                </div>
-                <div class="stat-card" style="background-image: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url('/img/ER Summer Summit 2022-068.jpg'); background-size: cover; background-position: center;">
-                    <div class="stat-number">50+</div>
-                    <div class="stat-label">Events Hosted</div>
-                </div>
-                <div class="stat-card" style="background-image: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url('/img/ER Animation Workshop Feb 2021_043.jpg'); background-size: cover; background-position: center;">
-                    <div class="stat-number">100+</div>
-                    <div class="stat-label">Volunteers</div>
-                </div>
+            <div class="stat-card-modern">
+                <span class="stat-icon">🎓</span>
+                <div class="stat-number" data-count="50">0</div>
+                <div class="stat-label">Events Hosted</div>
             </div>
-        </div>
-    </div>
-
-    <!-- Core Values Section -->
-    <div style="background: var(--col-cream); padding: 6rem 0;">
-        <div class="container">
-            <div class="text-center mb-4">
-                <h2 style="color: var(--col-blue); font-size: 2.5rem; margin-bottom: 1rem; font-family: 'DM Serif Display', serif;">Our Core Values</h2>
-                <div style="width: 80px; height: 4px; background: var(--col-pink); margin: 1rem auto;"></div>
+            <div class="stat-card-modern">
+                <span class="stat-icon">🤝</span>
+                <div class="stat-number" data-count="100">0</div>
+                <div class="stat-label">Volunteers</div>
             </div>
-            <div class="grid-3">
-                <div class="card hover-lift" style="border-top: 5px solid var(--col-pink);">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🦋</div>
-                    <h3 style="color: var(--col-blue);">Heritage</h3>
-                    <p style="color: var(--text-light);">Celebrating our roots and finding strength in our culture.</p>
-                </div>
-                <div class="card hover-lift" style="border-top: 5px solid var(--col-blue);">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">📚</div>
-                    <h3 style="color: var(--col-blue);">Education</h3>
-                    <p style="color: var(--text-light);">Prioritizing learning as the key to unlocking opportunity.</p>
-                </div>
-                <div class="card hover-lift" style="border-top: 5px solid var(--col-green);">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🤝</div>
-                    <h3 style="color: var(--col-blue);">Sisterhood</h3>
-                    <p style="color: var(--text-light);">Supporting one another through mentorship and community.</p>
-                </div>
+            <div class="stat-card-modern">
+                <span class="stat-icon">⭐</span>
+                <div class="stat-number" data-count="95">0</div>
+                <div class="stat-label">Satisfaction Rate</div>
             </div>
         </div>
     </div>
+</section>
 
-    <!-- Call to Action Strip -->
-    <div style="background: var(--col-peach); padding: 4rem 0;">
-        <div class="container text-center">
-            <h2 style="font-size: 3rem; color: var(--col-dark-gray); margin-bottom: 1.5rem; font-family: 'DM Serif Display', serif;">
-                Join Us in Making a Difference
-            </h2>
-            <p style="font-size: 1.3rem; color: var(--col-dark-gray); margin-bottom: 2.5rem; max-width: 700px; margin-left: auto; margin-right: auto;">
-                Your support helps us empower the next generation of Latina leaders. Together, we rise.
-            </p>
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <h2 class="section-title">What We Offer</h2>
+        <p class="section-subtitle">Comprehensive programs designed to empower and inspire</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🦋</div>
+                <h3 class="feature-title">Heritage Programs</h3>
+                <p class="feature-description">
+                    Celebrate your roots and connect with your cultural identity through workshops, 
+                    performances, and community events that honor our shared heritage.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3 class="feature-title">Educational Support</h3>
+                <p class="feature-description">
+                    Access tutoring, college prep, career guidance, and mentorship opportunities 
+                    that open doors to higher education and professional success.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🤝</div>
+                <h3 class="feature-title">Sisterhood Network</h3>
+                <p class="feature-description">
+                    Join a supportive community of peers and mentors who lift each other up, 
+                    share experiences, and build lifelong connections.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3 class="feature-title">Creative Expression</h3>
+                <p class="feature-description">
+                    Explore your talents through art, music, dance, and STEM workshops that 
+                    encourage creativity and innovation.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💼</div>
+                <h3 class="feature-title">Leadership Development</h3>
+                <p class="feature-description">
+                    Build confidence and leadership skills through workshops, conferences, 
+                    and hands-on experiences that prepare you to lead.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌟</div>
+                <h3 class="feature-title">Mentorship</h3>
+                <p class="feature-description">
+                    Connect with successful Latina professionals who provide guidance, 
+                    support, and inspiration on your journey to success.
+                </p>
+            </div>
         </div>
     </div>
+</section>
 
-    <%- include('partials/footer') %>
+<!-- Story Section -->
+<section class="story-section">
+    <div class="story-content">
+        <p class="story-quote">
+            Ella Rises gave me the confidence to pursue my dreams. The mentorship and 
+            community support I found here changed my life and showed me that I can achieve anything.
+        </p>
+        <p class="story-author">— Maria, Program Graduate</p>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="cta-section">
+    <div class="cta-content">
+        <h2 class="cta-title">Join the Movement</h2>
+        <p class="cta-text">
+            Whether you're a student looking to grow, a volunteer wanting to give back, 
+            or a supporter ready to make a difference, there's a place for you at Ella Rises.
+        </p>
+        <a href="/get-involved" class="btn-cta">Get Started Today</a>
+    </div>
+</section>
+
+<script>
+    // Animated counter for stats
+    function animateCounter(element) {
+        const target = parseInt(element.getAttribute('data-count'));
+        const duration = 2000; // 2 seconds
+        const increment = target / (duration / 16); // 60fps
+        let current = 0;
+
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                element.textContent = target + (element.getAttribute('data-count') === '95' ? '%' : '+');
+                clearInterval(timer);
+            } else {
+                element.textContent = Math.floor(current) + (element.getAttribute('data-count') === '95' ? '%' : '+');
+            }
+        }, 16);
+    }
+
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+        threshold: 0.3,
+        rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const statNumber = entry.target.querySelector('.stat-number');
+                if (statNumber && !statNumber.classList.contains('animated')) {
+                    statNumber.classList.add('animated');
+                    animateCounter(statNumber);
+                }
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe stat cards
+    document.addEventListener('DOMContentLoaded', () => {
+        const statCards = document.querySelectorAll('.stat-card-modern');
+        statCards.forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+
+        const featureCards = document.querySelectorAll('.feature-card');
+        featureCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+            observer.observe(card);
+        });
+    });
+</script>
+
+<%- include('partials/footer') %>

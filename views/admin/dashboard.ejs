@@ -4,6 +4,7 @@
         /* Dashboard Background - Peach */
         body {
             background-color: #FFD1C7;
+            padding-bottom: 3rem;
         }
 
         /* Brand Colors */
@@ -32,121 +33,366 @@
             transform: translateY(-5px) !important;
             box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
         }
+
+        .kpi-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none !important;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .2) !important;
+        }
+
+        .trend-up {
+            color: #28a745;
+        }
+
+        .trend-down {
+            color: #dc3545;
+        }
+
+        .trend-neutral {
+            color: #6c757d;
+        }
+
+        /* Improved Header */
+        .dashboard-header {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-header p {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        .date-badge {
+            background: linear-gradient(135deg, var(--brand-blue), var(--brand-lavender));
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(141, 169, 196, 0.3);
+        }
+
+        /* Quick Actions - Improved */
+        .quick-actions {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .quick-actions .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-left: -0.75rem;
+            margin-right: -0.75rem;
+        }
+
+        .quick-actions .row > [class*="col-"] {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        .quick-action-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: #f9f9f9;
+        }
+
+        .quick-action-card:hover {
+            border-color: var(--brand-blue);
+            background: white;
+            transform: translateY(-3px);
+        }
+
+        .quick-action-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+            font-size: 1.5rem;
+        }
+
+        /* Compact KPI Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-item {
+            background: white;
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-left: 4px solid;
+        }
+
+        .kpi-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .kpi-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-item-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .kpi-item-icon {
+            font-size: 1.1rem;
+            opacity: 0.6;
+        }
+
+        .kpi-item-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #2C2C2C;
+            margin: 0.5rem 0;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .kpi-item-trend {
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-top: 0.25rem;
+        }
+
+        .kpi-item-link {
+            font-size: 0.75rem;
+            color: #666;
+            text-decoration: none;
+            margin-top: 0.5rem;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        .kpi-item-link:hover {
+            color: #8DA9C4;
+        }
+
+        /* Color variants */
+        .kpi-item.purple { border-left-color: #958EBF; }
+        .kpi-item.blue { border-left-color: #8DA9C4; }
+        .kpi-item.pink { border-left-color: #EE969E; }
+        .kpi-item.light-pink { border-left-color: #FAD2D8; }
+
+        /* Section Spacing */
+        .dashboard-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-card {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-card-header {
+            background: white;
+            border: none;
+            padding: 1.5rem 2rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section-card-body {
+            padding: 2rem;
+        }
     </style>
 
-    <div class="container py-5">
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="display-5 fw-bold text-dark mb-0" style="font-family: 'DM Serif Display', serif;">Admin
-                    Dashboard</h1>
-                <p class="text-muted mb-0" style="font-family: 'Montserrat', sans-serif;">Overview of system performance
-                    and management.</p>
-            </div>
-            <div class="text-end">
-                <span class="badge bg-light text-dark border p-2 rounded-pill">
-                    <i class="fas fa-calendar-alt me-2"></i>
-                    <%= new Date().toLocaleDateString() %>
-                </span>
+    <div class="container py-4">
+        <!-- Improved Header -->
+        <div class="dashboard-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold text-dark mb-2" style="font-family: 'DM Serif Display', serif; font-size: 2.5rem;">Admin Dashboard</h1>
+                    <p class="text-muted mb-0" style="font-family: 'Montserrat', sans-serif; font-size: 1.1rem;">Overview of system performance and management.</p>
+                </div>
+                <div class="text-end">
+                    <div class="date-badge">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        <span style="font-weight: 600;">Today's Date:</span>
+                        <span class="ms-2"><%= new Date().toLocaleDateString() %></span>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- 1. Quick Actions Navigation (Top Row) -->
-        <div class="row g-2 mb-4">
-            <% const modules=[ { name: 'Users' , icon: 'users' , color: 'primary' , link: '/admin/users' }, {
-                name: 'Participants' , icon: 'user-graduate' , color: 'success' , link: '/admin/participants' }, {
-                name: 'Events' , icon: 'calendar-alt' , color: 'warning' , link: '/admin/events' }, { name: 'Surveys' ,
-                icon: 'poll' , color: 'info' , link: '/admin/surveys' }, { name: 'Milestones' , icon: 'flag' ,
-                color: 'danger' , link: '/admin/milestones' }, { name: 'Donations' , icon: 'donate' , color: 'secondary'
-                , link: '/admin/donations' } ]; %>
+        <div class="quick-actions">
+            <h5 class="fw-bold mb-3" style="font-family: 'DM Serif Display', serif; color: var(--col-dark-gray);">Quick Actions</h5>
+            <div class="row g-3" style="flex-wrap: wrap;">
+                <% const modules=[ 
+                    { name: 'Users' , icon: 'users' , color: '#8DA9C4' , link: '/admin/users' }, 
+                    { name: 'Participants' , icon: 'user-graduate' , color: '#958EBF' , link: '/admin/participants' }, 
+                    { name: 'Events' , icon: 'calendar-alt' , color: '#EE969E' , link: '/admin/events' }, 
+                    { name: 'Surveys' , icon: 'poll' , color: '#FAD2D8' , link: '/admin/surveys' }, 
+                    { name: 'Milestones' , icon: 'flag' , color: '#8DA9C4' , link: '/admin/milestones' }, 
+                    { name: 'Donations' , icon: 'donate' , color: '#958EBF' , link: '/admin/donations' } 
+                ]; %>
                 <% modules.forEach(mod=> { %>
-                    <div class="col-4 col-sm-3 col-md-2">
+                    <div class="col-6 col-sm-4 col-md-4 col-lg-2" style="min-width: 0; flex: 0 0 auto;">
                         <a href="<%= mod.link %>" class="text-decoration-none">
-                            <div class="card h-100 border-0 shadow-sm hover-lift text-center py-2"
-                                style="border-radius: 15px; transition: transform 0.2s; background: white;">
+                            <div class="card h-100 quick-action-card text-center py-3"
+                                style="border-radius: 15px; background: #f9f9f9;">
                                 <div class="card-body p-2">
-                                    <div class="icon-box mb-1 text-<%= mod.color %>">
-                                        <i class="fas fa-<%= mod.icon %> fa-lg"></i>
+                                    <div class="quick-action-icon" style="background: <%= mod.color %>; color: white;">
+                                        <i class="fas fa-<%= mod.icon %>"></i>
                                     </div>
                                     <h6 class="card-title mb-0 text-dark fw-bold"
-                                        style="font-size: 0.7rem; font-family: 'Montserrat', sans-serif;">
+                                        style="font-size: 0.85rem; font-family: 'Montserrat', sans-serif;">
                                         <%= mod.name %>
                                     </h6>
                                 </div>
                             </div>
                         </a>
                     </div>
-                    <% }); %>
+                <% }); %>
+            </div>
         </div>
 
-        <!-- 2. KPI Stats Cards (Second Row) -->
-        <div class="row g-4 mb-4">
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100"
-                    style="border-radius: 20px; background-color: #958EBF; color: white;">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6 class="text-uppercase mb-1 opacity-75"
-                                    style="font-size: 0.8rem; letter-spacing: 1px; font-family: 'Montserrat', sans-serif;">Total Participants</h6>
-                                <h2 class="display-4 fw-bold mb-0" style="font-family: 'Montserrat', sans-serif;">
-                                    <%= kpis.totalParticipants %>
-                                </h2>
-                            </div>
-                            <div class="icon-bg opacity-25">
-                                <i class="fas fa-users fa-3x"></i>
-                            </div>
-                        </div>
+        <!-- 2. Compact KPI Grid -->
+        <div class="dashboard-section">
+            <div class="kpi-grid">
+                <!-- Total Participants -->
+                <div class="kpi-item purple">
+                    <div class="kpi-item-header">
+                        <span class="kpi-item-title">Total Participants</span>
+                        <i class="fas fa-users kpi-item-icon"></i>
                     </div>
+                    <div class="kpi-item-value"><%= kpis.totalParticipants %></div>
+                    <% if (kpis.trends && kpis.trends.participants) { %>
+                        <div class="kpi-item-trend">
+                            <% const trend = kpis.trends.participants; %>
+                            <i class="fas fa-arrow-<%= trend.direction === 'up' ? 'up' : trend.direction === 'down' ? 'down' : 'right' %>" 
+                               style="color: <%= trend.direction === 'up' ? '#28a745' : trend.direction === 'down' ? '#dc3545' : '#999' %>;"></i>
+                            <span style="color: <%= trend.direction === 'up' ? '#28a745' : trend.direction === 'down' ? '#dc3545' : '#999' %>;">
+                                <%= trend.percentage %>% vs last month
+                            </span>
+                        </div>
+                    <% } %>
+                    <a href="/admin/participants" class="kpi-item-link">View Details →</a>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100"
-                    style="border-radius: 20px; background-color: #8DA9C4; color: white;">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6 class="text-uppercase mb-1 opacity-75"
-                                    style="font-size: 0.8rem; letter-spacing: 1px; font-family: 'Montserrat', sans-serif;">Avg Satisfaction</h6>
-                                <h2 class="display-4 fw-bold mb-0" style="font-family: 'Montserrat', sans-serif;">
-                                    <%= kpis.satisfactionScore %>
-                                </h2>
-                            </div>
-                            <div class="icon-bg opacity-25">
-                                <i class="fas fa-smile fa-3x"></i>
-                            </div>
-                        </div>
+
+                <!-- Avg Satisfaction -->
+                <div class="kpi-item blue">
+                    <div class="kpi-item-header">
+                        <span class="kpi-item-title">Avg Satisfaction</span>
+                        <i class="fas fa-smile kpi-item-icon"></i>
                     </div>
+                    <div class="kpi-item-value"><%= kpis.satisfactionScore %></div>
+                    <% if (kpis.trends && kpis.trends.satisfaction) { %>
+                        <div class="kpi-item-trend">
+                            <% const trend = kpis.trends.satisfaction; %>
+                            <i class="fas fa-arrow-<%= trend.direction === 'up' ? 'up' : trend.direction === 'down' ? 'down' : 'right' %>" 
+                               style="color: <%= trend.direction === 'up' ? '#28a745' : trend.direction === 'down' ? '#dc3545' : '#999' %>;"></i>
+                            <span style="color: <%= trend.direction === 'up' ? '#28a745' : trend.direction === 'down' ? '#dc3545' : '#999' %>;">
+                                <%= trend.percentage %>% vs last month
+                            </span>
+                        </div>
+                    <% } %>
+                    <a href="/admin/surveys" class="kpi-item-link">View Details →</a>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100"
-                    style="border-radius: 20px; background-color: #EE969E; color: white;">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6 class="text-uppercase mb-1 opacity-75"
-                                    style="font-size: 0.8rem; letter-spacing: 1px; font-family: 'Montserrat', sans-serif;">Milestones</h6>
-                                <h2 class="display-4 fw-bold mb-0" style="font-family: 'Montserrat', sans-serif;">
-                                    <%= kpis.milestoneCount %>
-                                </h2>
-                            </div>
-                            <div class="icon-bg opacity-25">
-                                <i class="fas fa-trophy fa-3x"></i>
-                            </div>
-                        </div>
+
+                <!-- Milestones -->
+                <div class="kpi-item pink">
+                    <div class="kpi-item-header">
+                        <span class="kpi-item-title">Milestones</span>
+                        <i class="fas fa-trophy kpi-item-icon"></i>
                     </div>
+                    <div class="kpi-item-value"><%= kpis.milestoneCount %></div>
+                    <% if (kpis.trends && kpis.trends.milestones) { %>
+                        <div class="kpi-item-trend">
+                            <% const trend = kpis.trends.milestones; %>
+                            <i class="fas fa-arrow-<%= trend.direction === 'up' ? 'up' : trend.direction === 'down' ? 'down' : 'right' %>" 
+                               style="color: <%= trend.direction === 'up' ? '#28a745' : trend.direction === 'down' ? '#dc3545' : '#999' %>;"></i>
+                            <span style="color: <%= trend.direction === 'up' ? '#28a745' : trend.direction === 'down' ? '#dc3545' : '#999' %>;">
+                                <%= trend.percentage %>% vs last month
+                            </span>
+                        </div>
+                    <% } %>
+                    <a href="/admin/milestones" class="kpi-item-link">View Details →</a>
+                </div>
+
+                <!-- Total Donations -->
+                <div class="kpi-item light-pink">
+                    <div class="kpi-item-header">
+                        <span class="kpi-item-title">Total Donations</span>
+                        <i class="fas fa-donate kpi-item-icon"></i>
+                    </div>
+                    <div class="kpi-item-value">$<%= parseFloat(kpis.totalDonations || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}) %></div>
+                    <% if (kpis.trends && kpis.trends.donations) { %>
+                        <div class="kpi-item-trend">
+                            <% const trend = kpis.trends.donations; %>
+                            <i class="fas fa-arrow-<%= trend.direction === 'up' ? 'up' : trend.direction === 'down' ? 'down' : 'right' %>" 
+                               style="color: <%= trend.direction === 'up' ? '#28a745' : trend.direction === 'down' ? '#dc3545' : '#999' %>;"></i>
+                            <span style="color: <%= trend.direction === 'up' ? '#28a745' : trend.direction === 'down' ? '#dc3545' : '#999' %>;">
+                                <%= trend.percentage %>% vs last month
+                            </span>
+                        </div>
+                    <% } %>
+                    <a href="/admin/donations" class="kpi-item-link">View Details →</a>
+                </div>
+
+                <!-- Attendance Rate -->
+                <div class="kpi-item purple">
+                    <div class="kpi-item-header">
+                        <span class="kpi-item-title">Attendance Rate</span>
+                        <i class="fas fa-check-circle kpi-item-icon"></i>
+                    </div>
+                    <div class="kpi-item-value"><%= kpis.attendanceRate || 0 %>%</div>
+                    <a href="/admin/events" class="kpi-item-link">View Details →</a>
+                </div>
+
+                <!-- Active Registrations -->
+                <div class="kpi-item light-pink">
+                    <div class="kpi-item-header">
+                        <span class="kpi-item-title">Active Registrations</span>
+                        <i class="fas fa-user-check kpi-item-icon"></i>
+                    </div>
+                    <div class="kpi-item-value"><%= kpis.activeRegistrations || 0 %></div>
+                    <a href="/admin/events" class="kpi-item-link">View Details →</a>
                 </div>
             </div>
         </div>
 
         <!-- 3. Filter Bar (Control Panel) -->
-        <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; background: white;">
-            <div class="card-header bg-white border-0 pt-4 px-4">
-                <h5 class="fw-bold mb-0" style="font-family: 'DM Serif Display', serif;">Filter Dashboard Data</h5>
-                <p class="text-muted mb-0" style="font-size: 0.9rem; font-family: 'Montserrat', sans-serif;">Filter analytics by event type and participant demographics</p>
-            </div>
-            <div class="card-body px-4 pb-4">
+        <div class="dashboard-section">
+            <div class="card section-card mb-4">
+                <div class="section-card-header">
+                    <h5 class="fw-bold mb-1" style="font-family: 'DM Serif Display', serif; font-size: 1.3rem;">Filter Dashboard Data</h5>
+                    <p class="text-muted mb-0" style="font-size: 0.95rem; font-family: 'Montserrat', sans-serif;">Filter analytics by event type and participant demographics</p>
+                </div>
+                <div class="section-card-body">
                 <form action="/admin/dashboard" method="GET" class="row g-3">
                     <div class="col-md-4">
                         <label for="eventType" class="form-label fw-bold" style="font-family: 'Montserrat', sans-serif;">Event Type</label>
@@ -195,36 +441,223 @@
             </div>
         </div>
 
-        <!-- 4. Tableau Dashboard Image -->
-        <div class="card shadow-sm p-2 mb-4" style="border-radius: 20px; background: white;">
-            <img src="/img/tableau_full.png" alt="Ella Rises Analytics Dashboard" 
-                 class="img-fluid rounded" 
-                 style="width: 100%; border: 1px solid #ddd;">
-        </div>
-
-        <!-- 5. Charts Section (Additional Analytics) -->
-        <div class="row g-4">
-            <div class="col-md-8">
-                <div class="card border-0 shadow-sm h-100" style="border-radius: 20px; background: white;">
-                    <div class="card-header bg-white border-0 pt-4 px-4">
-                        <h5 class="fw-bold mb-0" style="font-family: 'DM Serif Display', serif;">Participant
-                            Demographics</h5>
-                    </div>
-                    <div class="card-body px-4 pb-4">
+        <!-- 4. Analytics Charts Section -->
+        <div class="dashboard-section">
+            <div class="row g-4 mb-4">
+                <div class="col-md-8">
+                    <div class="card section-card h-100">
+                        <div class="section-card-header">
+                            <h5 class="fw-bold mb-1" style="font-family: 'DM Serif Display', serif; font-size: 1.3rem;">Event Attendance Over Time</h5>
+                            <p class="text-muted mb-0" style="font-size: 0.95rem; font-family: 'Montserrat', sans-serif;">Registrations by month (Last 6 months)</p>
+                        </div>
+                        <div class="section-card-body">
                         <div style="height: 300px; position: relative;">
-                            <canvas id="demographicsChart"></canvas>
+                            <canvas id="attendanceChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100" style="border-radius: 20px; background: white;">
-                    <div class="card-header bg-white border-0 pt-4 px-4">
-                        <h5 class="fw-bold mb-0" style="font-family: 'DM Serif Display', serif;">Program Impact</h5>
-                    </div>
-                    <div class="card-body px-4 pb-4">
+                <div class="col-md-4">
+                    <div class="card section-card h-100">
+                        <div class="section-card-header">
+                            <h5 class="fw-bold mb-1" style="font-family: 'DM Serif Display', serif; font-size: 1.3rem;">Program Impact</h5>
+                        </div>
+                        <div class="section-card-body">
                         <div style="height: 300px; position: relative;">
                             <canvas id="impactChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="card section-card h-100">
+                        <div class="section-card-header">
+                            <h5 class="fw-bold mb-1" style="font-family: 'DM Serif Display', serif; font-size: 1.3rem;">Satisfaction Trends</h5>
+                            <p class="text-muted mb-0" style="font-size: 0.95rem; font-family: 'Montserrat', sans-serif;">Average satisfaction score over time</p>
+                        </div>
+                        <div class="section-card-body">
+                        <div style="height: 300px; position: relative;">
+                            <canvas id="satisfactionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <div class="col-md-6">
+                    <div class="card section-card h-100">
+                        <div class="section-card-header">
+                            <h5 class="fw-bold mb-1" style="font-family: 'DM Serif Display', serif; font-size: 1.3rem;">Donation Trends</h5>
+                            <p class="text-muted mb-0" style="font-size: 0.95rem; font-family: 'Montserrat', sans-serif;">Total donations by month</p>
+                        </div>
+                        <div class="section-card-body">
+                        <div style="height: 300px; position: relative;">
+                            <canvas id="donationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Tableau Dashboard Image -->
+        <div class="dashboard-section">
+            <div class="card section-card mb-4">
+                <div class="section-card-header">
+                    <h5 class="fw-bold mb-1" style="font-family: 'DM Serif Display', serif; font-size: 1.3rem;">Advanced Analytics Dashboard</h5>
+                    <p class="text-muted mb-0" style="font-size: 0.95rem; font-family: 'Montserrat', sans-serif;">Comprehensive data visualization and insights</p>
+                </div>
+                <div class="section-card-body p-3">
+                    <img src="/img/tableau_full.png" alt="Ella Rises Analytics Dashboard" 
+                         class="img-fluid rounded" 
+                         style="width: 100%; border: 1px solid #e0e0e0;">
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Recent Activity & Insights Section -->
+        <div class="dashboard-section">
+            <div class="row g-4 mb-4">
+                <div class="col-md-8">
+                    <div class="card section-card h-100">
+                        <div class="section-card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold mb-1" style="font-family: 'DM Serif Display', serif; font-size: 1.3rem;">Recent Activity</h5>
+                                <p class="text-muted mb-0" style="font-size: 0.95rem; font-family: 'Montserrat', sans-serif;">Latest registrations and updates</p>
+                            </div>
+                            <a href="/admin/events" class="btn btn-sm btn-outline-primary">View All</a>
+                        </div>
+                        <div class="section-card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Participant</th>
+                                        <th>Event</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (recentActivity && recentActivity.length > 0) { %>
+                                        <% recentActivity.forEach(activity => { %>
+                                            <tr>
+                                                <td><%= activity.participant_first_name %> <%= activity.participant_last_name %></td>
+                                                <td><%= activity.event_name %></td>
+                                                <td>
+                                                    <%= activity.event_date_time_start ? new Date(activity.event_date_time_start).toLocaleDateString('en-US') : 'N/A' %>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-<%= activity.registration_status === 'Registered' ? 'success' : 'secondary' %>">
+                                                        <%= activity.registration_status %>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted">No recent activity</td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <div class="col-md-4">
+                    <div class="card section-card h-100">
+                        <div class="section-card-header">
+                            <h5 class="fw-bold mb-1" style="font-family: 'DM Serif Display', serif; font-size: 1.3rem;">Top Performers</h5>
+                            <p class="text-muted mb-0" style="font-size: 0.95rem; font-family: 'Montserrat', sans-serif;">Participants with most milestones</p>
+                        </div>
+                        <div class="section-card-body">
+                        <% if (topPerformers && topPerformers.length > 0) { %>
+                            <% topPerformers.forEach((performer, index) => { %>
+                                <div class="d-flex justify-content-between align-items-center mb-3 pb-3 <%= index < topPerformers.length - 1 ? 'border-bottom' : '' %>">
+                                    <div>
+                                        <div class="fw-bold" style="font-family: 'Montserrat', sans-serif;">
+                                            <%= performer.participant_first_name %> <%= performer.participant_last_name %>
+                                        </div>
+                                        <div class="text-muted" style="font-size: 0.85rem;">
+                                            <%= parseInt(performer.milestone_count) || 0 %> milestones
+                                        </div>
+                                    </div>
+                                    <div class="badge bg-primary rounded-pill" style="font-size: 1rem; padding: 0.5rem 0.75rem;">
+                                        #<%= index + 1 %>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <p class="text-muted text-center">No data available</p>
+                        <% } %>
+                        <a href="/admin/participants" class="btn btn-sm btn-outline-primary w-100 mt-3">View All Participants</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Upcoming Events Section -->
+        <div class="dashboard-section">
+            <div class="row g-4 mb-4">
+                <div class="col-12">
+                    <div class="card section-card">
+                        <div class="section-card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold mb-1" style="font-family: 'DM Serif Display', serif; font-size: 1.3rem;">Upcoming Events</h5>
+                                <p class="text-muted mb-0" style="font-size: 0.95rem; font-family: 'Montserrat', sans-serif;">Next 5 scheduled events</p>
+                            </div>
+                            <a href="/admin/events" class="btn btn-sm btn-outline-primary">View All Events</a>
+                        </div>
+                        <div class="section-card-body">
+                        <div class="row g-3">
+                            <% if (upcomingEvents && upcomingEvents.length > 0) { %>
+                                <% upcomingEvents.forEach(event => { %>
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="card border shadow-sm h-100" style="border-radius: 15px;">
+                                            <div class="card-body">
+                                                <h6 class="fw-bold mb-2" style="font-family: 'DM Serif Display', serif;">
+                                                    <%= event.event_name %>
+                                                </h6>
+                                                <p class="text-muted mb-1" style="font-size: 0.85rem;">
+                                                    <i class="fas fa-tag me-1"></i><%= event.event_type %>
+                                                </p>
+                                                <p class="text-muted mb-1" style="font-size: 0.85rem;">
+                                                    <i class="fas fa-calendar me-1"></i>
+                                                    <%= event.event_date_time_start ? new Date(event.event_date_time_start).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) : 'TBD' %>
+                                                </p>
+                                                <% if (event.event_location) { %>
+                                                    <p class="text-muted mb-0" style="font-size: 0.85rem;">
+                                                        <i class="fas fa-map-marker-alt me-1"></i><%= event.event_location %>
+                                                    </p>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% }); %>
+                            <% } else { %>
+                                <div class="col-12">
+                                    <p class="text-muted text-center">No upcoming events scheduled</p>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. Participant Demographics Chart -->
+        <div class="dashboard-section">
+            <div class="row g-4 mb-4">
+                <div class="col-md-12">
+                    <div class="card section-card h-100">
+                        <div class="section-card-header">
+                            <h5 class="fw-bold mb-1" style="font-family: 'DM Serif Display', serif; font-size: 1.3rem;">Participant Demographics</h5>
+                            <p class="text-muted mb-0" style="font-size: 0.95rem; font-family: 'Montserrat', sans-serif;">Top 5 cities by participant count</p>
+                        </div>
+                        <div class="section-card-body">
+                        <div style="height: 300px; position: relative;">
+                            <canvas id="demographicsChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -239,65 +672,202 @@
         const cityLabels = <%- JSON.stringify(cityLabels || []) %>;
         const cityData = <%- JSON.stringify(cityCounts || []) %>;
         const impactData = <%- JSON.stringify(attendanceData || [0, 0]) %>;
+        const attendanceOverTime = <%- JSON.stringify(attendanceOverTime || []) %>;
+        const satisfactionOverTime = <%- JSON.stringify(satisfactionOverTime || []) %>;
+        const donationOverTime = <%- JSON.stringify(donationOverTime || []) %>;
 
-        console.log('Chart Data:', { cityLabels, cityData, impactData });
+        // Helper function to format month labels
+        function formatMonth(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        }
 
-        // Demographics Chart (Vertical Bar)
-        const ctxDemographics = document.getElementById('demographicsChart').getContext('2d');
-        new Chart(ctxDemographics, {
-            type: 'bar',
-            data: {
-                labels: cityLabels,
-                datasets: [{
-                    label: 'Participants',
-                    data: cityData,
-                    backgroundColor: '#8DA9C4', // Brand Blue
-                    borderRadius: 5,
-                    barThickness: 30
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    title: { display: false }
+        // Event Attendance Over Time Chart
+        const ctxAttendance = document.getElementById('attendanceChart');
+        if (ctxAttendance) {
+            const attendanceLabels = attendanceOverTime.map(item => formatMonth(item.month));
+            const attendanceCounts = attendanceOverTime.map(item => parseInt(item.count || 0));
+            new Chart(ctxAttendance.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: attendanceLabels,
+                    datasets: [{
+                        label: 'Registrations',
+                        data: attendanceCounts,
+                        borderColor: '#8DA9C4',
+                        backgroundColor: 'rgba(141, 169, 196, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { borderDash: [2, 4] },
-                        ticks: { stepSize: 1 }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
                     },
-                    x: {
-                        grid: { display: false }
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { borderDash: [2, 4] }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
+
+        // Satisfaction Trends Chart
+        const ctxSatisfaction = document.getElementById('satisfactionChart');
+        if (ctxSatisfaction) {
+            const satisfactionLabels = satisfactionOverTime.map(item => formatMonth(item.month));
+            const satisfactionScores = satisfactionOverTime.map(item => parseFloat(item.avg_score || 0).toFixed(1));
+            new Chart(ctxSatisfaction.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: satisfactionLabels,
+                    datasets: [{
+                        label: 'Avg Satisfaction',
+                        data: satisfactionScores,
+                        borderColor: '#958EBF',
+                        backgroundColor: 'rgba(149, 142, 191, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            grid: { borderDash: [2, 4] }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Donation Trends Chart
+        const ctxDonation = document.getElementById('donationChart');
+        if (ctxDonation) {
+            // Filter out any future dates and ensure we only show actual data
+            const now = new Date();
+            const validDonationData = donationOverTime.filter(item => {
+                if (!item.month) return false;
+                const monthDate = new Date(item.month);
+                // Only include months that are not in the future
+                return monthDate <= now;
+            });
+            
+            const donationLabels = validDonationData.map(item => formatMonth(item.month));
+            const donationAmounts = validDonationData.map(item => parseFloat(item.total || 0));
+            
+            new Chart(ctxDonation.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: donationLabels,
+                    datasets: [{
+                        label: 'Donations',
+                        data: donationAmounts,
+                        backgroundColor: '#EE969E',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { borderDash: [2, 4] },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Demographics Chart (Vertical Bar)
+        const ctxDemographics = document.getElementById('demographicsChart');
+        if (ctxDemographics) {
+            new Chart(ctxDemographics.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: cityLabels,
+                    datasets: [{
+                        label: 'Participants',
+                        data: cityData,
+                        backgroundColor: '#8DA9C4',
+                        borderRadius: 5,
+                        barThickness: 30
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { borderDash: [2, 4] },
+                            ticks: { stepSize: 1 }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
 
         // Impact Chart (Doughnut)
-        const ctxImpact = document.getElementById('impactChart').getContext('2d');
-        new Chart(ctxImpact, {
-            type: 'doughnut',
-            data: {
-                labels: ['Attended', 'Missed'],
-                datasets: [{
-                    data: impactData,
-                    backgroundColor: ['#958EBF', '#FAD2D8'], // Brand Lavender, Brand Pink
-                    borderWidth: 0,
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: {
-                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { family: "'Montserrat', sans-serif" } } }
+        const ctxImpact = document.getElementById('impactChart');
+        if (ctxImpact) {
+            new Chart(ctxImpact.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Attended', 'Missed'],
+                    datasets: [{
+                        data: impactData,
+                        backgroundColor: ['#958EBF', '#FAD2D8'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { family: "'Montserrat', sans-serif" } } }
+                    }
                 }
-            }
-        });
+            });
+        }
     </script>
 
     <%- include('../partials/footer') %>

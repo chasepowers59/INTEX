@@ -1,98 +1,376 @@
 <%- include('../partials/header', { user: user }) %>
+<%- include('_shared_styles') %>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    /* Survey Detail Specific Styles */
+    .survey-detail-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Survey Details</h1>
-        <a href="/admin/surveys" class="btn btn-secondary">Back to Surveys</a>
+    /* Hero Header Card */
+    .survey-hero-card {
+        background: linear-gradient(135deg, var(--brand-blue), var(--brand-lavender));
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        color: white;
+    }
+
+    .survey-hero-card h1 {
+        font-family: 'DM Serif Display', serif;
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: white;
+    }
+
+    .survey-hero-card .survey-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        margin-top: 1.5rem;
+    }
+
+    .survey-hero-card .meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .survey-hero-card .meta-label {
+        font-size: 0.85rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .survey-hero-card .meta-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    /* Information Cards */
+    .info-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .info-card-header {
+        font-family: 'DM Serif Display', serif;
+        font-size: 1.5rem;
+        color: var(--brand-blue);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    /* Score Grid */
+    .score-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .score-card {
+        background: linear-gradient(135deg, #f8f9fa, #ffffff);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 2px solid transparent;
+    }
+
+    .score-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .score-card.satisfaction {
+        border-color: #8DA9C4;
+    }
+
+    .score-card.usefulness {
+        border-color: #4ECDC4;
+    }
+
+    .score-card.instructor {
+        border-color: #7CB342;
+    }
+
+    .score-card.recommendation {
+        border-color: #FFCA28;
+    }
+
+    .score-label {
+        font-size: 0.85rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .score-value {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #2C2C2C;
+        font-family: 'DM Serif Display', serif;
+        line-height: 1;
+    }
+
+    .score-scale {
+        font-size: 0.75rem;
+        color: #999;
+        margin-top: 0.5rem;
+    }
+
+    /* Overall Score & NPS Section */
+    .summary-scores {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .summary-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        border-left: 4px solid;
+    }
+
+    .summary-card.overall {
+        border-left-color: #6c757d;
+    }
+
+    .summary-card.nps {
+        border-left-color: #2C2C2C;
+    }
+
+    .summary-card.nps.promoter {
+        border-left-color: #28a745;
+        background: linear-gradient(135deg, #f0f9f4, #ffffff);
+    }
+
+    .summary-card.nps.passive {
+        border-left-color: #ffc107;
+        background: linear-gradient(135deg, #fffbf0, #ffffff);
+    }
+
+    .summary-card.nps.detractor {
+        border-left-color: #dc3545;
+        background: linear-gradient(135deg, #fff5f5, #ffffff);
+    }
+
+    .summary-label {
+        font-size: 0.85rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    .summary-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2C2C2C;
+        font-family: 'DM Serif Display', serif;
+    }
+
+    /* Comments Section */
+    .comments-section {
+        background: linear-gradient(135deg, #f8f9fa, #ffffff);
+        border-radius: 12px;
+        padding: 2rem;
+        border-left: 4px solid var(--brand-blue);
+        min-height: 150px;
+    }
+
+    .comments-text {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #2C2C2C;
+        font-family: 'Montserrat', sans-serif;
+        font-style: italic;
+    }
+
+    .comments-empty {
+        color: #999;
+        font-style: italic;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    /* Action Buttons */
+    .action-section {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .survey-hero-card {
+            padding: 1.5rem;
+        }
+
+        .survey-hero-card h1 {
+            font-size: 2rem;
+        }
+
+        .survey-hero-card .survey-meta {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .score-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-scores {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="container mt-4 survey-detail-container">
+    <!-- Hero Header -->
+    <div class="survey-hero-card">
+        <div class="d-flex justify-content-between align-items-start flex-wrap">
+            <div>
+                <h1>Survey Response</h1>
+                <div class="survey-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Event</span>
+                        <span class="meta-value"><%= survey.event_name %></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Participant</span>
+                        <span class="meta-value"><%= survey.participant_first_name %> <%= survey.participant_last_name %></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Survey ID</span>
+                        <span class="meta-value">#<%= survey.survey_id %></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Submitted</span>
+                        <span class="meta-value"><%= survey.survey_submission_date ? new Date(survey.survey_submission_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'N/A' %></span>
+                    </div>
+                </div>
+            </div>
+            <a href="/admin/surveys" class="admin-btn admin-btn-secondary" style="background: rgba(255,255,255,0.2); border: 2px solid white;">
+                ← Back to Surveys
+            </a>
+        </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <h3 class="mb-0">Survey Response</h3>
+    <!-- Scores Section -->
+    <div class="info-card">
+        <h2 class="info-card-header">Survey Scores</h2>
+        
+        <div class="score-grid">
+            <div class="score-card satisfaction">
+                <div class="score-label">Satisfaction</div>
+                <div class="score-value"><%= survey.survey_satisfaction_score !== null ? survey.survey_satisfaction_score : '—' %></div>
+                <div class="score-scale">Scale: 0-5</div>
+            </div>
+            <div class="score-card usefulness">
+                <div class="score-label">Usefulness</div>
+                <div class="score-value"><%= survey.survey_usefulness_score !== null ? survey.survey_usefulness_score : '—' %></div>
+                <div class="score-scale">Scale: 0-5</div>
+            </div>
+            <div class="score-card instructor">
+                <div class="score-label">Instructor</div>
+                <div class="score-value"><%= survey.survey_instructor_score !== null ? survey.survey_instructor_score : '—' %></div>
+                <div class="score-scale">Scale: 0-5</div>
+            </div>
+            <div class="score-card recommendation">
+                <div class="score-label">Recommendation</div>
+                <div class="score-value"><%= survey.survey_recommendation_score !== null ? survey.survey_recommendation_score : '—' %></div>
+                <div class="score-scale">Scale: 0-5</div>
+            </div>
         </div>
-        <div class="card-body">
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <strong>Event:</strong> <%= survey.event_name %>
+
+        <div class="summary-scores">
+            <div class="summary-card overall">
+                <div class="summary-label">Overall Score</div>
+                <div class="summary-value">
+                    <%= survey.survey_overall_score !== null ? parseFloat(survey.survey_overall_score).toFixed(2) : 'N/A' %>
                 </div>
-                <div class="col-md-6">
-                    <strong>Participant:</strong> <%= survey.participant_first_name %> <%= survey.participant_last_name %>
+                <div class="score-scale" style="margin-top: 0.5rem;">Average of all scores</div>
+            </div>
+            <div class="summary-card nps <%= survey.survey_nps_bucket ? survey.survey_nps_bucket.toLowerCase() : '' %>">
+                <div class="summary-label">NPS Category</div>
+                <div class="summary-value" style="font-size: 1.5rem; text-transform: capitalize;">
+                    <%= survey.survey_nps_bucket || 'N/A' %>
+                </div>
+                <div class="score-scale" style="margin-top: 0.5rem;">
+                    <% if (survey.survey_nps_bucket === 'Promoter') { %>
+                        Highly likely to recommend (4-5)
+                    <% } else if (survey.survey_nps_bucket === 'Passive') { %>
+                        Neutral response (3)
+                    <% } else if (survey.survey_nps_bucket === 'Detractor') { %>
+                        Unlikely to recommend (0-2)
+                    <% } else { %>
+                        Not categorized
+                    <% } %>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <strong>Survey ID:</strong> <%= survey.survey_id %>
-                </div>
-                <div class="col-md-6">
-                    <strong>Submission Date:</strong> <%= survey.survey_submission_date ? new Date(survey.survey_submission_date).toLocaleString() : 'N/A' %>
-                </div>
-            </div>
+    <!-- Comments Section -->
+    <div class="info-card">
+        <h2 class="info-card-header">Participant Comments</h2>
+        <div class="comments-section">
+            <% if (survey.survey_comments && survey.survey_comments.trim() !== '') { %>
+                <div class="comments-text">"<%= survey.survey_comments %>"</div>
+            <% } else { %>
+                <div class="comments-empty">No comments provided by the participant.</div>
+            <% } %>
+        </div>
+    </div>
 
-            <hr>
-
-            <h5 class="mb-3">Scores</h5>
-            <div class="row mb-3">
-                <div class="col-md-3">
-                    <strong>Satisfaction Score:</strong><br>
-                    <span class="badge bg-primary" style="font-size: 1.2rem; padding: 0.5rem 1rem;">
-                        <%= survey.survey_satisfaction_score !== null ? survey.survey_satisfaction_score : 'N/A' %>
-                    </span>
-                </div>
-                <div class="col-md-3">
-                    <strong>Usefulness Score:</strong><br>
-                    <span class="badge bg-info" style="font-size: 1.2rem; padding: 0.5rem 1rem;">
-                        <%= survey.survey_usefulness_score !== null ? survey.survey_usefulness_score : 'N/A' %>
-                    </span>
-                </div>
-                <div class="col-md-3">
-                    <strong>Instructor Score:</strong><br>
-                    <span class="badge bg-success" style="font-size: 1.2rem; padding: 0.5rem 1rem;">
-                        <%= survey.survey_instructor_score !== null ? survey.survey_instructor_score : 'N/A' %>
-                    </span>
-                </div>
-                <div class="col-md-3">
-                    <strong>Recommendation Score:</strong><br>
-                    <span class="badge bg-warning" style="font-size: 1.2rem; padding: 0.5rem 1rem;">
-                        <%= survey.survey_recommendation_score !== null ? survey.survey_recommendation_score : 'N/A' %>
-                    </span>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <strong>Overall Score:</strong>
-                    <span class="badge bg-secondary" style="font-size: 1.1rem; padding: 0.4rem 0.8rem;">
-                        <%= survey.survey_overall_score !== null ? parseFloat(survey.survey_overall_score).toFixed(2) : 'N/A' %>
-                    </span>
-                </div>
-                <div class="col-md-6">
-                    <strong>NPS Bucket:</strong>
-                    <span class="badge bg-dark" style="font-size: 1.1rem; padding: 0.4rem 0.8rem;">
-                        <%= survey.survey_nps_bucket || 'N/A' %>
-                    </span>
-                </div>
-            </div>
-
-            <hr>
-
-            <h5 class="mb-3">Comments</h5>
-            <div class="card bg-light">
-                <div class="card-body">
-                    <%= survey.survey_comments ? survey.survey_comments : '<em>No comments provided</em>' %>
-                </div>
-            </div>
-
-            <div class="mt-4">
-                <form action="/admin/surveys/delete/<%= survey.survey_id %>" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this survey?');">
-                    <button type="submit" class="btn btn-danger">Delete Survey</button>
+    <!-- Actions -->
+    <div class="info-card">
+        <div class="action-section">
+            <% if (user && user.participant_role === 'admin') { %>
+                <form action="/admin/surveys/delete/<%= survey.survey_id %>" method="POST" style="display: inline;" class="delete-survey-form">
+                    <button type="submit" class="admin-btn admin-btn-danger">
+                        Delete Survey
+                    </button>
                 </form>
-            </div>
+            <% } %>
         </div>
     </div>
 </div>
 
-<%- include('../partials/footer') %>
+<script>
+    // Handle delete confirmation with event delegation (CSP compliant)
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteForm = document.querySelector('.delete-survey-form');
+        if (deleteForm) {
+            deleteForm.addEventListener('submit', function(e) {
+                if (!confirm('Are you sure you want to delete this survey? This action cannot be undone.')) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+</script>
 
+<%- include('../partials/footer') %>

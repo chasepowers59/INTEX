@@ -1,6 +1,20 @@
 const knex = require('knex')(require('../knexfile')[process.env.NODE_ENV || 'development']);
 const { generateId } = require('../utils/idGenerator');
 
+// Helper function to calculate trend percentage
+// Business Logic: Calculate percentage change between current and previous period
+// Returns object with direction ('up', 'down', 'neutral') and percentage change
+function calculateTrend(current, previous) {
+    if (!previous || previous === 0) {
+        return { direction: current > 0 ? 'up' : 'neutral', percentage: current > 0 ? 100 : 0 };
+    }
+    const change = ((current - previous) / previous) * 100;
+    return {
+        direction: change > 0 ? 'up' : change < 0 ? 'down' : 'neutral',
+        percentage: Math.abs(Math.round(change))
+    };
+}
+
 exports.getDashboard = async (req, res) => {
     try {
         const { eventType, city, role } = req.query;
@@ -42,8 +56,13 @@ exports.getDashboard = async (req, res) => {
             });
         }
 
-        const pIds = await filteredParticipantIds.pluck('participant_id');
-        const rIds = await filteredRegistrationIds.pluck('registration_id');
+        // Get filtered IDs and ensure they are integers
+        const pIdsRaw = await filteredParticipantIds.pluck('participant_id');
+        const rIdsRaw = await filteredRegistrationIds.pluck('registration_id');
+        
+        // Convert to integers and filter out any invalid values
+        const pIds = pIdsRaw.map(id => parseInt(id)).filter(id => !isNaN(id) && id > 0);
+        const rIds = rIdsRaw.map(id => parseInt(id)).filter(id => !isNaN(id) && id > 0);
 
         // Calculate KPIs: All metrics use the filtered ID sets to ensure consistency
         const totalParticipants = pIds.length;
@@ -80,30 +99,57 @@ exports.getDashboard = async (req, res) => {
         }
 
         // KPI 4: Total Donations
-        const totalDonationsResult = await knex('donations').sum('donation_amount as total').first();
-        const totalDonations = totalDonationsResult.total || 0;
+        // Business Logic: Sum all donations from the database, ensuring we only count actual donations
+        // Only count donations with valid dates (not null, not in the future)
+        // Filter by participant IDs if filters are applied to maintain consistency with other KPIs
+        const nowForDonations = new Date();
+        let totalDonationsQuery = knex('donations')
+            .whereNotNull('donation_date')
+            .where('donation_date', '<=', nowForDonations); // Don't include future dates
+        if (pIds.length > 0) {
+            totalDonationsQuery = totalDonationsQuery.whereIn('participant_id', pIds);
+        }
+        const totalDonationsResult = await totalDonationsQuery.sum('donation_amount as total').first();
+        const totalDonations = totalDonationsResult && totalDonationsResult.total ? parseFloat(totalDonationsResult.total) : 0;
+        
+        // Debug: Log total donations calculation
+        console.log('Total Donations KPI:', {
+            total: totalDonations,
+            participantFilter: pIds.length > 0 ? `${pIds.length} participants` : 'all participants'
+        });
 
         // KPI 5: Net Promoter Score (NPS)
         // Business Logic: NPS measures participant loyalty and program advocacy.
         // Calculation: (Promoters - Detractors) / Total * 100
-        // Promoters: Scores 9-10 (highly likely to recommend)
-        // Detractors: Scores 0-6 (unlikely to recommend)
+        // IMPORTANT: Survey uses 0-5 scale, not 0-10
+        // Promoters: Scores 4-5 (highly likely to recommend)
+        // Passives: Score 3 (neutral)
+        // Detractors: Scores 0-2 (unlikely to recommend)
         // This metric helps identify program strengths and areas needing improvement.
         const surveyStats = await knex('surveys')
+            .whereNotNull('survey_recommendation_score')
             .select(
                 knex.raw("COUNT(*) as total"),
-                knex.raw("SUM(CASE WHEN survey_recommendation_score >= 9 THEN 1 ELSE 0 END) as promoters"),
-                knex.raw("SUM(CASE WHEN survey_recommendation_score <= 6 THEN 1 ELSE 0 END) as detractors")
+                knex.raw("SUM(CASE WHEN survey_recommendation_score >= 4 THEN 1 ELSE 0 END) as promoters"),
+                knex.raw("SUM(CASE WHEN survey_recommendation_score <= 2 THEN 1 ELSE 0 END) as detractors")
             )
             .first();
 
         let npsScore = 0;
         if (surveyStats && surveyStats.total > 0) {
-            const promoters = parseInt(surveyStats.promoters);
-            const detractors = parseInt(surveyStats.detractors);
+            const promoters = parseInt(surveyStats.promoters || 0);
+            const detractors = parseInt(surveyStats.detractors || 0);
             const total = parseInt(surveyStats.total);
             npsScore = Math.round(((promoters - detractors) / total) * 100);
         }
+        
+        // Debug: Log NPS calculation
+        console.log('NPS Score Calculation:', {
+            total: surveyStats ? parseInt(surveyStats.total) : 0,
+            promoters: surveyStats ? parseInt(surveyStats.promoters || 0) : 0,
+            detractors: surveyStats ? parseInt(surveyStats.detractors || 0) : 0,
+            npsScore: npsScore
+        });
 
         // KPI 6: Attendance Count
         const attendanceResult = await knex('registrations')
@@ -111,6 +157,145 @@ exports.getDashboard = async (req, res) => {
             .count('registration_id as count')
             .first();
         const attendanceCount = parseInt(attendanceResult.count || 0);
+
+        // KPI 7: Total Events
+        const totalEventsResult = await knex('event_instances')
+            .count('event_instance_id as count')
+            .first();
+        const totalEvents = parseInt(totalEventsResult.count || 0);
+
+        // KPI 8: Attendance Rate
+        // Business Logic: Calculate percentage of registrations that resulted in attendance
+        const totalRegistrations = await knex('registrations')
+            .whereIn('registration_id', rIds)
+            .count('registration_id as count')
+            .first();
+        const totalRegCount = parseInt(totalRegistrations.count || 0);
+        const attendanceRate = totalRegCount > 0 
+            ? Math.round((attendanceCount / totalRegCount) * 100) 
+            : 0;
+
+        // Calculate Trends (Current Period vs Previous Period)
+        // Business Logic: Compare current month data with previous month to show growth/decline trends
+        // Use a single 'nowDate' reference to ensure consistency across all date calculations
+        const nowDate = new Date();
+        
+        // KPI 9: Active Registrations (Upcoming Events)
+        // Use nowDate for consistency
+        const activeRegistrationsResult = await knex('registrations')
+            .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+            .where('event_instances.event_date_time_start', '>', nowDate)
+            .count('registrations.registration_id as count')
+            .first();
+        const activeRegistrations = parseInt(activeRegistrationsResult.count || 0);
+        const currentMonthStart = new Date(nowDate.getFullYear(), nowDate.getMonth(), 1);
+        const previousMonthStart = new Date(nowDate.getFullYear(), nowDate.getMonth() - 1, 1);
+        const previousMonthEnd = new Date(nowDate.getFullYear(), nowDate.getMonth(), 0);
+        
+        // Debug: Log date ranges for troubleshooting
+        console.log('Dashboard Date Ranges:', {
+            now: nowDate.toISOString(),
+            currentMonthStart: currentMonthStart.toISOString(),
+            previousMonthStart: previousMonthStart.toISOString()
+        });
+
+        // Participants Trend (using registration dates as proxy since participants table doesn't have created_at)
+        let currentParticipants = { count: 0 };
+        let prevParticipants = { count: 0 };
+        if (pIds.length > 0) {
+            currentParticipants = await knex('registrations')
+                .whereIn('participant_id', pIds)
+                .whereNotNull('registration_created_at')
+                .where('registration_created_at', '>=', currentMonthStart)
+                .countDistinct('participant_id as count')
+                .first();
+            prevParticipants = await knex('registrations')
+                .whereIn('participant_id', pIds)
+                .whereNotNull('registration_created_at')
+                .where('registration_created_at', '>=', previousMonthStart)
+                .where('registration_created_at', '<', currentMonthStart)
+                .countDistinct('participant_id as count')
+                .first();
+        }
+        const participantsTrend = calculateTrend(parseInt(currentParticipants.count || 0), parseInt(prevParticipants.count || 0));
+
+        // Donations Trend
+        // Business Logic: Compare current month donations vs previous month
+        // Only count donations with valid dates (not null, not in the future)
+        // Use nowDate (already defined above) instead of creating a new Date()
+        let currentDonationsQuery = knex('donations')
+            .whereNotNull('donation_date')
+            .where('donation_date', '>=', currentMonthStart)
+            .where('donation_date', '<=', nowDate); // Don't include future dates
+        let prevDonationsQuery = knex('donations')
+            .whereNotNull('donation_date')
+            .where('donation_date', '>=', previousMonthStart)
+            .where('donation_date', '<', currentMonthStart); // Previous month only
+        
+        // Apply participant filter if filters are active
+        if (pIds.length > 0) {
+            currentDonationsQuery = currentDonationsQuery.whereIn('participant_id', pIds);
+            prevDonationsQuery = prevDonationsQuery.whereIn('participant_id', pIds);
+        }
+        
+        const currentDonations = await currentDonationsQuery.sum('donation_amount as total').first();
+        const prevDonations = await prevDonationsQuery.sum('donation_amount as total').first();
+        
+        // Debug: Log donation trend data
+        console.log('Donation Trends:', {
+            currentMonth: currentMonthStart.toISOString(),
+            currentTotal: currentDonations && currentDonations.total ? parseFloat(currentDonations.total) : 0,
+            previousMonth: previousMonthStart.toISOString(),
+            previousTotal: prevDonations && prevDonations.total ? parseFloat(prevDonations.total) : 0
+        });
+        
+        const donationsTrend = calculateTrend(
+            parseFloat(currentDonations && currentDonations.total ? currentDonations.total : 0), 
+            parseFloat(prevDonations && prevDonations.total ? prevDonations.total : 0)
+        );
+
+        // Satisfaction Trend (using survey_submission_date)
+        let currentSatisfaction = { avg: null };
+        let prevSatisfaction = { avg: null };
+        if (rIds.length > 0) {
+            currentSatisfaction = await knex('surveys')
+                .whereIn('registration_id', rIds)
+                .whereNotNull('survey_submission_date')
+                .where('survey_submission_date', '>=', currentMonthStart)
+                .avg('survey_satisfaction_score as avg')
+                .first();
+            prevSatisfaction = await knex('surveys')
+                .whereIn('registration_id', rIds)
+                .whereNotNull('survey_submission_date')
+                .where('survey_submission_date', '>=', previousMonthStart)
+                .where('survey_submission_date', '<', currentMonthStart)
+                .avg('survey_satisfaction_score as avg')
+                .first();
+        }
+        const satisfactionTrend = calculateTrend(
+            parseFloat(currentSatisfaction.avg || 0), 
+            parseFloat(prevSatisfaction.avg || 0)
+        );
+
+        // Milestones Trend
+        let currentMilestones = { count: 0 };
+        let prevMilestones = { count: 0 };
+        if (pIds.length > 0) {
+            currentMilestones = await knex('milestones')
+                .whereIn('participant_id', pIds)
+                .whereNotNull('milestone_date')
+                .where('milestone_date', '>=', currentMonthStart)
+                .count('milestone_id as count')
+                .first();
+            prevMilestones = await knex('milestones')
+                .whereIn('participant_id', pIds)
+                .whereNotNull('milestone_date')
+                .where('milestone_date', '>=', previousMonthStart)
+                .where('milestone_date', '<', currentMonthStart)
+                .count('milestone_id as count')
+                .first();
+        }
+        const milestonesTrend = calculateTrend(parseInt(currentMilestones.count || 0), parseInt(prevMilestones.count || 0));
 
         // 3. Charts Data
         const satisfactionByType = await knex('surveys')
@@ -149,6 +334,135 @@ exports.getDashboard = async (req, res) => {
         const cityCounts = cityDistribution.map(c => parseInt(c.count));
         const attendanceData = impactData;
 
+        // Event Attendance Over Time (Last 6 Months)
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        let attendanceOverTime = [];
+        if (rIds.length > 0) {
+            attendanceOverTime = await knex('registrations')
+                .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+                .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
+                .whereIn('registrations.registration_id', rIds)
+                .select(
+                    knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
+                    knex.raw("COUNT(*) as count")
+                )
+                .groupBy('month')
+                .orderBy('month', 'asc');
+        }
+
+        // Satisfaction Trends Over Time (Last 6 Months)
+        let satisfactionOverTime = [];
+        if (rIds.length > 0) {
+            satisfactionOverTime = await knex('surveys')
+                .join('registrations', 'surveys.registration_id', 'registrations.registration_id')
+                .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+                .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
+                .whereIn('surveys.registration_id', rIds)
+                .select(
+                    knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
+                    knex.raw("AVG(survey_satisfaction_score) as avg_score")
+                )
+                .groupBy('month')
+                .orderBy('month', 'asc');
+        }
+
+        // Donation Trends Over Time (Last 6 Months)
+        // Business Logic: Show donation trends for the last 6 months from actual database data
+        // Only include donations with valid dates (not null, not in the future)
+        // Use nowDate (already defined above) instead of creating a new Date()
+        let donationOverTimeQuery = knex('donations')
+            .whereNotNull('donation_date')
+            .where('donation_date', '>=', sixMonthsAgo)
+            .where('donation_date', '<=', nowDate); // Don't include future dates
+        
+        // Apply participant filter if filters are active
+        if (pIds.length > 0) {
+            donationOverTimeQuery = donationOverTimeQuery.whereIn('participant_id', pIds);
+        }
+        
+        const donationOverTimeRaw = await donationOverTimeQuery
+            .select(
+                knex.raw("DATE_TRUNC('month', donation_date) as month"),
+                knex.raw("SUM(donation_amount) as total")
+            )
+            .groupBy('month')
+            .orderBy('month', 'asc');
+        
+        // Filter out any future dates and ensure data is valid
+        // Also ensure we only include months that actually have donations
+        const donationOverTime = donationOverTimeRaw.filter(item => {
+            if (!item.month) return false;
+            const monthDate = new Date(item.month);
+            // Only include months that are not in the future and have valid totals
+            return monthDate <= nowDate && item.total && parseFloat(item.total) > 0;
+        });
+        
+        // Debug: Log donation over time data
+        console.log('Donation Over Time (Last 6 Months):', {
+            sixMonthsAgo: sixMonthsAgo.toISOString(),
+            now: nowDate.toISOString(),
+            rawCount: donationOverTimeRaw.length,
+            filteredCount: donationOverTime.length,
+            months: donationOverTime.map(d => ({
+                month: d.month ? new Date(d.month).toISOString() : null,
+                total: parseFloat(d.total || 0)
+            }))
+        });
+
+        // Recent Activity (Last 10 Registrations)
+        let recentActivity = [];
+        if (rIds.length > 0) {
+            recentActivity = await knex('registrations')
+                .join('participants', 'registrations.participant_id', 'participants.participant_id')
+                .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+                .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
+                .whereIn('registrations.registration_id', rIds)
+                .select(
+                    'registrations.registration_id',
+                    'participants.participant_first_name',
+                    'participants.participant_last_name',
+                    'event_definitions.event_name',
+                    'event_instances.event_date_time_start',
+                    'registrations.registration_status',
+                    'registrations.registration_created_at'
+                )
+                .orderBy('registrations.registration_created_at', 'desc')
+                .limit(10);
+        }
+
+        // Top Performers (Top 5 by Milestone Count)
+        let topPerformers = [];
+        if (pIds.length > 0) {
+            topPerformers = await knex('participants')
+                .leftJoin('milestones', 'participants.participant_id', 'milestones.participant_id')
+                .whereIn('participants.participant_id', pIds)
+                .select(
+                    'participants.participant_id',
+                    'participants.participant_first_name',
+                    'participants.participant_last_name',
+                    knex.raw('COUNT(milestones.milestone_id) as milestone_count')
+                )
+                .groupBy('participants.participant_id', 'participants.participant_first_name', 'participants.participant_last_name')
+                .orderBy('milestone_count', 'desc')
+                .limit(5);
+        }
+
+        // Upcoming Events (Next 5)
+        // Use nowDate for consistency (defined earlier in trends section)
+        const upcomingEvents = await knex('event_instances')
+            .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
+            .where('event_instances.event_date_time_start', '>', nowDate)
+            .select(
+                'event_instances.event_instance_id',
+                'event_definitions.event_name',
+                'event_definitions.event_type',
+                'event_instances.event_date_time_start',
+                'event_instances.event_location'
+            )
+            .orderBy('event_instances.event_date_time_start', 'asc')
+            .limit(5);
+
         res.render('admin/dashboard', {
             user: req.user,
             kpis: {
@@ -158,8 +472,15 @@ exports.getDashboard = async (req, res) => {
                 totalDonations,
                 npsScore,
                 attendanceCount,
-                steamEducationRate: 0,
-                steamJobRate: 0
+                totalEvents,
+                attendanceRate,
+                activeRegistrations,
+                trends: {
+                    participants: participantsTrend,
+                    donations: donationsTrend,
+                    satisfaction: satisfactionTrend,
+                    milestones: milestonesTrend
+                }
             },
             // Pass specific chart variables as requested
             cityLabels,
@@ -171,7 +492,13 @@ exports.getDashboard = async (req, res) => {
                 impact: impactData
             },
             filters: { eventType, city, role },
-            options: { cities, roles, eventTypes }
+            options: { cities, roles, eventTypes },
+            attendanceOverTime,
+            satisfactionOverTime,
+            donationOverTime,
+            recentActivity,
+            topPerformers,
+            upcomingEvents
         });
     } catch (err) {
         console.error('Dashboard Error:', err);
@@ -509,7 +836,9 @@ exports.listSurveys = async (req, res) => {
                 'participants.participant_first_name',
                 'participants.participant_last_name',
                 'surveys.survey_satisfaction_score',
+                'surveys.survey_overall_score',
                 'surveys.survey_nps_bucket',
+                'surveys.survey_recommendation_score',
                 'surveys.survey_submission_date',
                 'surveys.survey_comments'
             )
@@ -534,20 +863,86 @@ exports.listSurveys = async (req, res) => {
             query = query.where('event_definitions.event_definition_id', eventFilter);
         }
 
-        // Score Filter: NPS-based filtering (Detractors vs Promoters)
+        // Score Filter: NPS-based filtering (Detractors, Passives, Promoters)
         // Business Logic: This implements Net Promoter Score segmentation.
-        // Detractors (0-6): Participants who are unlikely to recommend the program
-        // Promoters (9-10): Participants who are highly likely to recommend
-        // This helps managers identify program strengths and areas needing improvement
+        // IMPORTANT: Survey uses 0-5 scale, not 0-10
+        // Detractors (0-2): Participants who are unlikely to recommend the program
+        // Passives (3): Participants who are neutral
+        // Promoters (4-5): Participants who are highly likely to recommend
+        // Filter by survey_nps_bucket column for consistency with displayed values
+        // Use case-insensitive matching to handle any case variations
         if (scoreFilter === 'detractors') {
-            query = query.where('surveys.survey_satisfaction_score', '>=', 0)
-                .where('surveys.survey_satisfaction_score', '<=', 6);
+            query = query.where(function() {
+                this.where(knex.raw("LOWER(TRIM(surveys.survey_nps_bucket))"), '=', 'detractor')
+                    .orWhere(function() {
+                        // Fallback: calculate from score if bucket is null
+                        this.whereNull('surveys.survey_nps_bucket')
+                            .whereNotNull('surveys.survey_recommendation_score')
+                            .where('surveys.survey_recommendation_score', '>=', 0)
+                            .where('surveys.survey_recommendation_score', '<=', 2);
+                    });
+            });
+        } else if (scoreFilter === 'passives') {
+            query = query.where(function() {
+                this.where(knex.raw("LOWER(TRIM(surveys.survey_nps_bucket))"), '=', 'passive')
+                    .orWhere(function() {
+                        // Fallback: calculate from score if bucket is null
+                        this.whereNull('surveys.survey_nps_bucket')
+                            .whereNotNull('surveys.survey_recommendation_score')
+                            .where('surveys.survey_recommendation_score', '=', 3);
+                    });
+            });
         } else if (scoreFilter === 'promoters') {
-            query = query.where('surveys.survey_satisfaction_score', '>=', 9)
-                .where('surveys.survey_satisfaction_score', '<=', 10);
+            query = query.where(function() {
+                this.where(knex.raw("LOWER(TRIM(surveys.survey_nps_bucket))"), '=', 'promoter')
+                    .orWhere(function() {
+                        // Fallback: calculate from score if bucket is null
+                        this.whereNull('surveys.survey_nps_bucket')
+                            .whereNotNull('surveys.survey_recommendation_score')
+                            .where('surveys.survey_recommendation_score', '>=', 4)
+                            .where('surveys.survey_recommendation_score', '<=', 5);
+                    });
+            });
         }
 
-        const surveys = await query;
+        let surveysRaw = await query;
+
+        // Backfill and correct NPS buckets for surveys
+        // This ensures consistency between the bucket column and recommendation scores
+        // Process surveys and update missing or incorrect buckets in the database
+        for (let survey of surveysRaw) {
+            if (survey.survey_recommendation_score !== null) {
+                const recScore = parseFloat(survey.survey_recommendation_score);
+                let correctBucket = null;
+                if (!isNaN(recScore)) {
+                    if (recScore >= 4 && recScore <= 5) {
+                        correctBucket = 'Promoter';
+                    } else if (recScore === 3) {
+                        correctBucket = 'Passive';
+                    } else if (recScore >= 0 && recScore <= 2) {
+                        correctBucket = 'Detractor';
+                    }
+                }
+                
+                // Update the database if bucket is missing or incorrect
+                const currentBucket = survey.survey_nps_bucket ? survey.survey_nps_bucket.trim() : null;
+                if (correctBucket && currentBucket !== correctBucket) {
+                    try {
+                        await knex('surveys')
+                            .where('survey_id', survey.survey_id)
+                            .update({ survey_nps_bucket: correctBucket });
+                        survey.survey_nps_bucket = correctBucket; // Update the object for display
+                    } catch (err) {
+                        console.error('Error updating survey bucket:', err);
+                    }
+                } else if (correctBucket && !currentBucket) {
+                    // Bucket is missing, add it
+                    survey.survey_nps_bucket = correctBucket;
+                }
+            }
+        }
+        
+        const surveys = surveysRaw;
 
         // Fetch event definitions for dropdown
         const eventDefinitions = await knex('event_definitions')

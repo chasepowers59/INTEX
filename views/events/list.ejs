@@ -1,29 +1,30 @@
 <%- include('../partials/header', { user: user }) %>
 
-    <!-- Hero / Title Section -->
-    <div class="section-header-blue">
-        <div class="brush-border-top"></div>
+    <style>
+        body {
+            background-color: var(--col-cream);
+        }
+    </style>
+
+    <!-- Banner Section with Wavy Edge -->
+    <div class="wavy-banner">
         <h2>UPCOMING EVENTS</h2>
-        <div class="brush-border-bottom"></div>
     </div>
 
-    <div class="container" style="padding: 4rem 0;">
-        <!-- Search & Filter Bar -->
-        <div class="card"
-            style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <form action="/events" method="GET" style="display: flex; gap: 1rem; flex: 1;">
-                <input type="text" name="search" class="form-control" placeholder="Search events..."
-                    value="<%= search %>">
-                <button type="submit" class="btn">Search</button>
+    <div class="container" style="padding: 2rem 0 4rem 0; max-width: 1200px;">
+        <!-- Search & Filter Card -->
+        <div class="events-search-card">
+            <form action="/events" method="GET" class="events-search-row">
+                <input type="text" name="search" class="events-search-input" placeholder="Search events..." value="<%= search || '' %>">
+                <button type="submit" class="events-search-btn">Search</button>
             </form>
 
             <% if (user && user.role==='Manager' ) { %>
-                <div style="display: flex; gap: 1rem;">
-                    <a href="/events/definitions/add" class="btn" style="background-color: var(--col-purple);">New
-                        Definition</a>
-                    <a href="/events/add" class="btn" style="background-color: var(--col-green);">Schedule Event</a>
+                <div class="events-action-buttons">
+                    <a href="/events/definitions/add" class="events-action-btn events-action-btn-purple">New Definition</a>
+                    <a href="/events/add" class="events-action-btn events-action-btn-green">Schedule Event</a>
                 </div>
-                <% } %>
+            <% } %>
         </div>
 
         <!-- Events List -->
@@ -32,292 +33,226 @@
             const groupedEventsArray = groupedEvents ? Object.values(groupedEvents) : [];
         %>
         <% if (groupedEventsArray && groupedEventsArray.length > 0) { %>
-            <div style="display: flex; flex-direction: column; gap: 2rem;">
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
                 <% groupedEventsArray.forEach(function(group) { %>
-                    <div class="card event-card" style="padding: 0; overflow: hidden; border: none; box-shadow: var(--shadow-md);">
-                        <!-- Event Header (Clickable to expand) -->
-                        <div class="event-header" style="padding: 2rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: white;"
-                            data-event-id="<%= group.definition.event_name %>">
-                            <div>
-                                <h3 style="margin-bottom: 0.5rem; color: var(--col-blue);">
-                                    <%= group.definition.event_name %>
-                                </h3>
-                                <p style="color: var(--col-dark-pink); font-weight: 600; margin-bottom: 0.5rem;">
-                                    <%= group.definition.event_type %>
-                                        <% if (group.definition.event_recurrence_pattern) { %>
-                                            | <%= group.definition.event_recurrence_pattern %>
-                                                <% } %>
-                                </p>
-                                <p style="color: #666; margin-bottom: 1rem; max-width: 800px;">
-                                    <%= group.definition.event_description %>
-                                </p>
+                    <div class="event-card-simple">
+                        <div class="event-card-content">
+                            <h3 class="event-card-title">
+                                <%= group.definition.event_name %>
+                            </h3>
+                            <div class="event-card-meta">
+                                <%= group.definition.event_type %>
+                                <% if (group.definition.event_recurrence_pattern) { %>
+                                    | <%= group.definition.event_recurrence_pattern %>
+                                <% } %>
                             </div>
-                            <button class="btn btn-toggle"
-                                style="background-color: var(--col-light-pink); color: var(--col-blue);">
+                            <p class="event-card-description">
+                                <%= group.definition.event_description || 'Join us for this exciting event!' %>
+                            </p>
+                        </div>
+                        <div class="event-card-action">
+                            <button class="event-register-btn btn-toggle" data-event-id="<%= group.definition.event_name %>">
                                 Select Date to Register (<%= group.instances.length %>)
                             </button>
                         </div>
+                    </div>
 
-                        <!-- Collapsible Instances List -->
-                        <div class="instances-list"
-                            style="display: none; background: #f9f9f9; padding: 1rem 2rem; max-height: 500px; overflow-y: auto;">
-                            <p
-                                style="margin-bottom: 1rem; color: var(--col-blue); font-weight: bold; text-align: center;">
-                                👇 Choose a specific date below to register:</p>
-                            <div class="grid-3" style="gap: 1rem;">
-                                        <% group.instances.forEach(function(event) { %>
-                                    <div
-                                        style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid #ddd;">
-                                        <div style="margin-bottom: 0.5rem; font-weight: bold; color: var(--col-blue);">
-                                            <%= event.event_date_time_start ? new Date(event.event_date_time_start).toLocaleDateString('en-US', {
-                                                weekday: 'short' , month: 'short' , day: 'numeric' }) : 'TBD' %>
-                                        </div>
-                                        <div style="margin-bottom: 0.5rem; font-size: 0.9rem;">
-                                            <%= event.event_date_time_start ? new Date(event.event_date_time_start).toLocaleTimeString('en-US', {
-                                                hour: 'numeric' , minute: '2-digit' }) : 'TBD' %>
-                                                -
-                                                <%= event.event_date_time_end ? new Date(event.event_date_time_end).toLocaleTimeString('en-US', {
-                                                    hour: 'numeric' , minute: '2-digit' }) : 'TBD' %>
-                                        </div>
-                                        <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
-                                            📍 <%= event.event_location %> <br>
-                                                👥 <%= event.event_capacity %> spots
-                                        </div>
+                    <!-- Collapsible Instances List -->
+                    <div class="instances-list" data-event-id="<%= group.definition.event_name %>"
+                        style="display: none; background: white; border-radius: var(--radius-card); padding: 2rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-soft);">
+                        <p style="margin-bottom: 1.5rem; color: var(--col-blue); font-weight: 600; text-align: center; font-family: 'Montserrat', sans-serif;">
+                            👇 Choose a specific date below to register:
+                        </p>
+                        <div class="grid-3" style="gap: 1rem;">
+                            <% group.instances.forEach(function(event) { %>
+                                <div style="background: var(--col-cream); padding: 1.5rem; border-radius: 15px; border: 1px solid rgba(148, 170, 185, 0.2);">
+                                    <div style="margin-bottom: 0.75rem; font-weight: 600; color: var(--col-blue); font-family: 'Montserrat', sans-serif; font-size: 1rem;">
+                                        <%= event.event_date_time_start ? new Date(event.event_date_time_start).toLocaleDateString('en-US', {
+                                            weekday: 'short', month: 'short', day: 'numeric' }) : 'TBD' %>
+                                    </div>
+                                    <div style="margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--text-light); font-family: 'Montserrat', sans-serif;">
+                                        <%= event.event_date_time_start ? new Date(event.event_date_time_start).toLocaleTimeString('en-US', {
+                                            hour: 'numeric', minute: '2-digit' }) : 'TBD' %>
+                                        -
+                                        <%= event.event_date_time_end ? new Date(event.event_date_time_end).toLocaleTimeString('en-US', {
+                                            hour: 'numeric', minute: '2-digit' }) : 'TBD' %>
+                                    </div>
+                                    <div style="margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-light); font-family: 'Montserrat', sans-serif;">
+                                        📍 <%= event.event_location || 'TBD' %> <br>
+                                        👥 <%= event.event_capacity || 'Unlimited' %> spots
+                                    </div>
 
-                                        <% 
-                                            // Business Logic: Determine what action buttons to show
-                                            const now = new Date();
-                                            // Parse event date - handle both Date objects and strings from PostgreSQL
-                                            let eventDate = null;
-                                            if (event.event_date_time_start) {
-                                                try {
-                                                    // If it's already a Date object (from Knex), use it directly
-                                                    // Otherwise, parse it as a string
-                                                    if (event.event_date_time_start instanceof Date) {
-                                                        eventDate = event.event_date_time_start;
-                                                    } else {
-                                                        // Parse the date string - handle ISO format from PostgreSQL
-                                                        eventDate = new Date(event.event_date_time_start);
-                                                    }
-                                                    // Validate the date was parsed correctly
-                                                    if (isNaN(eventDate.getTime())) {
-                                                        eventDate = null;
-                                                    }
-                                                } catch (e) {
+                                    <% 
+                                        // Business Logic: Determine what action buttons to show
+                                        const now = new Date();
+                                        let eventDate = null;
+                                        if (event.event_date_time_start) {
+                                            try {
+                                                if (event.event_date_time_start instanceof Date) {
+                                                    eventDate = event.event_date_time_start;
+                                                } else {
+                                                    eventDate = new Date(event.event_date_time_start);
+                                                }
+                                                if (isNaN(eventDate.getTime())) {
                                                     eventDate = null;
                                                 }
+                                            } catch (e) {
+                                                eventDate = null;
                                             }
-                                            // Compare dates: if event date is less than now, it's in the past
-                                            // If event date is greater than or equal to now, it's in the future
-                                            // Use direct timestamp comparison for reliability
-                                            const eventTime = eventDate ? eventDate.getTime() : 0;
-                                            const nowTime = now.getTime();
-                                            const isPastEvent = eventDate && !isNaN(eventTime) && eventTime < nowTime;
-                                            const registrationId = userRegistrations && userRegistrations[event.event_instance_id] ? userRegistrations[event.event_instance_id] : null;
-                                            const hasSurvey = registrationId && userSurveys && userSurveys[registrationId];
-                                            const isRegistered = !!registrationId;
-                                        %>
-                                        
-                                        <% if (user) { %>
-                                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                                                <% if (user.role==='Manager' ) { %>
-                                                    <!-- Manager Actions: Always show Edit/Delete -->
-                                                    <div style="display: flex; gap: 0.5rem;">
-                                                        <a href="/events/edit/<%= event.event_instance_id %>" class="btn"
-                                                            style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">Edit</a>
-                                                        <form action="/events/delete/<%= event.event_instance_id %>"
-                                                            method="POST" class="delete-event-form"
-                                                            style="display: inline;">
-                                                            <button type="submit" class="btn delete-event-btn"
-                                                                style="padding: 0.3rem 0.8rem; font-size: 0.8rem; background-color: #dc3545;">Del</button>
-                                                        </form>
+                                        }
+                                        const eventTime = eventDate ? eventDate.getTime() : 0;
+                                        const nowTime = now.getTime();
+                                        const isPastEvent = eventDate && !isNaN(eventTime) && eventTime < nowTime;
+                                        const registrationId = userRegistrations && userRegistrations[event.event_instance_id] ? userRegistrations[event.event_instance_id] : null;
+                                        const hasSurvey = registrationId && userSurveys && userSurveys[registrationId];
+                                        const isRegistered = !!registrationId;
+                                    %>
+                                    
+                                    <% if (user) { %>
+                                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                            <% if (user.role==='Manager' ) { %>
+                                                <!-- Manager Actions: Always show Edit/Delete -->
+                                                <div style="display: flex; gap: 0.5rem;">
+                                                    <a href="/events/edit/<%= event.event_instance_id %>" class="btn"
+                                                        style="padding: 0.4rem 0.8rem; font-size: 0.85rem; flex: 1; text-align: center; text-decoration: none;">Edit</a>
+                                                    <form action="/events/delete/<%= event.event_instance_id %>"
+                                                        method="POST" class="delete-event-form"
+                                                        style="display: inline; flex: 1;">
+                                                        <button type="submit" class="btn delete-event-btn"
+                                                            style="padding: 0.4rem 0.8rem; font-size: 0.85rem; width: 100%; background-color: #dc3545; color: white; border: none;">Del</button>
+                                                    </form>
+                                                </div>
+                                                <% if (isPastEvent && isRegistered && !hasSurvey) { %>
+                                                    <a href="/surveys/new/<%= registrationId %>" class="btn"
+                                                        style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background-color: var(--col-blue); color: white; text-align: center; text-decoration: none;">
+                                                        Submit Survey
+                                                    </a>
+                                                <% } else if (isPastEvent && isRegistered && hasSurvey) { %>
+                                                    <div style="padding: 0.5rem; font-size: 0.85rem; color: #666; text-align: center; background: #f0f0f0; border-radius: 4px;">
+                                                        Survey Submitted ✓
                                                     </div>
-                                                    <% if (isPastEvent && isRegistered && !hasSurvey) { %>
-                                                        <!-- Manager can also submit surveys for past events -->
+                                                <% } else if (isPastEvent) { %>
+                                                    <div style="padding: 0.5rem; font-size: 0.85rem; color: #666; text-align: center; background: #f0f0f0; border-radius: 4px;">
+                                                        Event Passed
+                                                    </div>
+                                                <% } else { %>
+                                                    <% if (!isRegistered) { %>
+                                                        <form action="/events/register/<%= event.event_instance_id %>" method="POST">
+                                                            <button type="submit" class="btn"
+                                                                style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background-color: var(--col-green); color: white; border: none;">
+                                                                Register for This Date
+                                                            </button>
+                                                        </form>
+                                                    <% } else { %>
+                                                        <div style="padding: 0.5rem; font-size: 0.85rem; color: var(--col-blue); text-align: center; background: #e8f4f8; border-radius: 4px; font-weight: 600;">
+                                                            Registered ✓
+                                                        </div>
+                                                    <% } %>
+                                                <% } %>
+                                            <% } else { %>
+                                                <!-- Common User Actions -->
+                                                <% if (isPastEvent) { %>
+                                                    <% if (isRegistered && !hasSurvey) { %>
                                                         <a href="/surveys/new/<%= registrationId %>" class="btn"
-                                                            style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background-color: var(--col-blue); color: white;">
+                                                            style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background-color: var(--col-blue); color: white; text-align: center; text-decoration: none;">
                                                             Submit Survey
                                                         </a>
-                                                    <% } else if (isPastEvent && isRegistered && hasSurvey) { %>
+                                                    <% } else if (isRegistered && hasSurvey) { %>
                                                         <div style="padding: 0.5rem; font-size: 0.85rem; color: #666; text-align: center; background: #f0f0f0; border-radius: 4px;">
                                                             Survey Submitted ✓
                                                         </div>
-                                                    <% } else if (isPastEvent) { %>
+                                                    <% } else { %>
                                                         <div style="padding: 0.5rem; font-size: 0.85rem; color: #666; text-align: center; background: #f0f0f0; border-radius: 4px;">
                                                             Event Passed
                                                         </div>
                                                     <% } %>
                                                 <% } else { %>
-                                                    <!-- Common User Actions -->
-                                                    <% if (isPastEvent) { %>
-                                                        <!-- Past Event: Show survey button if registered and no survey, otherwise show status -->
-                                                        <% if (isRegistered && !hasSurvey) { %>
-                                                            <a href="/surveys/new/<%= registrationId %>" class="btn"
-                                                                style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background-color: var(--col-blue); color: white;">
-                                                                Submit Survey
-                                                            </a>
-                                                        <% } else if (isRegistered && hasSurvey) { %>
-                                                            <div style="padding: 0.5rem; font-size: 0.85rem; color: #666; text-align: center; background: #f0f0f0; border-radius: 4px;">
-                                                                Survey Submitted ✓
-                                                            </div>
-                                                        <% } else { %>
-                                                            <div style="padding: 0.5rem; font-size: 0.85rem; color: #666; text-align: center; background: #f0f0f0; border-radius: 4px;">
-                                                                Event Passed
-                                                            </div>
-                                                        <% } %>
+                                                    <% if (!isRegistered) { %>
+                                                        <form action="/events/register/<%= event.event_instance_id %>" method="POST">
+                                                            <button type="submit" class="btn"
+                                                                style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background-color: var(--col-green); color: white; border: none;">
+                                                                Register for This Date
+                                                            </button>
+                                                        </form>
                                                     <% } else { %>
-                                                        <!-- Future Event: Show register button if not already registered -->
-                                                        <% if (!isRegistered) { %>
-                                                            <form action="/events/register/<%= event.event_instance_id %>"
-                                                                method="POST">
-                                                                <button type="submit" class="btn"
-                                                                    style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background-color: var(--col-green);">Register
-                                                                    for This Date</button>
-                                                            </form>
-                                                        <% } else { %>
-                                                            <div style="padding: 0.5rem; font-size: 0.85rem; color: var(--col-blue); text-align: center; background: #e8f4f8; border-radius: 4px; font-weight: 600;">
-                                                                Registered ✓
-                                                            </div>
-                                                        <% } %>
+                                                        <div style="padding: 0.5rem; font-size: 0.85rem; color: var(--col-blue); text-align: center; background: #e8f4f8; border-radius: 4px; font-weight: 600;">
+                                                            Registered ✓
+                                                        </div>
                                                     <% } %>
                                                 <% } %>
+                                            <% } %>
+                                        </div>
+                                    <% } else { %>
+                                        <!-- Visitor Actions: Prompt to create account for future events -->
+                                        <% if (isPastEvent) { %>
+                                            <div style="padding: 0.5rem; font-size: 0.85rem; color: #666; text-align: center; background: #f0f0f0; border-radius: 4px;">
+                                                Event Passed
                                             </div>
                                         <% } else { %>
-                                            <!-- Visitor Actions: Only show register for future events -->
-                                            <% if (isPastEvent) { %>
-                                                <div style="padding: 0.5rem; font-size: 0.85rem; color: #666; text-align: center; background: #f0f0f0; border-radius: 4px;">
-                                                    Event Passed
-                                                </div>
-                                            <% } else { %>
-                                                <button class="btn open-register-modal-btn"
-                                                    data-event-id="<%= event.event_instance_id %>"
-                                                    data-event-name="<%= event.event_name %>"
-                                                    style="width: 100%; padding: 0.5rem; font-size: 0.9rem;">Register</button>
-                                            <% } %>
+                                            <a href="/auth/register" class="btn"
+                                                style="width: 100%; padding: 0.5rem; font-size: 0.9rem; background-color: var(--col-green); text-align: center; text-decoration: none; display: block; color: white;">
+                                                Create Account to Register
+                                            </a>
                                         <% } %>
-                                    </div>
-                                    <% }); %>
-                            </div>
+                                    <% } %>
+                                </div>
+                            <% }); %>
                         </div>
                     </div>
-                    <% }); %>
+                <% }); %>
             </div>
-            <% } else { %>
-                <div class="text-center">
-                    <p>No events found.</p>
-                </div>
-                <% } %>
+        <% } else { %>
+            <div class="text-center" style="padding: 4rem 0;">
+                <p style="font-size: 1.2rem; color: var(--text-light); font-family: 'Montserrat', sans-serif;">No events found.</p>
+            </div>
+        <% } %>
+    </div>
 
-                    <!-- Registration Modal for Visitors -->
-                    <div id="registerModal"
-                        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
-                        <div
-                            style="background: white; padding: 2rem; border-radius: 20px; max-width: 500px; width: 90%; position: relative;">
-                            <span class="close-modal-btn"
-                                style="position: absolute; top: 1rem; right: 1.5rem; font-size: 1.5rem; cursor: pointer;">&times;</span>
-                            <h2 style="margin-bottom: 1rem; color: var(--col-blue);">Register for Event</h2>
-                            <p style="margin-bottom: 1.5rem; color: #666;" id="modalEventName">Please provide your information to register.</p>
-                            <form action="/events/register-visitor" method="POST" id="visitorRegistrationForm">
-                                <input type="hidden" name="event_instance_id" id="modalEventId" value="">
-                                <div class="form-group" style="margin-bottom: 1rem;">
-                                    <label style="display: block; margin-bottom: 0.5rem; color: var(--col-blue); font-weight: 600;">First Name</label>
-                                    <input type="text" name="first_name" class="form-control" placeholder="Your First Name" required>
-                                </div>
-                                <div class="form-group" style="margin-bottom: 1rem;">
-                                    <label style="display: block; margin-bottom: 0.5rem; color: var(--col-blue); font-weight: 600;">Last Name</label>
-                                    <input type="text" name="last_name" class="form-control" placeholder="Your Last Name" required>
-                                </div>
-                                <div class="form-group" style="margin-bottom: 1.5rem;">
-                                    <label style="display: block; margin-bottom: 0.5rem; color: var(--col-blue); font-weight: 600;">Email</label>
-                                    <input type="email" name="email" class="form-control" placeholder="your@email.com" required>
-                                </div>
-                                <button type="submit" class="btn" style="width: 100%; background-color: var(--col-green);">Confirm Registration</button>
-                            </form>
-                        </div>
-                    </div>
+    <script>
+        // Event Delegation: Handle all event interactions without inline handlers
+        document.addEventListener('DOMContentLoaded', function () {
+            // Toggle event instances when clicking register button
+            document.addEventListener('click', function(e) {
+                const registerBtn = e.target.closest('.btn-toggle');
+                if (registerBtn) {
+                    e.preventDefault();
+                    const eventId = registerBtn.getAttribute('data-event-id');
+                    const instancesList = document.querySelector(`.instances-list[data-event-id="${eventId}"]`);
+                    
+                    if (instancesList) {
+                        if (instancesList.style.display === 'none' || !instancesList.style.display) {
+                            instancesList.style.display = 'block';
+                            registerBtn.textContent = 'Hide Dates';
+                        } else {
+                            instancesList.style.display = 'none';
+                            const count = instancesList.querySelectorAll('.grid-3 > div').length;
+                            registerBtn.textContent = `Select Date to Register (${count})`;
+                        }
+                    }
+                }
+            });
 
-                    <script>
-                        // Event Delegation: Handle all event interactions without inline handlers
-                        document.addEventListener('DOMContentLoaded', function () {
-                            // Toggle event instances when clicking event header or button
-                            document.addEventListener('click', function(e) {
-                                const eventHeader = e.target.closest('.event-header');
-                                if (eventHeader) {
-                                    e.preventDefault();
-                                    const card = eventHeader.closest('.event-card');
-                                    const list = card.querySelector('.instances-list');
-                                    const btn = card.querySelector('button.btn-toggle');
+            // Delete event confirmation (without inline onsubmit)
+            document.addEventListener('submit', function(e) {
+                if (e.target && e.target.classList.contains('delete-event-form')) {
+                    if (!confirm('Are you sure you want to delete this event?')) {
+                        e.preventDefault();
+                    }
+                }
+            });
 
-                                    if (list) {
-                                        if (list.style.display === 'none' || !list.style.display) {
-                                            list.style.display = 'block';
-                                            if (btn) btn.textContent = 'Hide Dates';
-                                        } else {
-                                            list.style.display = 'none';
-                                            const count = list.querySelectorAll('.grid-3 > div').length;
-                                            if (btn) btn.textContent = `Select Date to Register (${count})`;
-                                        }
-                                    }
-                                }
-                            });
+            // Auto-expand if searching
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('search') || urlParams.has('eventType')) {
+                const lists = document.querySelectorAll('.instances-list');
+                const btns = document.querySelectorAll('.btn-toggle');
 
-                            // Delete event confirmation (without inline onsubmit)
-                            document.addEventListener('submit', function(e) {
-                                // Check if the form being submitted is a delete form
-                                if (e.target && e.target.classList.contains('delete-event-form')) {
-                                    if (!confirm('Are you sure you want to delete this event?')) {
-                                        e.preventDefault();
-                                    }
-                                }
-                            });
+                lists.forEach(list => list.style.display = 'block');
+                btns.forEach(btn => {
+                    btn.textContent = 'Hide Dates';
+                });
+            }
+        });
+    </script>
 
-                            // Open register modal for visitors
-                            document.addEventListener('click', function(e) {
-                                const btn = e.target.closest('.open-register-modal-btn');
-                                if (btn) {
-                                    e.preventDefault();
-                                    const eventId = btn.getAttribute('data-event-id');
-                                    const eventName = btn.getAttribute('data-event-name');
-                                    const modal = document.getElementById('registerModal');
-                                    if (modal) {
-                                        // Populate modal with event information
-                                        document.getElementById('modalEventId').value = eventId || '';
-                                        document.getElementById('modalEventName').textContent = eventName ? `Register for: ${eventName}` : 'Please provide your information to register.';
-                                        modal.style.display = 'flex';
-                                    }
-                                }
-                            });
-
-                            // Close modal when clicking close button
-                            document.addEventListener('click', function(e) {
-                                if (e.target.classList.contains('close-modal-btn')) {
-                                    const modal = document.getElementById('registerModal');
-                                    if (modal) {
-                                        modal.style.display = 'none';
-                                    }
-                                }
-                            });
-
-                            // Close modal when clicking outside
-                            window.addEventListener('click', function (event) {
-                                const modal = document.getElementById('registerModal');
-                                if (event.target == modal) {
-                                    modal.style.display = "none";
-                                }
-                            });
-
-                            // Auto-expand if searching
-                            const urlParams = new URLSearchParams(window.location.search);
-                            if (urlParams.has('search')) {
-                                const lists = document.querySelectorAll('.instances-list');
-                                const btns = document.querySelectorAll('.event-card button.btn-toggle');
-
-                                lists.forEach(list => list.style.display = 'block');
-                                btns.forEach(btn => {
-                                    btn.textContent = 'Hide Dates';
-                                });
-                            }
-                        });
-                    </script>
-
-                    <%- include('../partials/footer') %>
+    <%- include('../partials/footer') %>

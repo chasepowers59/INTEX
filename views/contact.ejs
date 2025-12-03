@@ -1,77 +1,484 @@
 <%- include('partials/header', { user: user }) %>
 
-    <div
-        style="background-color: var(--col-peach); min-height: 90vh; display: flex; align-items: center; justify-content: center; padding: 4rem 1rem; position: relative; overflow: hidden;">
-        
-        <!-- Blurred Background Image -->
-        <div style="position: absolute; inset: 0; background-image: url('/img/ER Summer Summit 2022-068.jpg'); background-size: cover; background-position: center; filter: blur(10px); opacity: 0.3; z-index: 0;"></div>
-        <div style="position: absolute; inset: 0; background: rgba(255, 209, 199, 0.7); z-index: 1;"></div>
+<style>
+    body {
+        background-color: var(--col-cream);
+    }
 
-        <div class="card shadow-soft"
-            style="background: white; padding: 3rem; width: 100%; max-width: 700px; border-radius: var(--radius-card); position: relative; z-index: 2; box-shadow: var(--shadow-hover);">
-            <div class="text-center mb-4">
-                <h1 style="color: var(--col-blue); font-size: 2.5rem; margin-bottom: 0.5rem; font-family: 'DM Serif Display', serif;">Get in Touch</h1>
-                <p style="color: var(--text-light);">We'd love to hear from you. Fill out the form below.</p>
+    /* Hero Banner with Wavy Edge */
+    .contact-hero {
+        background: linear-gradient(135deg, var(--col-blue) 0%, var(--col-purple) 100%);
+        padding: 5rem 0 6rem 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        color: white;
+    }
+
+    .contact-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        background: var(--col-cream);
+        clip-path: polygon(0 20%, 5% 15%, 10% 20%, 15% 15%, 20% 20%, 25% 15%, 30% 20%, 35% 15%, 40% 20%, 45% 15%, 50% 20%, 55% 15%, 60% 20%, 65% 15%, 70% 20%, 75% 15%, 80% 20%, 85% 15%, 90% 20%, 95% 15%, 100% 20%, 100% 100%, 0 100%);
+        z-index: 1;
+    }
+
+    .contact-hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .contact-hero h1 {
+        font-family: 'DM Serif Display', serif;
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        color: white;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .contact-hero p {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.95);
+        line-height: 1.6;
+    }
+
+    /* Main Container */
+    .contact-container {
+        padding: 4rem 0 6rem 0;
+    }
+
+    .contact-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    /* Split Layout */
+    .contact-layout {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 3rem;
+        margin-top: 3rem;
+    }
+
+    /* Contact Info Side */
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: var(--radius-card);
+        padding: 2rem;
+        box-shadow: var(--shadow-soft);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-left: 4px solid var(--col-blue);
+    }
+
+    .info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .info-card-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--col-blue), var(--col-purple));
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .info-card h3 {
+        font-family: 'DM Serif Display', serif;
+        font-size: 1.5rem;
+        color: var(--col-blue);
+        margin-bottom: 0.75rem;
+    }
+
+    .info-card p {
+        font-family: 'Montserrat', sans-serif;
+        color: var(--text-main);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .info-card a {
+        color: var(--col-blue);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+
+    .info-card a:hover {
+        color: var(--col-purple);
+        text-decoration: underline;
+    }
+
+    /* Form Side */
+    .contact-form-card {
+        background: white;
+        border-radius: var(--radius-card);
+        padding: 3rem;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .contact-form-card h2 {
+        font-family: 'DM Serif Display', serif;
+        font-size: 2rem;
+        color: var(--col-blue);
+        margin-bottom: 0.5rem;
+    }
+
+    .contact-form-card .subtitle {
+        font-family: 'Montserrat', sans-serif;
+        color: var(--text-light);
+        margin-bottom: 2rem;
+        font-size: 1rem;
+    }
+
+    /* Form Styling */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 600;
+        color: var(--col-dark-gray);
+        margin-bottom: 0.5rem;
+        display: block;
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1rem;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        background: white;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--col-blue);
+        box-shadow: 0 0 0 3px rgba(148, 170, 185, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: #999;
+    }
+
+    select.form-control {
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg fill=%2394AAB9 height=24 viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 3rem;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    /* Submit Button */
+    .submit-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .captcha-placeholder {
+        background: linear-gradient(135deg, #f9f9f9, #ffffff);
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        color: var(--text-light);
+        font-size: 0.9rem;
+        border: 2px dashed #ddd;
+        font-family: 'Montserrat', sans-serif;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .captcha-placeholder i {
+        color: var(--col-blue);
+        font-size: 1.2rem;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, var(--col-blue), var(--col-purple));
+        color: white;
+        padding: 1rem 3rem;
+        border: none;
+        border-radius: var(--radius-pill);
+        font-family: 'Montserrat', sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 15px rgba(148, 170, 185, 0.3);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(148, 170, 185, 0.4);
+    }
+
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+
+    /* Privacy Notice */
+    .privacy-notice {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        line-height: 1.6;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f9f9f9;
+        border-radius: 8px;
+        border-left: 3px solid var(--col-blue);
+    }
+
+    /* Social Links */
+    .social-links {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .social-link {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, var(--col-blue), var(--col-purple));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-decoration: none;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        font-size: 1.2rem;
+    }
+
+    .social-link:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(148, 170, 185, 0.4);
+        color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 968px) {
+        .contact-layout {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .contact-hero {
+            padding: 3rem 0 4rem 0;
+        }
+
+        .contact-form-card {
+            padding: 2rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .contact-wrapper {
+            padding: 0 1rem;
+        }
+
+        .submit-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-submit {
+            width: 100%;
+        }
+    }
+</style>
+
+<!-- Hero Banner -->
+<div class="contact-hero">
+    <div class="contact-hero-content">
+        <h1>Get in Touch</h1>
+        <p>We'd love to hear from you. Reach out to learn more about our programs, volunteer opportunities, or partnership possibilities.</p>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="contact-container">
+    <div class="contact-wrapper">
+        <div class="contact-layout">
+            <!-- Contact Information Side -->
+            <div class="contact-info">
+                <div class="info-card">
+                    <div class="info-card-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3>Email Us</h3>
+                    <p>
+                        <a href="mailto:info@ellarises.org">info@ellarises.org</a>
+                    </p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-light);">
+                        We typically respond within 24-48 hours.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-card-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h3>Call Us</h3>
+                    <p>
+                        <a href="tel:+18005551234">(800) 555-1234</a>
+                    </p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-light);">
+                        Monday - Friday, 9 AM - 5 PM MST
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-card-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3>Visit Us</h3>
+                    <p>
+                        123 Community Center Drive<br>
+                        Salt Lake City, UT 84101
+                    </p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-light);">
+                        Office hours by appointment
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-card-icon">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h3>Connect With Us</h3>
+                    <p style="margin-bottom: 1rem;">Follow us on social media for updates and inspiration.</p>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/EllaRises" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://www.instagram.com/ellarises/" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/company/ellarises/" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
 
-            <form action="/contact" method="POST">
+            <!-- Contact Form Side -->
+            <div class="contact-form-card">
+                <h2>Send Us a Message</h2>
+                <p class="subtitle">Fill out the form below and we'll get back to you as soon as possible.</p>
 
-                <!-- Option Select -->
-                <div class="floating-label">
-                    <select name="type" class="form-control"
-                        style="appearance: none; -webkit-appearance: none; background: white url('data:image/svg+xml;utf8,<svg fill=%2394AAB9 height=24 viewBox=0 0 24 24 width=24 xmlns=http://www.w3.org/2000/svg><path d=M7 10l5 5 5-5z/></svg>') no-repeat right 1rem center; border-radius: 10px;">
-                        <option value="" disabled selected>Select an option</option>
-                        <option value="general">General Inquiry</option>
-                        <option value="volunteer">Volunteer</option>
-                        <option value="enroll">Enroll a Student</option>
-                        <option value="partner">Partner with Us</option>
-                    </select>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="floating-label">
-                        <input type="text" name="first_name" placeholder=" " required>
-                        <label>First Name</label>
+                <form action="/contact" method="POST">
+                    <!-- Inquiry Type -->
+                    <div class="form-group">
+                        <label for="type">How can we help? *</label>
+                        <select name="type" id="type" class="form-control" required>
+                            <option value="" disabled selected>Select an option</option>
+                            <option value="general">General Inquiry</option>
+                            <option value="volunteer">Volunteer Opportunity</option>
+                            <option value="enroll">Enroll a Student</option>
+                            <option value="partner">Partnership Inquiry</option>
+                            <option value="donation">Donation Question</option>
+                            <option value="media">Media & Press</option>
+                        </select>
                     </div>
-                    <div class="floating-label">
-                        <input type="text" name="last_name" placeholder=" " required>
-                        <label>Last Name</label>
+
+                    <!-- Name Fields -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first_name">First Name *</label>
+                            <input type="text" name="first_name" id="first_name" class="form-control" placeholder="Jane" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="last_name">Last Name *</label>
+                            <input type="text" name="last_name" id="last_name" class="form-control" placeholder="Doe" required>
+                        </div>
                     </div>
-                </div>
 
-                <div class="floating-label">
-                    <input type="email" name="email" placeholder=" " required>
-                    <label>Email Address</label>
-                </div>
-
-                <div class="floating-label">
-                    <textarea name="message" rows="5" placeholder=" " required></textarea>
-                    <label>Message</label>
-                </div>
-
-                <div class="floating-label">
-                    <input type="tel" name="phone" placeholder=" ">
-                    <label>Phone Number (Optional)</label>
-                </div>
-
-                <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 2rem; line-height: 1.4;">
-                    By providing your phone number, you agree to receive text messages from Ella Rises. Message and data
-                    rates may apply. Reply STOP to cancel.
-                </p>
-
-                <div
-                    style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                    <div
-                        style="background: #f9f9f9; padding: 0.8rem 1.5rem; border-radius: 4px; color: var(--text-light); font-size: 0.9rem; border: 1px dashed #ccc;">
-                        I'm not a robot
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" name="email" id="email" class="form-control" placeholder="jane.doe@example.com" required>
                     </div>
-                    <button type="submit" class="btn hover-lift" style="padding: 1rem 3rem; font-size: 1rem; border-radius: var(--radius-pill);">
-                        Send Message
-                    </button>
-                </div>
-            </form>
+
+                    <!-- Phone -->
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" name="phone" id="phone" class="form-control" placeholder="(555) 123-4567">
+                    </div>
+
+                    <!-- Message -->
+                    <div class="form-group">
+                        <label for="message">Message *</label>
+                        <textarea name="message" id="message" class="form-control" placeholder="Tell us how we can help you..." required></textarea>
+                    </div>
+
+                    <!-- Privacy Notice -->
+                    <div class="privacy-notice">
+                        <i class="fas fa-info-circle" style="color: var(--col-blue); margin-right: 0.5rem;"></i>
+                        By providing your phone number, you agree to receive text messages from Ella Rises. Message and data rates may apply. Reply STOP to cancel.
+                    </div>
+
+                    <!-- Submit Section -->
+                    <div class="submit-section">
+                        <div class="captcha-placeholder">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>I'm not a robot</span>
+                        </div>
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-paper-plane me-2"></i>
+                            Send Message
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-
     </div>
+</div>
 
-    <%- include('partials/footer') %>
+<%- include('partials/footer') %>

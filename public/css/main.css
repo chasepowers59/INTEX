@@ -177,6 +177,135 @@ a {
     color: var(--col-dark-gray);
 }
 
+/* Primary Logo - Pink Circle with Script/Serif Text */
+.logo-primary {
+    width: 80px;
+    height: 80px;
+    background: #F9AFB1;
+    border: 3px solid #000;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+    position: relative;
+    padding: 0.3rem;
+    box-sizing: border-box;
+}
+
+.logo-primary:hover {
+    transform: scale(1.05);
+}
+
+.logo-primary .logo-ella {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: #000;
+    line-height: 1;
+    margin-top: 0.1rem;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    text-transform: none;
+}
+
+.logo-primary .logo-ella::first-letter {
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.logo-primary .logo-rises {
+    font-family: 'DM Serif Display', serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #000;
+    line-height: 1;
+    margin-top: 0.05rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+/* Alternative Logo - Text with Heart Icon */
+.logo-alternative {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: opacity 0.3s ease;
+}
+
+.logo-alternative:hover {
+    opacity: 0.8;
+}
+
+.logo-alternative .logo-heart {
+    width: 18px;
+    height: 16px;
+    position: relative;
+    display: inline-block;
+    margin: 0 0.2rem;
+}
+
+.logo-alternative .logo-heart::before,
+.logo-alternative .logo-heart::after {
+    content: '';
+    width: 9px;
+    height: 14px;
+    position: absolute;
+    background: currentColor;
+    border-radius: 9px 9px 0 0;
+    transform: rotate(-45deg);
+    transform-origin: 0 100%;
+}
+
+.logo-alternative .logo-heart::before {
+    left: 9px;
+}
+
+.logo-alternative .logo-heart::after {
+    left: 0;
+    transform: rotate(45deg);
+    transform-origin: 100% 100%;
+}
+
+/* Responsive Logo Sizing */
+@media (max-width: 768px) {
+    .logo-primary {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .logo-primary .logo-ella {
+        font-size: 1rem;
+    }
+    
+    .logo-primary .logo-ella::first-letter {
+        font-size: 1.2rem;
+    }
+    
+    .logo-primary .logo-rises {
+        font-size: 0.5rem;
+    }
+    
+    .logo-alternative {
+        font-size: 1.2rem;
+    }
+    
+    .logo-alternative .logo-heart {
+        width: 14px;
+        height: 12px;
+    }
+}
+
+/* Legacy logo-circle for backward compatibility */
 .logo-circle {
     width: 60px;
     height: 60px;
@@ -194,7 +323,228 @@ a {
     letter-spacing: 1px;
 }
 
-/* Section Headers (Blue Bar with Torn Edges) */
+/* Universal Wavy Banner with Wavy Edge */
+.wavy-banner {
+    background-color: rgba(148, 170, 185, 0.25); /* Light blue-grey with opacity */
+    color: var(--col-dark-gray);
+    padding: 4rem 0 5rem 0;
+    text-align: center;
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+}
+
+.wavy-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: var(--col-cream);
+    clip-path: polygon(0 20%, 5% 15%, 10% 20%, 15% 15%, 20% 20%, 25% 15%, 30% 20%, 35% 15%, 40% 20%, 45% 15%, 50% 20%, 55% 15%, 60% 20%, 65% 15%, 70% 20%, 75% 15%, 80% 20%, 85% 15%, 90% 20%, 95% 15%, 100% 20%, 100% 100%, 0 100%);
+}
+
+.wavy-banner h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--col-dark-gray);
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.wavy-banner p {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.1rem;
+    color: var(--col-dark-gray);
+    margin: 1rem auto 0;
+    max-width: 700px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Legacy class name for backward compatibility */
+.events-banner {
+    background-color: rgba(148, 170, 185, 0.25);
+    color: var(--col-dark-gray);
+    padding: 4rem 0 5rem 0;
+    text-align: center;
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+}
+
+.events-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: var(--col-cream);
+    clip-path: polygon(0 20%, 5% 15%, 10% 20%, 15% 15%, 20% 20%, 25% 15%, 30% 20%, 35% 15%, 40% 20%, 45% 15%, 50% 20%, 55% 15%, 60% 20%, 65% 15%, 70% 20%, 75% 15%, 80% 20%, 85% 15%, 90% 20%, 95% 15%, 100% 20%, 100% 100%, 0 100%);
+}
+
+.events-banner h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--col-dark-gray);
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* Events Search Card */
+.events-search-card {
+    background: var(--col-cream);
+    border-radius: var(--radius-card);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-soft);
+}
+
+.events-search-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.events-search-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid rgba(148, 170, 185, 0.3);
+    border-radius: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+}
+
+.events-search-input:focus {
+    outline: none;
+    border-color: var(--col-blue);
+}
+
+.events-search-btn {
+    padding: 0.75rem 2rem;
+    background-color: rgba(148, 170, 185, 0.5);
+    color: var(--col-dark-gray);
+    border: none;
+    border-radius: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.events-search-btn:hover {
+    background-color: rgba(148, 170, 185, 0.7);
+}
+
+.events-action-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.events-action-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.events-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.events-action-btn-purple {
+    background-color: var(--col-purple);
+    color: white;
+}
+
+.events-action-btn-green {
+    background-color: var(--col-green);
+    color: white;
+}
+
+/* Simplified Event Cards */
+.event-card-simple {
+    background: white;
+    border-radius: var(--radius-card);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.event-card-simple:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+}
+
+.event-card-content {
+    flex: 1;
+}
+
+.event-card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    color: var(--col-dark-gray);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.event-card-meta {
+    color: var(--col-dark-pink);
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.event-card-description {
+    color: var(--text-light);
+    font-size: 1rem;
+    line-height: 1.6;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.event-card-action {
+    flex-shrink: 0;
+}
+
+.event-register-btn {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--col-light-pink);
+    color: var(--col-dark-gray);
+    border: none;
+    border-radius: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.event-register-btn:hover {
+    background-color: var(--col-pink);
+    transform: translateY(-2px);
+}
+
+/* Section Headers (Blue Bar with Torn Edges) - Keep for other pages */
 .section-header-blue {
     background-color: var(--col-blue);
     color: white;
@@ -315,11 +665,129 @@ a {
 }
 
 /* Footer */
-footer {
-    background: var(--col-dark-gray);
+.site-footer {
+    background: linear-gradient(135deg, var(--col-blue) 0%, var(--col-purple) 100%);
     color: white;
     padding: 3rem 2rem;
+    margin-top: 4rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.site-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-content {
     text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.footer-logo {
+    margin-bottom: 1.5rem;
+}
+
+.logo-alternative-footer {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    text-decoration: none;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.logo-alternative-footer:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+    color: white;
+    text-decoration: none;
+}
+
+.logo-alternative-footer .logo-heart {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: white;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center;
+    mask-size: contain;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") no-repeat center;
+    -webkit-mask-size: contain;
+    background-color: white;
+}
+
+.footer-copyright {
+    margin: 1rem 0 1.5rem 0;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 400;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.3s ease, transform 0.2s ease;
+    padding: 0.25rem 0.5rem;
+}
+
+.footer-links a:hover {
+    color: white;
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+.footer-divider {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    margin: 0 0.25rem;
+}
+
+/* Responsive Footer */
+@media (max-width: 768px) {
+    .site-footer {
+        padding: 2.5rem 1.5rem;
+    }
+
+    .logo-alternative-footer {
+        font-size: 1.5rem;
+    }
+
+    .footer-links {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .footer-divider {
+        display: none;
+    }
 }
 
 /* Programs Grid */

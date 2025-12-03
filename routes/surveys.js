@@ -75,6 +75,23 @@ router.post('/new', isAuthenticated, async (req, res) => {
         // Calculate overall score (simple average)
         const overall = (parseFloat(satisfaction) + parseFloat(usefulness) + parseFloat(instructor) + parseFloat(recommendation)) / 4;
 
+        // Calculate NPS Bucket based on recommendation score (0-5 scale)
+        // Business Logic: NPS segmentation for survey analysis
+        // Promoters: Scores 4-5 (highly likely to recommend)
+        // Passives: Score 3 (neutral)
+        // Detractors: Scores 0-2 (unlikely to recommend)
+        let npsBucket = null;
+        const recScore = parseFloat(recommendation);
+        if (!isNaN(recScore)) {
+            if (recScore >= 4) {
+                npsBucket = 'Promoter';
+            } else if (recScore === 3) {
+                npsBucket = 'Passive';
+            } else if (recScore >= 0 && recScore <= 2) {
+                npsBucket = 'Detractor';
+            }
+        }
+
         await db('surveys').insert({
             survey_id: surveyId,
             registration_id,
@@ -83,6 +100,7 @@ router.post('/new', isAuthenticated, async (req, res) => {
             survey_instructor_score: instructor,
             survey_recommendation_score: recommendation,
             survey_overall_score: overall,
+            survey_nps_bucket: npsBucket,
             survey_comments: comments,
             survey_submission_date: new Date()
         });

@@ -131,6 +131,17 @@ exports.getDonate = (req, res) => {
 exports.postDonate = async (req, res) => {
     const { amount, donor_first_name, donor_last_name, donor_email } = req.body;
     
+    // Validation
+    if (!amount || parseFloat(amount) <= 0) {
+        req.flash('error', 'Please enter a valid donation amount.');
+        return res.redirect('/donate');
+    }
+    
+    if (!donor_first_name || !donor_last_name || !donor_email) {
+        req.flash('error', 'Please fill in all required donor information fields.');
+        return res.redirect('/donate');
+    }
+    
     try {
         let participantId = null;
         
@@ -177,15 +188,19 @@ exports.postDonate = async (req, res) => {
         await knex('donations').insert({
             donation_id: donationId,
             participant_id: participantId,
-            donation_amount: amount,
+            donation_amount: parseFloat(amount),
             donation_date: new Date()
         });
 
+        // Success message
+        req.flash('success', `Thank you for your donation of $${parseFloat(amount).toFixed(2)}! Your support helps us empower the next generation.`);
+        
         // Redirect to thank you page
         res.redirect('/thank-you?amount=' + encodeURIComponent(amount));
     } catch (err) {
         console.error('Donation Error:', err);
-        res.status(500).send('Error processing donation. Please try again.');
+        req.flash('error', 'Error processing donation. Please try again.');
+        res.redirect('/donate');
     }
 };
 

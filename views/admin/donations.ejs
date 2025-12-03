@@ -1,45 +1,21 @@
 <%- include('../partials/header', { user: user }) %>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <style>
-        /* Admin View Background - Peach */
-        body {
-            background-color: #FFD1C7;
-        }
-
-        /* Brand Colors */
-        :root {
-            --brand-blue: #8DA9C4;
-            --brand-lavender: #958EBF;
-            --brand-pink: #FAD2D8;
-            --brand-cream: #FDFBF7;
-            --brand-coral: #EE969E;
-            --brand-peach: #FFD1C7;
-        }
-
-        .card {
-            border-radius: 20px;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            border: none;
-            background: white;
-        }
-    </style>
+<%- include('_shared_styles') %>
 
     <div class="container mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- Page Header -->
+        <div class="admin-page-header">
             <h1>Donation Maintenance</h1>
-            <div>
-                <a href="/donations/insights" class="btn btn-info me-2">View Donation Insights</a>
+            <div class="btn-group">
+                <a href="/donations/insights" class="admin-btn admin-btn-info">View Donation Insights</a>
                 <% if (user && user.participant_role === 'admin') { %>
-                    <a href="/admin/donations/add" class="btn btn-success me-2">Add Donation</a>
+                    <a href="/admin/donations/add" class="admin-btn admin-btn-success">Add Donation</a>
                 <% } %>
-                <a href="/admin/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="/admin/dashboard" class="admin-btn admin-btn-secondary">Back to Dashboard</a>
             </div>
         </div>
 
         <!-- Advanced Filters -->
-        <div class="card mb-4">
+        <div class="admin-filter-card">
             <div class="card-header">
                 <h5 class="mb-0">Filters</h5>
             </div>
@@ -66,16 +42,17 @@
                             placeholder="0.00" value="<%= filters && filters.minAmount ? filters.minAmount : '' %>">
                     </div>
                     <div class="col-12">
-                        <button type="submit" class="btn btn-primary">Apply Filters</button>
-                        <a href="/admin/donations" class="btn btn-secondary">Clear Filters</a>
+                        <button type="submit" class="admin-btn admin-btn-primary">Apply Filters</button>
+                        <a href="/admin/donations" class="admin-btn admin-btn-secondary">Clear Filters</a>
                     </div>
                 </form>
             </div>
         </div>
 
-        <div class="card">
+        <!-- Table -->
+        <div class="admin-table-card">
             <div class="card-body">
-                <table class="table table-striped table-hover">
+                <table class="table admin-table">
                     <thead>
                         <tr>
                             <th>Donor Name</th>
@@ -85,43 +62,53 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% if (donations && donations.length> 0) { %>
-                            <% donations.forEach(d=> { %>
+                        <% if (donations && donations.length > 0) { %>
+                            <% donations.forEach(d => { %>
                                 <tr>
                                     <td>
                                         <% if (d.participant_first_name) { %>
-                                            <%= d.participant_first_name %>
-                                                <%= d.participant_last_name %>
-                                                    <% } else { %>
-                                                        <span class="text-muted fst-italic">Guest / Anonymous</span>
-                                                        <% } %>
-                                    </td>
-                                    <td>$<%= d.donation_amount %>
-                                    </td>
-                                    <td>
-                                        <%= d.donation_date ? new Date(d.donation_date).toLocaleDateString('en-US') : 'N/A' %>
-                                    </td>
-                                    <td>
-                                        <% if (user && user.participant_role === 'admin') { %>
-                                            <form action="/admin/donations/delete/<%= d.donation_id %>" method="POST"
-                                                style="display: inline;"
-                                                onsubmit="return confirm('Are you sure you want to delete this donation?');">
-                                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                            </form>
+                                            <%= d.participant_first_name %> <%= d.participant_last_name %>
+                                        <% } else { %>
+                                            <span class="text-muted fst-italic">Guest / Anonymous</span>
                                         <% } %>
+                                    </td>
+                                    <td>$<%= parseFloat(d.donation_amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></td>
+                                    <td><%= d.donation_date ? new Date(d.donation_date).toLocaleDateString('en-US') : 'N/A' %></td>
+                                    <td>
+                                        <div class="admin-action-buttons">
+                                            <% if (user && user.participant_role === 'admin') { %>
+                                                <form action="/admin/donations/delete/<%= d.donation_id %>" method="POST"
+                                                    style="display: inline;" class="delete-form">
+                                                    <button type="submit" class="admin-btn admin-btn-danger">Delete</button>
+                                                </form>
+                                            <% } %>
+                                        </div>
                                     </td>
                                 </tr>
-                                <% }) %>
-                                    <% } else { %>
-                                        <tr>
-                                            <td colspan="4" class="text-center">No donations found.</td>
-                                        </tr>
-                                        <% } %>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="4" class="admin-empty-state">No donations found.</td>
+                            </tr>
+                        <% } %>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
+    <script>
+        // Handle delete confirmation with event delegation
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.delete-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    if (!confirm('Are you sure you want to delete this donation?')) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
 
     <%- include('../partials/footer') %>
 

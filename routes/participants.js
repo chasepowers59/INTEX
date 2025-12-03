@@ -22,11 +22,13 @@ router.get('/', isAuthenticated, async (req, res) => {
         }
 
         if (role) {
-            query = query.where('participant_role', 'ilike', role);
+            // Use exact match for role filter (role values are standardized)
+            query = query.where('participant_role', role);
         }
 
         if (city) {
-            query = query.where('participant_city', 'ilike', city);
+            // Use case-insensitive pattern matching for city (allows partial matches)
+            query = query.where('participant_city', 'ilike', `%${city}%`);
         }
 
         if (sort) {
