@@ -1,176 +1,213 @@
 <%- include('../partials/header', { user: user }) %>
 
-    <div class="container" style="padding: 4rem 0;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <h1>Admin Dashboard</h1>
-            <div style="display: flex; gap: 1rem;">
-                <a href="/participants" class="btn">Manage Participants</a>
-                <a href="/events" class="btn">Manage Events</a>
-                <a href="/donations/insights" class="btn" style="background-color: var(--col-green);">Donation
-                    Insights</a>
-                <a href="/events/insights" class="btn" style="background-color: var(--col-purple);">Impact Report</a>
+    <div class="container py-5">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1 class="display-5 fw-bold text-dark mb-0" style="font-family: 'DM Serif Display', serif;">Admin
+                    Dashboard</h1>
+                <p class="text-muted mb-0" style="font-family: 'Montserrat', sans-serif;">Overview of system performance
+                    and management.</p>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-light text-dark border p-2 rounded-pill">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    <%= new Date().toLocaleDateString() %>
+                </span>
             </div>
         </div>
 
-        <!-- Analytics Placeholder -->
-        <div id="tableau-dashboard"
-            style="background: #f0f0f0; height: 300px; margin-bottom: 2rem; display: flex; align-items: center; justify-content: center; border: 2px dashed #ccc; border-radius: var(--radius-card);">
-            <div style="text-align: center;">
-                <h3 style="color: #888;">Tableau Analytics Integration</h3>
-                <p style="color: #aaa;">Connect your Tableau dashboard here for deep insights.</p>
-                <button class="btn" style="background: #ccc; cursor: not-allowed;">Connect Data Source</button>
-            </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="card" style="margin-bottom: 2rem; padding: 1.5rem;">
-            <h4 style="margin-bottom: 1rem;">Filters</h4>
-            <form id="filterForm" action="/admin/dashboard" method="GET"
-                style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <select name="eventType" class="form-control" style="width: auto;" onchange="this.form.submit()">
-                    <option value="">All Event Types</option>
-                    <% if (options && options.eventTypes) { %>
-                        <% options.eventTypes.forEach(type=> { %>
-                            <option value="<%= type %>" <%=filters.eventType===type ? 'selected' : '' %>><%= type %>
-                            </option>
-                            <% }) %>
-                                <% } %>
-                </select>
-                <select name="city" class="form-control" style="width: auto;" onchange="this.form.submit()">
-                    <option value="">All Cities</option>
-                    <% if (options && options.cities) { %>
-                        <% options.cities.forEach(city=> { %>
-                            <option value="<%= city %>" <%=filters.city===city ? 'selected' : '' %>><%= city %>
-                            </option>
-                            <% }) %>
-                                <% } %>
-                </select>
-                <select name="role" class="form-control" style="width: auto;" onchange="this.form.submit()">
-                    <option value="">All Roles</option>
-                    <% if (options && options.roles) { %>
-                        <% options.roles.forEach(role=> { %>
-                            <option value="<%= role %>" <%=filters.role===role ? 'selected' : '' %>><%= role %>
-                            </option>
-                            <% }) %>
-                                <% } %>
-                </select>
-            </form>
+        <!-- Management Quick Links (Top Row) -->
+        <div class="row g-3 mb-5">
+            <% const modules=[ { name: 'Users' , icon: 'users' , color: 'primary' , link: '/admin/users' }, {
+                name: 'Participants' , icon: 'user-graduate' , color: 'success' , link: '/admin/participants' }, {
+                name: 'Events' , icon: 'calendar-alt' , color: 'warning' , link: '/admin/events' }, { name: 'Surveys' ,
+                icon: 'poll' , color: 'info' , link: '/admin/surveys' }, { name: 'Milestones' , icon: 'flag' ,
+                color: 'danger' , link: '/admin/milestones' }, { name: 'Donations' , icon: 'donate' , color: 'secondary'
+                , link: '/admin/donations' } ]; %>
+                <% modules.forEach(mod=> { %>
+                    <div class="col-6 col-md-2">
+                        <a href="<%= mod.link %>" class="text-decoration-none">
+                            <div class="card h-100 border-0 shadow-sm hover-lift text-center py-3"
+                                style="border-radius: 15px; transition: transform 0.2s;">
+                                <div class="card-body p-2">
+                                    <div class="icon-box mb-2 text-<%= mod.color %>">
+                                        <i class="fas fa-<%= mod.icon %> fa-lg"></i>
+                                    </div>
+                                    <h6 class="card-title mb-0 text-dark fw-bold"
+                                        style="font-size: 0.85rem; font-family: 'Montserrat', sans-serif;">
+                                        <%= mod.name %>
+                                    </h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <% }); %>
         </div>
 
         <!-- KPI Cards -->
-        <div class="grid-3" style="margin-bottom: 2rem;">
-            <div class="card">
-                <h3 style="font-size: 3rem; color: var(--col-blue);">
-                    <%= kpis.totalParticipants %>
-                </h3>
-                <p>Total Participants</p>
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100"
+                    style="border-radius: 20px; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: white;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-uppercase mb-1 opacity-75"
+                                    style="font-size: 0.8rem; letter-spacing: 1px;">Total Participants</h6>
+                                <h2 class="display-4 fw-bold mb-0">
+                                    <%= kpis.totalParticipants %>
+                                </h2>
+                            </div>
+                            <div class="icon-bg opacity-25">
+                                <i class="fas fa-users fa-3x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="card">
-                <h3 style="font-size: 3rem; color: var(--col-green);">
-                    <%= kpis.satisfactionScore %>
-                </h3>
-                <p>Avg Satisfaction</p>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100"
+                    style="border-radius: 20px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-uppercase mb-1 opacity-75"
+                                    style="font-size: 0.8rem; letter-spacing: 1px;">Avg Satisfaction</h6>
+                                <h2 class="display-4 fw-bold mb-0">
+                                    <%= kpis.satisfactionScore %>
+                                </h2>
+                            </div>
+                            <div class="icon-bg opacity-25">
+                                <i class="fas fa-smile fa-3x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="card">
-                <h3 style="font-size: 3rem; color: var(--col-purple);">
-                    <%= kpis.milestoneCount %>
-                </h3>
-                <p>Higher Ed Milestones</p>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100"
+                    style="border-radius: 20px; background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%); color: white;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-uppercase mb-1 opacity-75"
+                                    style="font-size: 0.8rem; letter-spacing: 1px;">Milestones</h6>
+                                <h2 class="display-4 fw-bold mb-0">
+                                    <%= kpis.milestoneCount %>
+                                </h2>
+                            </div>
+                            <div class="icon-bg opacity-25">
+                                <i class="fas fa-trophy fa-3x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Long-Term Program Impact -->
-        <div style="margin-bottom: 2rem;">
-            <h2 style="margin-bottom: 1.5rem; font-family: 'DM Serif Display'; color: var(--col-dark-gray);">Long-Term Program Impact</h2>
-            <div class="grid-2" style="gap: 2rem;">
-                <div class="card" style="background: linear-gradient(135deg, var(--col-blue) 0%, #7a9fb8 100%); color: white;">
-                    <h3 style="font-size: 3rem; color: white; margin-bottom: 0.5rem;">
-                        <%= kpis.steamEducationRate !== undefined ? kpis.steamEducationRate : '0' %>%
-                    </h3>
-                    <p style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600;">Post-Secondary STEAM Rate</p>
-                    <p style="font-size: 0.9rem; opacity: 0.9;">Percentage of participants pursuing STEAM fields in post-secondary education</p>
-                </div>
-                <div class="card" style="background: linear-gradient(135deg, var(--col-green) 0%, #7ba37e 100%); color: white;">
-                    <h3 style="font-size: 3rem; color: white; margin-bottom: 0.5rem;">
-                        <%= kpis.steamJobRate !== undefined ? kpis.steamJobRate : '0' %>%
-                    </h3>
-                    <p style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 600;">Post-College STEAM Job Rate</p>
-                    <p style="font-size: 0.9rem; opacity: 0.9;">Percentage of participants working in STEAM careers after college</p>
+        <!-- Charts Section -->
+        <div class="row g-4">
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 20px;">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="fw-bold mb-0" style="font-family: 'DM Serif Display', serif;">Participant
+                            Demographics</h5>
+                    </div>
+                    <div class="card-body px-4 pb-4">
+                        <canvas id="demographicsChart" height="250"></canvas>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Charts -->
-        <div
-            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-bottom: 4rem;">
-            <div class="card">
-                <h3>Event Satisfaction</h3>
-                <div style="height: 300px; position: relative;">
-                    <canvas id="satisfactionChart"
-                        data-chart-data='<%- JSON.stringify(charts.satisfaction) %>'></canvas>
-                </div>
-            </div>
-            <div class="card">
-                <h3>Participant Cities</h3>
-                <div style="height: 300px; position: relative;">
-                    <canvas id="cityChart" data-chart-data='<%- JSON.stringify(charts.city) %>'></canvas>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 20px;">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="fw-bold mb-0" style="font-family: 'DM Serif Display', serif;">Program Impact</h5>
+                    </div>
+                    <div class="card-body px-4 pb-4 d-flex align-items-center justify-content-center">
+                        <div style="width: 100%; max-width: 300px;">
+                            <canvas id="impactChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Satisfaction Chart
-            const satisfactionCanvas = document.getElementById('satisfactionChart');
-            if (satisfactionCanvas) {
-                const satisfactionCtx = satisfactionCanvas.getContext('2d');
-                const satisfactionData = JSON.parse(satisfactionCanvas.dataset.chartData);
+        // Data from EJS
+        const cityData = <% - JSON.stringify(charts.city || []) %>;
+        const attendanceCount = <%= kpis.attendanceCount || 0 %>;
+        const totalParticipants = <%= kpis.totalParticipants || 0 %>;
 
-                new Chart(satisfactionCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: satisfactionData.map(d => d.event_type),
-                        datasets: [{
-                            label: 'Avg Satisfaction Score',
-                            data: satisfactionData.map(d => d.avg_score),
-                            backgroundColor: ['#99B7C6', '#978EC4', '#9AB59D'],
-                            borderWidth: 1
-                        }]
+        // Process City Data
+        const cityLabels = cityData.map(c => c.participant_city || 'Unknown');
+        const cityCounts = cityData.map(c => c.count);
+
+        // Demographics Chart (Bar)
+        const ctxDemographics = document.getElementById('demographicsChart').getContext('2d');
+        new Chart(ctxDemographics, {
+            type: 'bar',
+            data: {
+                labels: cityLabels,
+                datasets: [{
+                    label: 'Participants',
+                    data: cityCounts,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    title: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { borderDash: [2, 4] }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: { beginAtZero: true, max: 10 }
-                        }
+                    x: {
+                        grid: { display: false }
                     }
-                });
+                }
             }
+        });
 
-            // City Chart
-            const cityCanvas = document.getElementById('cityChart');
-            if (cityCanvas) {
-                const cityCtx = cityCanvas.getContext('2d');
-                const cityData = JSON.parse(cityCanvas.dataset.chartData);
-
-                new Chart(cityCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: cityData.map(d => d.participant_city || 'Unknown'),
-                        datasets: [{
-                            data: cityData.map(d => d.count),
-                            backgroundColor: ['#FFD8D1', '#F9AFB1', '#F4B092', '#CE325B', '#9AB59D']
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false
-                    }
-                });
+        // Impact Chart (Doughnut)
+        const ctxImpact = document.getElementById('impactChart').getContext('2d');
+        new Chart(ctxImpact, {
+            type: 'doughnut',
+            data: {
+                labels: ['Attended', 'Inactive'],
+                datasets: [{
+                    data: [attendanceCount, Math.max(0, totalParticipants - attendanceCount)],
+                    backgroundColor: ['#38ef7d', '#ff6b6b'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                }
             }
         });
     </script>
+
+    <style>
+        .hover-lift:hover {
+            transform: translateY(-5px) !important;
+            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+        }
+    </style>
 
     <%- include('../partials/footer') %>

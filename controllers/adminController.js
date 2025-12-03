@@ -55,7 +55,6 @@ exports.getDashboard = async (req, res) => {
             : 0;
 
         // KPI 2: Higher Education Milestones (Count)
-        // Milestones: "Accepted to College", "FAFSA Completed", "Scholarship"
         const higherEdKeywords = ['College', 'FAFSA', 'Scholarship', 'University', 'Degree'];
         let milestoneCount = 0;
         if (pIds.length > 0) {
@@ -71,128 +70,33 @@ exports.getDashboard = async (req, res) => {
             milestoneCount = parseInt(milestoneResult.count);
         }
 
-        // KPI 3: Event Effectiveness (STEAM vs Heritage Satisfaction)
-        // We'll calculate the gap or just show STEAM satisfaction for now as a simple metric, 
-        // or we can pass both to the view if we want to get fancy. 
-        // Let's stick to the "STEAM Interest Rate" as requested in the previous turn, 
-        // BUT the user asked for "Event Effectiveness" in this turn.
-        // Let's calculate Avg Satisfaction for STEAM events specifically.
-        const steamSatisfactionResult = await knex('surveys')
-            .join('registrations', 'surveys.registration_id', 'registrations.registration_id')
-            .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
-            .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
-            .whereIn('registrations.registration_id', rIds)
-            .where('event_definitions.event_type', 'STEAM')
-            .avg('survey_satisfaction_score as avg')
+        // KPI 4: Total Donations
+        const totalDonationsResult = await knex('donations').sum('donation_amount as total').first();
+        const totalDonations = totalDonationsResult.total || 0;
+
+        // KPI 5: NPS Score
+        const surveyStats = await knex('surveys')
+            .select(
+                knex.raw("COUNT(*) as total"),
+                knex.raw("SUM(CASE WHEN survey_recommendation_score >= 9 THEN 1 ELSE 0 END) as promoters"),
+                knex.raw("SUM(CASE WHEN survey_recommendation_score <= 6 THEN 1 ELSE 0 END) as detractors")
+            )
             .first();
 
-        const steamSatisfaction = steamSatisfactionResult && steamSatisfactionResult.avg
-            ? parseFloat(steamSatisfactionResult.avg).toFixed(1)
-            : 'N/A';
-
-        // Reuse the variable name steamInterestRate to pass this new metric or keep the old one?
-        // The user asked to "Update the logic... to calculate... Event Effectiveness".
-        // Let's keep "STEAM Interest Rate" as it's already in the view, but maybe update what it represents or add a new one?
-        // The view expects `kpis.steamInterestRate`. Let's keep that but maybe update the label in the view if needed.
-        // Or better, let's just calculate the Interest Rate as before because it's a good metric, 
-        // and maybe add the Milestone Count as a new KPI if the view supports it.
-        // Wait, the view has 3 cards: Total Participants, Avg Satisfaction, STEAM Interest Rate.
-        // The user wants: Avg Satisfaction, Milestone Count, Event Effectiveness.
-        // I should probably replace "Total Participants" or "STEAM Interest Rate" with "Milestone Count".
-        // Let's replace "STEAM Interest Rate" with "Higher Ed Milestones" count for now as it seems more "Impact" focused.
-
-        // Actually, let's keep it simple. 
-        // Card 1: Total Participants (Keep)
-        // Card 2: Avg Satisfaction (Keep)
-        // Card 3: Higher Ed Milestones (New - replaces STEAM Interest Rate)
-
-        const steamInterestRate = milestoneCount; // Hijacking this variable to avoid changing view structure too much, but I should rename it in the object passed to view.
-
-        // 4. STEAM Impact Analytics
-        // Define keyword arrays
-        const educationKeywords = ['Education', 'College', 'University', 'Degree', 'Graduation', 'School', 'FAFSA', 'Scholarship', 'Enrolled', 'Accepted', 'Admission'];
-        const jobKeywords = ['Job', 'Career', 'Employment', 'Hired', 'Position', 'Work', 'Internship', 'Employed'];
-        const steamKeywords = ['Engineering', 'Science', 'Math', 'Technology', 'Medical', 'Nursing', 'Biology', 'CS', 'Computer', 'STEM', 'STEAM', 'Chemistry', 'Physics', 'Data', 'Software', 'Developer', 'Programmer'];
-
-        // Metric A: Post-Secondary STEAM Rate
-        let steamEducationRate = 0;
-        if (pIds.length > 0) {
-            // Total participants with Education milestones
-            const totalEducationParticipants = await knex('milestones')
-                .whereIn('participant_id', pIds)
-                .where(builder => {
-                    educationKeywords.forEach((keyword, index) => {
-                        if (index === 0) {
-                            builder.where('milestone_title', 'ilike', `%${keyword}%`);
-                        } else {
-                            builder.orWhere('milestone_title', 'ilike', `%${keyword}%`);
-                        }
-                    });
-                })
-                .distinct('participant_id')
-                .count('participant_id as count')
-                .first();
-
-            const totalEducationCount = parseInt(totalEducationParticipants?.count || 0);
-
-            if (totalEducationCount > 0) {
-                // Participants with STEAM Education milestones (milestone must have BOTH education AND STEAM keywords)
-                // Build education keyword condition
-                const educationCondition = educationKeywords.map(k => `milestone_title ILIKE '%${k}%'`).join(' OR ');
-                // Build STEAM keyword condition
-                const steamCondition = steamKeywords.map(k => `milestone_title ILIKE '%${k}%'`).join(' OR ');
-                
-                const steamEducationParticipants = await knex('milestones')
-                    .whereIn('participant_id', pIds)
-                    .whereRaw(`(${educationCondition}) AND (${steamCondition})`)
-                    .distinct('participant_id')
-                    .count('participant_id as count')
-                    .first();
-
-                const steamEducationCount = parseInt(steamEducationParticipants?.count || 0);
-                steamEducationRate = ((steamEducationCount / totalEducationCount) * 100).toFixed(1);
-            }
+        let npsScore = 0;
+        if (surveyStats && surveyStats.total > 0) {
+            const promoters = parseInt(surveyStats.promoters);
+            const detractors = parseInt(surveyStats.detractors);
+            const total = parseInt(surveyStats.total);
+            npsScore = Math.round(((promoters - detractors) / total) * 100);
         }
 
-        // Metric B: Post-College STEAM Job Rate
-        let steamJobRate = 0;
-        if (pIds.length > 0) {
-            // Total participants with Job/Career milestones
-            const totalJobParticipants = await knex('milestones')
-                .whereIn('participant_id', pIds)
-                .where(builder => {
-                    jobKeywords.forEach((keyword, index) => {
-                        if (index === 0) {
-                            builder.where('milestone_title', 'ilike', `%${keyword}%`);
-                        } else {
-                            builder.orWhere('milestone_title', 'ilike', `%${keyword}%`);
-                        }
-                    });
-                })
-                .distinct('participant_id')
-                .count('participant_id as count')
-                .first();
-
-            const totalJobCount = parseInt(totalJobParticipants?.count || 0);
-
-            if (totalJobCount > 0) {
-                // Participants with STEAM Job milestones (milestone must have BOTH job AND STEAM keywords)
-                // Build job keyword condition
-                const jobCondition = jobKeywords.map(k => `milestone_title ILIKE '%${k}%'`).join(' OR ');
-                // Build STEAM keyword condition
-                const steamCondition = steamKeywords.map(k => `milestone_title ILIKE '%${k}%'`).join(' OR ');
-                
-                const steamJobParticipants = await knex('milestones')
-                    .whereIn('participant_id', pIds)
-                    .whereRaw(`(${jobCondition}) AND (${steamCondition})`)
-                    .distinct('participant_id')
-                    .count('participant_id as count')
-                    .first();
-
-                const steamJobCount = parseInt(steamJobParticipants?.count || 0);
-                steamJobRate = ((steamJobCount / totalJobCount) * 100).toFixed(1);
-            }
-        }
+        // KPI 6: Attendance Count
+        const attendanceResult = await knex('registrations')
+            .where('registration_attended_flag', 1)
+            .count('registration_id as count')
+            .first();
+        const attendanceCount = parseInt(attendanceResult.count || 0);
 
         // 3. Charts Data
         const satisfactionByType = await knex('surveys')
@@ -213,18 +117,21 @@ exports.getDashboard = async (req, res) => {
         res.render('admin/dashboard', {
             user: req.user,
             kpis: {
-                milestoneCount: steamInterestRate, // Using the calculated milestone count (variable name hijack from previous step, but let's be clean)
+                milestoneCount: milestoneCount,
                 satisfactionScore,
                 totalParticipants,
-                steamEducationRate,
-                steamJobRate
+                totalDonations,
+                npsScore,
+                attendanceCount,
+                steamEducationRate: 0,
+                steamJobRate: 0
             },
             charts: {
                 satisfaction: satisfactionByType,
                 city: cityDistribution
             },
             filters: { eventType, city, role },
-            options: { cities, roles, eventTypes } // Pass dynamic options
+            options: { cities, roles, eventTypes }
         });
     } catch (err) {
         console.error('Dashboard Error:', err);
@@ -273,7 +180,7 @@ exports.resetUserPassword = async (req, res) => {
     try {
         const { participant_id } = req.params;
         const participant = await knex('participants').where({ participant_id }).first();
-        
+
         if (!participant) {
             return res.status(404).send('User not found');
         }
@@ -311,7 +218,7 @@ exports.listParticipants = async (req, res) => {
         }
 
         const participants = await query;
-        
+
         // Calculate age for each participant
         const participantsWithAge = participants.map(p => {
             let age = null;
@@ -341,7 +248,8 @@ exports.getEditParticipant = async (req, res) => {
         if (!participant) {
             return res.status(404).send('Participant not found');
         }
-        res.render('admin/participant_edit', { user: req.user, participant });
+        const milestones = await knex('milestones').where({ participant_id: id }).orderBy('milestone_date', 'desc');
+        res.render('admin/participant_edit', { user: req.user, participant, milestones });
     } catch (err) {
         console.error('Get Edit Participant Error:', err);
         res.status(500).send('Server Error');
@@ -433,14 +341,14 @@ exports.postAddEvent = async (req, res) => {
 exports.getEditEvent = async (req, res) => {
     try {
         const { id } = req.params;
-        const event = await knex('event_instances').where({ event_instance_id: id }).first();
-        if (!event) {
-            return res.status(404).send('Event not found');
+        const participant = await knex('participants').where({ participant_id: id }).first();
+        if (!participant) {
+            return res.status(404).send('Participant not found');
         }
-        const definitions = await knex('event_definitions').select('*').orderBy('event_name', 'asc');
-        res.render('admin/event_form', { user: req.user, event, definitions });
+        const milestones = await knex('milestones').where({ participant_id: id }).orderBy('milestone_date', 'desc');
+        res.render('admin/participant_edit', { user: req.user, participant, milestones });
     } catch (err) {
-        console.error('Get Edit Event Error:', err);
+        console.error('Get Edit Participant Error:', err);
         res.status(500).send('Server Error');
     }
 };
@@ -509,22 +417,22 @@ exports.listSurveys = async (req, res) => {
         // Score filter
         if (scoreFilter === 'detractors') {
             query = query.where('surveys.survey_satisfaction_score', '>=', 0)
-                         .where('surveys.survey_satisfaction_score', '<=', 6);
+                .where('surveys.survey_satisfaction_score', '<=', 6);
         } else if (scoreFilter === 'promoters') {
             query = query.where('surveys.survey_satisfaction_score', '>=', 9)
-                         .where('surveys.survey_satisfaction_score', '<=', 10);
+                .where('surveys.survey_satisfaction_score', '<=', 10);
         }
 
         const surveys = await query;
-        
+
         // Fetch event definitions for dropdown
         const eventDefinitions = await knex('event_definitions')
             .select('event_definition_id', 'event_name')
             .orderBy('event_name', 'asc');
 
-        res.render('admin/surveys', { 
-            user: req.user, 
-            surveys, 
+        res.render('admin/surveys', {
+            user: req.user,
+            surveys,
             eventDefinitions,
             filters: { eventFilter, scoreFilter }
         });
@@ -724,9 +632,9 @@ exports.listDonations = async (req, res) => {
         }
 
         const donations = await query;
-        res.render('admin/donations', { 
-            user: req.user, 
-            donations, 
+        res.render('admin/donations', {
+            user: req.user,
+            donations,
             filters: { search, startDate, endDate, minAmount }
         });
     } catch (err) {

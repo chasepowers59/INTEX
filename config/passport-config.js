@@ -1,11 +1,12 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt'); // REMOVED
 const knex = require('knex');
 const knexConfig = require('../knexfile');
 
 const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
 
+// Configure LocalStrategy
 // Configure LocalStrategy
 passport.use(new LocalStrategy({
     usernameField: 'participant_email',
@@ -15,18 +16,18 @@ passport.use(new LocalStrategy({
         console.log(`Looking up email: ${participant_email}`);
         const user = await db('participants').where({ participant_email }).first();
         console.log('User Found?', user ? 'YES' : 'NO');
-        
+
         if (!user) {
             return done(null, false, { message: 'Invalid email or password' });
         }
-        
-        if (user) console.log('Stored hash:', user.participant_password);
-        
-        // Check for plain text password OR bcrypt hash
-        const isMatch = user.participant_password === participant_password || 
-                       await bcrypt.compare(participant_password, user.participant_password);
-        console.log('Hash comparison result?', isMatch);
-        
+
+        // DEBUG: Log passwords for comparison
+        console.log("Input Password: " + participant_password + " | Stored Password: " + user.participant_password);
+
+        // Check for plain text password (Direct string comparison)
+        const isMatch = user.participant_password === participant_password;
+        console.log('Password match result?', isMatch);
+
         if (isMatch) {
             return done(null, user);
         } else {

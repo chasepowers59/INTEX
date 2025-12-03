@@ -29,10 +29,10 @@ app.use(helmet({
         directives: {
             defaultSrc: ["'self'"],
             scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://code.jquery.com", "https://cdnjs.cloudflare.com", "https://stackpath.bootstrapcdn.com"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://stackpath.bootstrapcdn.com", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://stackpath.bootstrapcdn.com", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net"],
             imgSrc: ["'self'", "data:", "https://images.unsplash.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
-            connectSrc: ["'self'"],
+            connectSrc: ["'self'", "https://cdn.jsdelivr.net"],
             upgradeInsecureRequests: [],
         },
     },
@@ -93,9 +93,9 @@ app.use('/milestones', milestoneRoutes);
 app.use('/donations', donationRoutes);
 app.use('/surveys', surveyRoutes);
 
-// Easter Egg
+// Easter Egg - RFC 2324
 app.get('/teapot', (req, res) => {
-    res.status(418).send("I am a teapot - Ella Rises Code");
+    res.status(418).render('teapot');
 });
 
 // Global Error Handler

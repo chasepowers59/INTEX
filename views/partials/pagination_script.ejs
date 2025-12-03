@@ -1,0 +1,49 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Find the first table on the page
+        const table = document.querySelector('table');
+        if (!table) return;
+
+        const tbody = table.querySelector('tbody');
+        if (!tbody) return;
+
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        // If 10 or fewer rows, no need for pagination
+        if (rows.length <= 10) return;
+
+        const rowsPerPage = 10;
+        let visibleCount = rowsPerPage;
+
+        // Hide rows beyond the limit
+        rows.forEach((row, index) => {
+            if (index >= visibleCount) {
+                row.style.display = 'none';
+            }
+        });
+
+        // Create "Show More" button
+        const btn = document.createElement('button');
+        btn.innerText = 'Show More';
+        btn.className = 'btn btn-outline-primary mt-3';
+        btn.style.display = 'block';
+        btn.style.margin = '0 auto';
+
+        btn.addEventListener('click', function () {
+            const nextCount = visibleCount + rowsPerPage;
+            rows.forEach((row, index) => {
+                if (index < nextCount) {
+                    row.style.display = '';
+                }
+            });
+            visibleCount = nextCount;
+
+            // Hide button if all rows are shown
+            if (visibleCount >= rows.length) {
+                btn.style.display = 'none';
+            }
+        });
+
+        // Insert button after the table
+        table.parentNode.appendChild(btn);
+    });
+</script>

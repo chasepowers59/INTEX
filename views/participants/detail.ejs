@@ -1,74 +1,39 @@
 <%- include('../partials/header', { user: user }) %>
 
     <div class="container mt-4">
-        <!-- Header Section -->
-        <div
-            style="background: white; padding: 2rem; border-radius: var(--radius-card); box-shadow: var(--shadow-soft); margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h1 style="margin-bottom: 0.5rem; color: var(--col-purple);">
-                    <%= participant.participant_first_name %>
-                        <%= participant.participant_last_name %>
-                </h1>
-                <div style="display: flex; gap: 1rem; align-items: center;">
-                    <span
-                        style="background: var(--col-blue); color: white; padding: 0.3rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
-                        <%= participant.participant_role %>
-                    </span>
-                    <span style="color: var(--text-light);"><i class="fas fa-envelope"></i>
-                        <%= participant.participant_email %>
-                    </span>
-                </div>
-            </div>
-            <% if (user.role==='Admin' || user.role==='Manager' ) { %>
-                <a href="/participants/edit/<%= participant.participant_id %>" class="btn">Edit Profile</a>
-                <% } %>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
-            <!-- Left Column: Activity Feed -->
-            <div style="display: flex; flex-direction: column; gap: 2rem;">
-
-                <!-- Milestones -->
-                <div class="card" style="text-align: left;">
-                    <h3
-                        style="color: var(--col-purple); border-bottom: 2px solid var(--col-purple); padding-bottom: 0.5rem; display: inline-block; margin-bottom: 1.5rem;">
-                        Milestones</h3>
-                    <% if (milestones.length> 0) { %>
-                        <div class="timeline"
-                            style="border-left: 3px solid var(--col-cream); padding-left: 1.5rem; margin-left: 0.5rem;">
-                            <% milestones.forEach(m=> { %>
-                                <div style="position: relative; margin-bottom: 1.5rem;">
-                                    <div
-                                        style="position: absolute; left: -2.1rem; top: 0.2rem; width: 1rem; height: 1rem; background: var(--col-purple); border-radius: 50%;">
-                                    </div>
-                                    <strong style="font-size: 1.1rem; display: block;">
-                                        <%= m.milestone_title %>
-                                    </strong>
-                                    <span style="font-size: 0.9rem; color: var(--text-light);">
-                                        <%= new Date(m.milestone_date).toLocaleDateString() %>
-                                    </span>
-                                    <% if (m.milestone_notes) { %>
-                                        <p style="margin-top: 0.5rem; font-size: 0.95rem;">
-                                            <%= m.milestone_notes %>
-                                        </p>
-                                        <% } %>
-                                </div>
-                                <% }) %>
+        <div class="row">
+            <!-- Left Column: Main Content -->
+            <div class="col-md-8">
+                <!-- Header Section -->
+                <div
+                    style="background: white; padding: 2rem; border-radius: var(--radius-card); box-shadow: var(--shadow-soft); margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1 style="margin-bottom: 0.5rem; color: var(--col-purple);">
+                            <%= participant.participant_first_name %>
+                                <%= participant.participant_last_name %>
+                        </h1>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <span
+                                style="background: var(--col-blue); color: white; padding: 0.3rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
+                                <%= participant.participant_role %>
+                            </span>
+                            <span style="color: var(--text-light);"><i class="fas fa-envelope"></i>
+                                <%= participant.participant_email %>
+                            </span>
                         </div>
-                        <% } else { %>
-                            <p style="color: var(--text-light); font-style: italic;">No milestones recorded yet.</p>
-                            <% } %>
+                    </div>
+                    <% if (user.participant_role==='admin' || user.participant_role==='manager' ) { %>
+                        <a href="/admin/participants/edit/<%= participant.participant_id %>" class="btn">Edit
+                            Profile</a>
+                        <% } %>
                 </div>
 
-                <!-- Events & Surveys -->
-                <div class="card" style="text-align: left;">
-                    <h3
-                        style="color: var(--col-green); border-bottom: 2px solid var(--col-green); padding-bottom: 0.5rem; display: inline-block; margin-bottom: 1.5rem;">
-                        Events & Impact</h3>
-
-                    <% if (registrations.length> 0) { %>
+                <!-- Event History -->
+                <div class="card mb-4">
+                    <h3 class="mb-3">Event History</h3>
+                    <% if (registrations && registrations.length> 0) { %>
                         <div style="overflow-x: auto;">
-                            <table>
+                            <table class="table">
                                 <thead>
                                     <tr>
                                         <th style="color: var(--col-green);">Event</th>
@@ -95,7 +60,7 @@
                         </div>
 
                         <!-- Survey Chart -->
-                        <% if (surveys.length> 0) { %>
+                        <% if (surveys && surveys.length> 0) { %>
                             <div style="margin-top: 2rem; height: 300px;">
                                 <canvas id="surveyChart"></canvas>
                             </div>
@@ -132,71 +97,71 @@
             </div>
 
             <!-- Right Column: Sidebar -->
-            <div style="display: flex; flex-direction: column; gap: 2rem;">
+            <div class="col-md-4">
+                <div style="display: flex; flex-direction: column; gap: 2rem;">
 
-                <!-- Profile Details -->
-                <div class="card" style="text-align: left;">
-                    <h4 style="color: var(--col-blue); margin-bottom: 1rem;">Profile Details</h4>
-                    <ul
-                        style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1rem;">
-                        <li>
-                            <strong
-                                style="display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--text-light);">Location</strong>
-                            <%= participant.participant_city || 'N/A' %>, <%= participant.participant_state || '' %>
-                        </li>
-                        <li>
-                            <strong
-                                style="display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--text-light);">School
-                                / Employer</strong>
-                            <%= participant.participant_school_or_employer || 'N/A' %>
-                        </li>
-                        <li>
-                            <strong
-                                style="display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--text-light);">Field
-                                of Interest</strong>
-                            <%= participant.participant_field_of_interest || 'N/A' %>
-                        </li>
-                        <li>
-                            <strong
-                                style="display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--text-light);">Date
-                                of Birth</strong>
-                            <%= participant.participant_dob ? new Date(participant.participant_dob).toLocaleDateString()
-                                : 'N/A' %>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Donation History (Only if exists) -->
-                <% if (donations.length> 0) { %>
-                    <div class="card" style="text-align: left; background: var(--col-cream);">
-                        <h4 style="color: var(--col-dark-pink); margin-bottom: 1rem;">Contributions</h4>
-                        <ul style="list-style: none; padding: 0; margin: 0;">
-                            <% donations.forEach(d=> { %>
-                                <li
-                                    style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(0,0,0,0.05);">
-                                    <span>
-                                        <%= new Date(d.donation_date).toLocaleDateString() %>
-                                    </span>
-                                    <strong>$<%= d.donation_amount %></strong>
-                                </li>
-                                <% }) %>
+                    <!-- Profile Details -->
+                    <div class="card" style="text-align: left;">
+                        <h4 style="color: var(--col-blue); margin-bottom: 1rem;">Profile Details</h4>
+                        <ul
+                            style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1rem;">
+                            <li>
+                                <strong
+                                    style="display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--text-light);">Location</strong>
+                                <%= participant.participant_city || 'N/A' %>, <%= participant.participant_state || '' %>
+                            </li>
+                            <li>
+                                <strong
+                                    style="display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--text-light);">School
+                                    / Employer</strong>
+                                <%= participant.participant_school_or_employer || 'N/A' %>
+                            </li>
+                            <li>
+                                <strong
+                                    style="display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--text-light);">Field
+                                    of Interest</strong>
+                                <%= participant.participant_field_of_interest || 'N/A' %>
+                            </li>
+                            <li>
+                                <strong
+                                    style="display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--text-light);">Date
+                                    of Birth</strong>
+                                <%= participant.participant_dob ? new
+                                    Date(participant.participant_dob).toLocaleDateString() : 'N/A' %>
+                            </li>
                         </ul>
                     </div>
-                    <% } %>
+
+                    <!-- Donation History (Only if exists) -->
+                    <% if (donations && donations.length> 0) { %>
+                        <div class="card" style="text-align: left; background: var(--col-cream);">
+                            <h4 style="color: var(--col-dark-pink); margin-bottom: 1rem;">Contributions</h4>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <% donations.forEach(d=> { %>
+                                    <li
+                                        style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(0,0,0,0.05);">
+                                        <span>
+                                            <%= new Date(d.donation_date).toLocaleDateString() %>
+                                        </span>
+                                        <strong>$<%= d.donation_amount %></strong>
+                                    </li>
+                                    <% }) %>
+                            </ul>
+                        </div>
+                        <% } %>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const ctx = document.getElementById('surveyChart');
-            if (ctx) {
-                const surveyData = <% - JSON.stringify(surveys) %>;
+            const surveyData = <% - JSON.stringify(surveys || []) %>;
 
-                // If no data, don't break
-                if (!surveyData || surveyData.length === 0) return;
-
+            if (surveyData.length > 0) {
+                const ctx = document.getElementById('surveyChart').getContext('2d');
                 new Chart(ctx, {
                     type: 'line',
                     data: {

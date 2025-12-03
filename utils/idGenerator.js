@@ -1,7 +1,8 @@
 const crypto = require('crypto');
 
 function generateId() {
-    return crypto.randomBytes(5).toString('hex'); // Generates 10 characters
+    // Generate a random integer between 1 and 2147483647 (Postgres INTEGER max)
+    return Math.floor(Math.random() * 2147483647) + 1;
 }
 
 module.exports = { generateId };

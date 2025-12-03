@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt'); // REMOVED
 const knex = require('knex');
 const knexConfig = require('../knexfile');
 const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
@@ -22,7 +22,7 @@ exports.postLogin = (req, res, next) => {
             if (err) {
                 return res.render('login', { user: null, error: 'An error occurred during login' });
             }
-            
+
             // Redirect based on participant_role
             if (user.participant_role === 'admin') {
                 return res.redirect('/admin/dashboard');
@@ -55,7 +55,7 @@ exports.postRegister = async (req, res) => {
         }
 
         // Hash password
-        const hashedPassword = await bcrypt.hash(participant_password, 10);
+        // const hashedPassword = await bcrypt.hash(participant_password, 10); // REMOVED
 
         // Generate participant ID
         const participantId = generateId();
@@ -66,7 +66,7 @@ exports.postRegister = async (req, res) => {
             participant_first_name,
             participant_last_name,
             participant_email,
-            participant_password: hashedPassword,
+            participant_password: participant_password, // Plain text
             participant_role: 'participant' // Hardcoded to 'participant'
         });
 

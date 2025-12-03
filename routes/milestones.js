@@ -20,9 +20,15 @@ router.get('/add', isAuthenticated, isManager, async (req, res) => {
 });
 
 // Handle Add Milestone
-router.post('/add', isAuthenticated, isManager, async (req, res) => {
+router.post('/add', isAuthenticated, async (req, res) => {
     try {
         const { participant_id, milestone_title, milestone_date } = req.body;
+
+        // Access Control: Admin or Owner
+        if (req.user.participant_role !== 'admin' && req.user.participant_role !== 'manager' && req.user.participant_id != participant_id) {
+            return res.status(403).send('Unauthorized');
+        }
+
         const milestoneId = generateId();
 
         await db('milestones').insert({
@@ -32,41 +38,57 @@ router.post('/add', isAuthenticated, isManager, async (req, res) => {
             milestone_date: milestone_date
         });
 
-        res.redirect(`/participants/${participant_id}`);
+        // Redirect back to referring page
+        res.redirect(req.get('referer'));
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
     }
 });
 
-// --- TEMPLATES ---
-
-// List Templates
-router.get('/templates', isAuthenticated, isManager, async (req, res) => {
+// Handle Edit Milestone
+router.post('/edit/:id', isAuthenticated, async (req, res) => {
     try {
-        const templates = await db('milestone_templates').orderBy('created_at', 'desc');
-        res.render('milestones/templates', { user: req.user, templates });
+        const { id } = req.params;
+        const { milestone_title, milestone_date } = req.body;
+
+        const milestone = await db('milestones').where({ milestone_id: id }).first();
+        if (!milestone) return res.status(404).send('Milestone not found');
+
+        // Access Control: Admin or Owner
+        if (req.user.participant_role !== 'admin' && req.user.participant_role !== 'manager' && req.user.participant_id != milestone.participant_id) {
+            return res.status(403).send('Unauthorized');
+        }
+
+        await db('milestones')
+            .where({ milestone_id: id })
+            .update({
+                milestone_title,
+                milestone_date
+            });
+
+        res.redirect(req.get('referer'));
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
     }
 });
 
-// Add Template Form
-router.get('/templates/add', isAuthenticated, isManager, (req, res) => {
-    res.render('milestones/add_template', { user: req.user });
-});
-
-// Handle Add Template
-router.post('/templates/add', isAuthenticated, isManager, async (req, res) => {
+// Handle Delete Milestone
+router.post('/delete/:id', isAuthenticated, async (req, res) => {
     try {
-        const { title, description, days_from_start } = req.body;
-        await db('milestone_templates').insert({
-            title,
-            description,
-            days_from_start: days_from_start || 0
-        });
-        res.redirect('/milestones/templates');
+        const { id } = req.params;
+        const milestone = await db('milestones').where({ milestone_id: id }).first();
+
+        if (!milestone) return res.status(404).send('Milestone not found');
+
+        // Access Control: Admin or Owner
+        if (req.user.participant_role !== 'admin' && req.user.participant_role !== 'manager' && req.user.participant_id != milestone.participant_id) {
+            return res.status(403).send('Unauthorized');
+        }
+
+        await db('milestones').where({ milestone_id: id }).del();
+        res.redirect(req.get('referer'));
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
