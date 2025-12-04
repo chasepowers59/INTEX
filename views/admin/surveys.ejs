@@ -10,26 +10,21 @@
             </div>
         </div>
 
-        <!-- Search Bar -->
-        <div class="admin-search-card">
-            <form action="/admin/surveys" method="GET" class="admin-search-form">
-                <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="Search by participant name, event name, or comments..." value="<%= search || '' %>">
-                    <button type="submit" class="btn btn-primary">Search</button>
-                    <% if (search) { %>
-                        <a href="/admin/surveys" class="admin-btn admin-btn-secondary" style="margin-left: 0.5rem;">Clear</a>
-                    <% } %>
-                </div>
-            </form>
-        </div>
-
-        <!-- Advanced Filters -->
+        <!-- Search and Filters Combined -->
         <div class="admin-filter-card">
             <div class="card-header">
-                <h5 class="mb-0">Filters</h5>
+                <h5 class="mb-0">Search & Filters</h5>
             </div>
             <div class="card-body">
                 <form action="/admin/surveys" method="GET" class="row g-3">
+                    <!-- Search -->
+                    <div class="col-12">
+                        <label for="search" class="form-label">Search</label>
+                        <input type="text" name="search" id="search" class="form-control admin-select" 
+                            placeholder="Search by participant name, event name, or comments..." 
+                            value="<%= search || '' %>">
+                    </div>
+                    <!-- Filters -->
                     <div class="col-md-6">
                         <label for="eventFilter" class="form-label">Filter by Event</label>
                         <select name="eventFilter" id="eventFilter" class="admin-select form-select">
@@ -52,9 +47,10 @@
                             <option value="promoters" <%= filters && filters.scoreFilter === 'promoters' ? 'selected' : '' %>>Promoters</option>
                         </select>
                     </div>
+                    <!-- Action Buttons -->
                     <div class="col-12">
                         <button type="submit" class="admin-btn admin-btn-primary">Apply Filters</button>
-                        <a href="/admin/surveys" class="admin-btn admin-btn-secondary">Clear Filters</a>
+                        <a href="/admin/surveys" class="admin-btn admin-btn-secondary">Clear All</a>
                     </div>
                 </form>
             </div>
@@ -87,6 +83,7 @@
                                         <div class="admin-action-buttons">
                                             <a href="/admin/surveys/<%= s.survey_id %>" class="admin-btn admin-btn-info">View Details</a>
                                             <% if (user && user.participant_role === 'admin') { %>
+                                                <a href="/admin/surveys/edit/<%= s.survey_id %>" class="admin-btn admin-btn-warning">Edit</a>
                                                 <form action="/admin/surveys/delete/<%= s.survey_id %>" method="POST"
                                                     style="display: inline;" class="delete-form">
                                                     <button type="submit" class="admin-btn admin-btn-danger">Delete</button>

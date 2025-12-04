@@ -70,13 +70,26 @@ exports.getDashboard = async (req, res) => {
         // KPI 1: Average Satisfaction Score
         // Business Logic: Calculate average satisfaction across all surveys for filtered registrations.
         // This gives managers insight into program quality for specific participant segments or event types.
-        const avgSatisfactionResult = await knex('surveys')
-            .whereIn('registration_id', rIds)
-            .avg('survey_satisfaction_score as avg')
-            .first();
-        const satisfactionScore = avgSatisfactionResult && avgSatisfactionResult.avg
-            ? parseFloat(avgSatisfactionResult.avg).toFixed(1)
-            : 0;
+        let satisfactionScore = '0.0';
+        if (rIds.length > 0) {
+            const avgSatisfactionResult = await knex('surveys')
+                .whereIn('registration_id', rIds)
+                .whereNotNull('survey_satisfaction_score')
+                .avg('survey_satisfaction_score as avg')
+                .first();
+            satisfactionScore = avgSatisfactionResult && avgSatisfactionResult.avg
+                ? parseFloat(avgSatisfactionResult.avg).toFixed(1)
+                : '0.0';
+        } else {
+            // If no filters, calculate from all surveys
+            const avgSatisfactionResult = await knex('surveys')
+                .whereNotNull('survey_satisfaction_score')
+                .avg('survey_satisfaction_score as avg')
+                .first();
+            satisfactionScore = avgSatisfactionResult && avgSatisfactionResult.avg
+                ? parseFloat(avgSatisfactionResult.avg).toFixed(1)
+                : '0.0';
+        }
 
         // KPI 2: Higher Education Milestones
         // Business Logic: Count milestones related to higher education achievement.
@@ -84,33 +97,43 @@ exports.getDashboard = async (req, res) => {
         // We use keyword matching because milestone titles are free-form text, allowing flexibility
         // while still capturing education-related achievements.
         const higherEdKeywords = ['College', 'FAFSA', 'Scholarship', 'University', 'Degree'];
-        let milestoneCount = 0;
+        let milestoneQuery = knex('milestones')
+            .where(builder => {
+                higherEdKeywords.forEach(keyword => {
+                    builder.orWhere('milestone_title', 'ilike', `%${keyword}%`);
+                });
+            });
+        
+        // Apply participant filter if filters are active
         if (pIds.length > 0) {
-            const milestoneResult = await knex('milestones')
-                .whereIn('participant_id', pIds)
-                .where(builder => {
-                    higherEdKeywords.forEach(keyword => {
-                        builder.orWhere('milestone_title', 'ilike', `%${keyword}%`);
-                    });
-                })
-                .count('milestone_id as count')
-                .first();
-            milestoneCount = parseInt(milestoneResult.count);
+            milestoneQuery = milestoneQuery.whereIn('participant_id', pIds);
         }
+        
+        const milestoneResult = await milestoneQuery.count('milestone_id as count').first();
+        const milestoneCount = parseInt(milestoneResult.count || 0);
 
         // KPI 4: Total Donations
         // Business Logic: Sum all donations from the database, ensuring we only count actual donations
         // Only count donations with valid dates (not null, not in the future)
         // Filter by participant IDs if filters are applied to maintain consistency with other KPIs
+        // Note: Donations can have null participant_id (visitor donations), so we use whereIn only when filters are active
         const nowForDonations = new Date();
         let totalDonationsQuery = knex('donations')
             .whereNotNull('donation_date')
+            .whereNotNull('donation_amount')
             .where('donation_date', '<=', nowForDonations); // Don't include future dates
+        
+        // Apply participant filter if filters are active
+        // When filters are applied, only count donations from filtered participants (excludes visitor donations)
+        // When no filters, count all donations including visitor donations (where participant_id is null)
         if (pIds.length > 0) {
             totalDonationsQuery = totalDonationsQuery.whereIn('participant_id', pIds);
         }
+        
         const totalDonationsResult = await totalDonationsQuery.sum('donation_amount as total').first();
-        const totalDonations = totalDonationsResult && totalDonationsResult.total ? parseFloat(totalDonationsResult.total) : 0;
+        const totalDonations = totalDonationsResult && totalDonationsResult.total 
+            ? parseFloat(totalDonationsResult.total) 
+            : 0;
         
         // Debug: Log total donations calculation
         console.log('Total Donations KPI:', {
@@ -126,8 +149,15 @@ exports.getDashboard = async (req, res) => {
         // Passives: Score 3 (neutral)
         // Detractors: Scores 0-2 (unlikely to recommend)
         // This metric helps identify program strengths and areas needing improvement.
-        const surveyStats = await knex('surveys')
-            .whereNotNull('survey_recommendation_score')
+        let npsQuery = knex('surveys')
+            .whereNotNull('survey_recommendation_score');
+        
+        // Apply registration filter if filters are active for consistency
+        if (rIds.length > 0) {
+            npsQuery = npsQuery.whereIn('registration_id', rIds);
+        }
+        
+        const surveyStats = await npsQuery
             .select(
                 knex.raw("COUNT(*) as total"),
                 knex.raw("SUM(CASE WHEN survey_recommendation_score >= 4 THEN 1 ELSE 0 END) as promoters"),
@@ -151,14 +181,20 @@ exports.getDashboard = async (req, res) => {
             npsScore: npsScore
         });
 
-        // KPI 6: Attendance Count
-        const attendanceResult = await knex('registrations')
-            .where('registration_attended_flag', true)
-            .count('registration_id as count')
-            .first();
+        // KPI 6: Attendance Count (for filtered registrations)
+        // Business Logic: Count registrations where attendance flag is true, using filtered registration IDs
+        let attendanceQuery = knex('registrations')
+            .where('registration_attended_flag', true);
+        
+        // Apply registration filter if filters are active
+        if (rIds.length > 0) {
+            attendanceQuery = attendanceQuery.whereIn('registration_id', rIds);
+        }
+        
+        const attendanceResult = await attendanceQuery.count('registration_id as count').first();
         const attendanceCount = parseInt(attendanceResult.count || 0);
 
-        // KPI 7: Total Events
+        // KPI 7: Total Events (always show all events, not filtered)
         const totalEventsResult = await knex('event_instances')
             .count('event_instance_id as count')
             .first();
@@ -166,10 +202,15 @@ exports.getDashboard = async (req, res) => {
 
         // KPI 8: Attendance Rate
         // Business Logic: Calculate percentage of registrations that resulted in attendance
-        const totalRegistrations = await knex('registrations')
-            .whereIn('registration_id', rIds)
-            .count('registration_id as count')
-            .first();
+        // Both numerator and denominator must use the same filter for consistency
+        let totalRegistrationsQuery = knex('registrations');
+        
+        // Apply registration filter if filters are active
+        if (rIds.length > 0) {
+            totalRegistrationsQuery = totalRegistrationsQuery.whereIn('registration_id', rIds);
+        }
+        
+        const totalRegistrations = await totalRegistrationsQuery.count('registration_id as count').first();
         const totalRegCount = parseInt(totalRegistrations.count || 0);
         const attendanceRate = totalRegCount > 0 
             ? Math.round((attendanceCount / totalRegCount) * 100) 
@@ -181,10 +222,18 @@ exports.getDashboard = async (req, res) => {
         const nowDate = new Date();
         
         // KPI 9: Active Registrations (Upcoming Events)
-        // Use nowDate for consistency
-        const activeRegistrationsResult = await knex('registrations')
+        // Business Logic: Count registrations for future events
+        // Apply participant filter if filters are active for consistency
+        let activeRegistrationsQuery = knex('registrations')
             .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
-            .where('event_instances.event_date_time_start', '>', nowDate)
+            .where('event_instances.event_date_time_start', '>', nowDate);
+        
+        // Apply participant filter if filters are active
+        if (pIds.length > 0) {
+            activeRegistrationsQuery = activeRegistrationsQuery.whereIn('registrations.participant_id', pIds);
+        }
+        
+        const activeRegistrationsResult = await activeRegistrationsQuery
             .count('registrations.registration_id as count')
             .first();
         const activeRegistrations = parseInt(activeRegistrationsResult.count || 0);
@@ -221,14 +270,16 @@ exports.getDashboard = async (req, res) => {
 
         // Donations Trend
         // Business Logic: Compare current month donations vs previous month
-        // Only count donations with valid dates (not null, not in the future)
+        // Only count donations with valid dates (not null, not in the future) and valid amounts
         // Use nowDate (already defined above) instead of creating a new Date()
         let currentDonationsQuery = knex('donations')
             .whereNotNull('donation_date')
+            .whereNotNull('donation_amount')
             .where('donation_date', '>=', currentMonthStart)
             .where('donation_date', '<=', nowDate); // Don't include future dates
         let prevDonationsQuery = knex('donations')
             .whereNotNull('donation_date')
+            .whereNotNull('donation_amount')
             .where('donation_date', '>=', previousMonthStart)
             .where('donation_date', '<', currentMonthStart); // Previous month only
         
@@ -335,6 +386,8 @@ exports.getDashboard = async (req, res) => {
         const attendanceData = impactData;
 
         // Event Attendance Over Time (Last 6 Months)
+        // Business Logic: Show registration trends for the last 6 months
+        // Only include past events (not future events) for accurate historical trends
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
         let attendanceOverTime = [];
@@ -342,7 +395,20 @@ exports.getDashboard = async (req, res) => {
             attendanceOverTime = await knex('registrations')
                 .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
                 .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
+                .where('event_instances.event_date_time_start', '<=', nowDate) // Don't include future events
                 .whereIn('registrations.registration_id', rIds)
+                .select(
+                    knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
+                    knex.raw("COUNT(*) as count")
+                )
+                .groupBy('month')
+                .orderBy('month', 'asc');
+        } else {
+            // If no filters, calculate from all registrations
+            attendanceOverTime = await knex('registrations')
+                .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+                .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
+                .where('event_instances.event_date_time_start', '<=', nowDate) // Don't include future events
                 .select(
                     knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
                     knex.raw("COUNT(*) as count")
@@ -352,13 +418,31 @@ exports.getDashboard = async (req, res) => {
         }
 
         // Satisfaction Trends Over Time (Last 6 Months)
+        // Business Logic: Show satisfaction trends for the last 6 months
+        // Only include surveys with valid satisfaction scores and past events
         let satisfactionOverTime = [];
         if (rIds.length > 0) {
             satisfactionOverTime = await knex('surveys')
                 .join('registrations', 'surveys.registration_id', 'registrations.registration_id')
                 .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
                 .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
+                .where('event_instances.event_date_time_start', '<=', nowDate) // Don't include future events
+                .whereNotNull('survey_satisfaction_score')
                 .whereIn('surveys.registration_id', rIds)
+                .select(
+                    knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
+                    knex.raw("AVG(survey_satisfaction_score) as avg_score")
+                )
+                .groupBy('month')
+                .orderBy('month', 'asc');
+        } else {
+            // If no filters, calculate from all surveys
+            satisfactionOverTime = await knex('surveys')
+                .join('registrations', 'surveys.registration_id', 'registrations.registration_id')
+                .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+                .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
+                .where('event_instances.event_date_time_start', '<=', nowDate) // Don't include future events
+                .whereNotNull('survey_satisfaction_score')
                 .select(
                     knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
                     knex.raw("AVG(survey_satisfaction_score) as avg_score")
@@ -369,10 +453,11 @@ exports.getDashboard = async (req, res) => {
 
         // Donation Trends Over Time (Last 6 Months)
         // Business Logic: Show donation trends for the last 6 months from actual database data
-        // Only include donations with valid dates (not null, not in the future)
+        // Only include donations with valid dates (not null, not in the future) and valid amounts
         // Use nowDate (already defined above) instead of creating a new Date()
         let donationOverTimeQuery = knex('donations')
             .whereNotNull('donation_date')
+            .whereNotNull('donation_amount')
             .where('donation_date', '>=', sixMonthsAgo)
             .where('donation_date', '<=', nowDate); // Don't include future dates
         
@@ -626,12 +711,35 @@ exports.listParticipants = async (req, res) => {
             .orderBy('participant_last_name', 'asc');
 
         // Multi-field Search Logic: Search across name and location
-        // This allows managers to find participants by any identifying information
-        if (search) {
+        // This allows managers to find participants by any identifying information.
+        // Supports both single-word searches (e.g., "hazel") and full name searches (e.g., "hazel allen").
+        if (search && search.trim() !== '') {
+            const searchTerm = search.trim();
+            const searchParts = searchTerm.split(/\s+/); // Split by whitespace
+            
             query = query.where(builder => {
-                builder.where('participant_first_name', 'ilike', `%${search}%`)
-                    .orWhere('participant_last_name', 'ilike', `%${search}%`)
-                    .orWhere('participant_city', 'ilike', `%${search}%`);
+                if (searchParts.length > 1) {
+                    // Full name search: Match first name AND last name
+                    builder.where(function() {
+                        this.where('participant_first_name', 'ilike', `%${searchParts[0]}%`)
+                            .andWhere('participant_last_name', 'ilike', `%${searchParts[searchParts.length - 1]}%`);
+                    })
+                    // Also try reversed (in case user types "allen hazel")
+                    .orWhere(function() {
+                        this.where('participant_first_name', 'ilike', `%${searchParts[searchParts.length - 1]}%`)
+                            .andWhere('participant_last_name', 'ilike', `%${searchParts[0]}%`);
+                    })
+                    // Also search concatenated full name
+                    .orWhere(knex.raw("CONCAT(participant_first_name, ' ', participant_last_name) ILIKE ?", [`%${searchTerm}%`]))
+                    // Also search city
+                    .orWhere('participant_city', 'ilike', `%${searchTerm}%`);
+                } else {
+                    // Single word search: Match first name OR last name OR full name OR city
+                    builder.where('participant_first_name', 'ilike', `%${searchTerm}%`)
+                        .orWhere('participant_last_name', 'ilike', `%${searchTerm}%`)
+                        .orWhere(knex.raw("CONCAT(participant_first_name, ' ', participant_last_name) ILIKE ?", [`%${searchTerm}%`]))
+                        .orWhere('participant_city', 'ilike', `%${searchTerm}%`);
+                }
             });
         }
 
@@ -659,6 +767,61 @@ exports.listParticipants = async (req, res) => {
     } catch (err) {
         console.error('List Participants Error:', err);
         res.status(500).send('Server Error');
+    }
+};
+
+/**
+ * Get Add Participant Form: Display form for creating a new participant
+ * 
+ * Business Logic: Managers need to be able to manually add participants to the system.
+ * This is useful for participants who register in person or through other channels
+ * before they create an online account. The form includes all essential participant fields.
+ */
+exports.getAddParticipant = async (req, res) => {
+    try {
+        res.render('admin/participant_add', { user: req.user, participant: null });
+    } catch (err) {
+        console.error('Get Add Participant Error:', err);
+        res.status(500).send('Server Error');
+    }
+};
+
+/**
+ * Post Add Participant: Handle form submission to create a new participant
+ * 
+ * Business Logic: Creates a new participant record in the database. The participant_id
+ * is generated using our custom ID generator. All fields are optional except first name,
+ * last name, and email. The participant_role defaults to 'participant' unless specified.
+ */
+exports.postAddParticipant = async (req, res) => {
+    try {
+        const participantId = generateId();
+        
+        // Build participant data object from form submission
+        const participantData = {
+            participant_id: participantId,
+            participant_email: req.body.participant_email,
+            participant_first_name: req.body.participant_first_name,
+            participant_last_name: req.body.participant_last_name,
+            participant_dob: req.body.participant_dob || null,
+            participant_role: req.body.participant_role || 'participant',
+            participant_phone: req.body.participant_phone || null,
+            participant_city: req.body.participant_city || null,
+            participant_state: req.body.participant_state || null,
+            participant_zip: req.body.participant_zip || null,
+            participant_school_or_employer: req.body.participant_school_or_employer || null,
+            participant_field_of_interest: req.body.participant_field_of_interest || null,
+            participant_password: req.body.participant_password || null // Optional password
+        };
+
+        await knex('participants').insert(participantData);
+        
+        req.flash('success', 'Participant added successfully!');
+        res.redirect('/admin/participants');
+    } catch (err) {
+        console.error('Add Participant Error:', err);
+        req.flash('error', 'Error adding participant. Please try again.');
+        res.redirect('/admin/participants/add');
     }
 };
 
@@ -847,13 +1010,37 @@ exports.listSurveys = async (req, res) => {
         // Text Search Filter: Multi-field search across participant names, event names, and comments
         // Business Logic: Surveys contain rich information across multiple related tables.
         // Searching across participant names, event names, and comments allows managers to find
-        // surveys by any relevant context. This is more flexible than searching only survey fields.
+        // surveys by any relevant context. Supports both single-word and full name searches for participants.
         if (search && search.trim() !== '') {
+            const searchTerm = search.trim();
+            const searchParts = searchTerm.split(/\s+/); // Split by whitespace
+            
             query = query.where(builder => {
-                builder.where('participants.participant_first_name', 'ilike', `%${search}%`)
-                    .orWhere('participants.participant_last_name', 'ilike', `%${search}%`)
-                    .orWhere('event_definitions.event_name', 'ilike', `%${search}%`)
-                    .orWhere('surveys.survey_comments', 'ilike', `%${search}%`);
+                // Participant name search (supports full names)
+                if (searchParts.length > 1) {
+                    // Full name search: Match first name AND last name
+                    builder.where(function() {
+                        this.where('participants.participant_first_name', 'ilike', `%${searchParts[0]}%`)
+                            .andWhere('participants.participant_last_name', 'ilike', `%${searchParts[searchParts.length - 1]}%`);
+                    })
+                    // Also try reversed (in case user types "allen hazel")
+                    .orWhere(function() {
+                        this.where('participants.participant_first_name', 'ilike', `%${searchParts[searchParts.length - 1]}%`)
+                            .andWhere('participants.participant_last_name', 'ilike', `%${searchParts[0]}%`);
+                    })
+                    // Also search concatenated full name
+                    .orWhere(knex.raw("CONCAT(participants.participant_first_name, ' ', participants.participant_last_name) ILIKE ?", [`%${searchTerm}%`]))
+                    // Also search event names and comments
+                    .orWhere('event_definitions.event_name', 'ilike', `%${searchTerm}%`)
+                    .orWhere('surveys.survey_comments', 'ilike', `%${searchTerm}%`);
+                } else {
+                    // Single word search: Match first name OR last name OR full name OR event OR comments
+                    builder.where('participants.participant_first_name', 'ilike', `%${searchTerm}%`)
+                        .orWhere('participants.participant_last_name', 'ilike', `%${searchTerm}%`)
+                        .orWhere(knex.raw("CONCAT(participants.participant_first_name, ' ', participants.participant_last_name) ILIKE ?", [`%${searchTerm}%`]))
+                        .orWhere('event_definitions.event_name', 'ilike', `%${searchTerm}%`)
+                        .orWhere('surveys.survey_comments', 'ilike', `%${searchTerm}%`);
+                }
             });
         }
 
@@ -990,6 +1177,107 @@ exports.getSurveyDetail = async (req, res) => {
     }
 };
 
+/**
+ * Get Edit Survey Form: Display form for editing an existing survey response
+ * 
+ * Business Logic: Managers may need to correct survey data if errors were made during submission
+ * or if participants request changes. This allows editing all survey scores and comments
+ * while preserving the original registration and participant linkage.
+ */
+exports.getEditSurvey = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const survey = await knex('surveys')
+            .join('registrations', 'surveys.registration_id', 'registrations.registration_id')
+            .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+            .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
+            .join('participants', 'registrations.participant_id', 'participants.participant_id')
+            .where('surveys.survey_id', id)
+            .select(
+                'surveys.*',
+                'event_definitions.event_name',
+                'participants.participant_first_name',
+                'participants.participant_last_name'
+            )
+            .first();
+
+        if (!survey) {
+            return res.status(404).send('Survey not found');
+        }
+
+        res.render('admin/survey_edit', { user: req.user, survey });
+    } catch (err) {
+        console.error('Get Edit Survey Error:', err);
+        res.status(500).send('Server Error');
+    }
+};
+
+/**
+ * Post Edit Survey: Handle form submission to update survey data
+ * 
+ * Business Logic: Updates survey scores and recalculates the overall score and NPS bucket.
+ * The overall score is the average of all four scores (satisfaction, usefulness, instructor, recommendation).
+ * The NPS bucket is recalculated based on the recommendation score (0-2 Detractor, 3 Passive, 4-5 Promoter).
+ * This ensures data consistency when surveys are edited.
+ */
+exports.postEditSurvey = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const {
+            survey_satisfaction_score,
+            survey_usefulness_score,
+            survey_instructor_score,
+            survey_recommendation_score,
+            survey_comments
+        } = req.body;
+
+        // Validate scores are within 0-5 range
+        const scores = [
+            parseFloat(survey_satisfaction_score),
+            parseFloat(survey_usefulness_score),
+            parseFloat(survey_instructor_score),
+            parseFloat(survey_recommendation_score)
+        ];
+
+        if (scores.some(score => isNaN(score) || score < 0 || score > 5)) {
+            req.flash('error', 'All scores must be between 0 and 5.');
+            return res.redirect(`/admin/surveys/edit/${id}`);
+        }
+
+        // Calculate overall score (average of all four scores)
+        const overallScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+
+        // Recalculate NPS bucket based on recommendation score
+        let npsBucket = 'Passive'; // Default
+        const recScore = parseFloat(survey_recommendation_score);
+        if (recScore >= 4 && recScore <= 5) {
+            npsBucket = 'Promoter';
+        } else if (recScore >= 0 && recScore <= 2) {
+            npsBucket = 'Detractor';
+        }
+
+        // Update survey in database
+        await knex('surveys')
+            .where('survey_id', id)
+            .update({
+                survey_satisfaction_score: scores[0],
+                survey_usefulness_score: scores[1],
+                survey_instructor_score: scores[2],
+                survey_recommendation_score: scores[3],
+                survey_overall_score: overallScore,
+                survey_nps_bucket: npsBucket,
+                survey_comments: survey_comments || null
+            });
+
+        req.flash('success', 'Survey updated successfully!');
+        res.redirect(`/admin/surveys/${id}`);
+    } catch (err) {
+        console.error('Edit Survey Error:', err);
+        req.flash('error', 'Error updating survey. Please try again.');
+        res.redirect(`/admin/surveys/edit/${id}`);
+    }
+};
+
 exports.deleteSurvey = async (req, res) => {
     try {
         const { id } = req.params;
@@ -1018,11 +1306,37 @@ exports.listMilestones = async (req, res) => {
             )
             .orderBy('milestones.milestone_date', 'desc');
 
-        if (search) {
+        // Text Search: Search by milestone title or participant name
+        // Business Logic: Supports both single-word and full name searches for participants.
+        // This allows managers to find milestones by either the milestone title or the participant's name.
+        if (search && search.trim() !== '') {
+            const searchTerm = search.trim();
+            const searchParts = searchTerm.split(/\s+/); // Split by whitespace
+            
             query = query.where(builder => {
-                builder.where('milestones.milestone_title', 'ilike', `%${search}%`)
-                    .orWhere('participants.participant_first_name', 'ilike', `%${search}%`)
-                    .orWhere('participants.participant_last_name', 'ilike', `%${search}%`);
+                // Always search milestone title
+                builder.where('milestones.milestone_title', 'ilike', `%${searchTerm}%`);
+                
+                // Participant name search (supports full names)
+                if (searchParts.length > 1) {
+                    // Full name search: Match first name AND last name
+                    builder.orWhere(function() {
+                        this.where('participants.participant_first_name', 'ilike', `%${searchParts[0]}%`)
+                            .andWhere('participants.participant_last_name', 'ilike', `%${searchParts[searchParts.length - 1]}%`);
+                    })
+                    // Also try reversed (in case user types "allen hazel")
+                    .orWhere(function() {
+                        this.where('participants.participant_first_name', 'ilike', `%${searchParts[searchParts.length - 1]}%`)
+                            .andWhere('participants.participant_last_name', 'ilike', `%${searchParts[0]}%`);
+                    })
+                    // Also search concatenated full name
+                    .orWhere(knex.raw("CONCAT(participants.participant_first_name, ' ', participants.participant_last_name) ILIKE ?", [`%${searchTerm}%`]));
+                } else {
+                    // Single word search: Match first name OR last name OR full name
+                    builder.orWhere('participants.participant_first_name', 'ilike', `%${searchTerm}%`)
+                        .orWhere('participants.participant_last_name', 'ilike', `%${searchTerm}%`)
+                        .orWhere(knex.raw("CONCAT(participants.participant_first_name, ' ', participants.participant_last_name) ILIKE ?", [`%${searchTerm}%`]));
+                }
             });
         }
 
@@ -1141,11 +1455,35 @@ exports.listDonations = async (req, res) => {
             .orderBy('donations.donation_date', 'desc');
 
         // Text Search: Search by donor name (for participant-linked donations)
-        // Business Logic: Helps managers find donations from specific participants
-        if (search) {
+        // Business Logic: Helps managers find donations from specific participants.
+        // Supports both single-word searches (e.g., "hazel") and full name searches (e.g., "hazel allen").
+        // For full names, we split the search term and match first AND last name.
+        // We also search the concatenated full name to catch cases where names might be stored differently.
+        if (search && search.trim() !== '') {
+            const searchTerm = search.trim();
+            const searchParts = searchTerm.split(/\s+/); // Split by whitespace
+            
             query = query.where(builder => {
-                builder.where('participants.participant_first_name', 'ilike', `%${search}%`)
-                    .orWhere('participants.participant_last_name', 'ilike', `%${search}%`);
+                if (searchParts.length > 1) {
+                    // Full name search: Match first name AND last name
+                    // Example: "hazel allen" matches first_name LIKE '%hazel%' AND last_name LIKE '%allen%'
+                    builder.where(function() {
+                        this.where('participants.participant_first_name', 'ilike', `%${searchParts[0]}%`)
+                            .andWhere('participants.participant_last_name', 'ilike', `%${searchParts[searchParts.length - 1]}%`);
+                    })
+                    // Also try reversed (in case user types "allen hazel")
+                    .orWhere(function() {
+                        this.where('participants.participant_first_name', 'ilike', `%${searchParts[searchParts.length - 1]}%`)
+                            .andWhere('participants.participant_last_name', 'ilike', `%${searchParts[0]}%`);
+                    })
+                    // Also search concatenated full name
+                    .orWhere(knex.raw("CONCAT(participants.participant_first_name, ' ', participants.participant_last_name) ILIKE ?", [`%${searchTerm}%`]));
+                } else {
+                    // Single word search: Match first name OR last name OR concatenated full name
+                    builder.where('participants.participant_first_name', 'ilike', `%${searchTerm}%`)
+                        .orWhere('participants.participant_last_name', 'ilike', `%${searchTerm}%`)
+                        .orWhere(knex.raw("CONCAT(participants.participant_first_name, ' ', participants.participant_last_name) ILIKE ?", [`%${searchTerm}%`]));
+                }
             });
         }
 

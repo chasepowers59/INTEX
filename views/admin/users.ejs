@@ -24,15 +24,26 @@
             </div>
         <% } %>
 
-        <!-- Search Bar -->
-        <div class="admin-search-card">
-            <form action="/admin/users" method="GET" class="admin-search-form">
-                <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="Search by email..."
-                        value="<%= search || '' %>">
-                    <button type="submit" class="btn btn-primary">Search</button>
-                </div>
-            </form>
+        <!-- Search and Filters Combined -->
+        <div class="admin-filter-card">
+            <div class="card-header">
+                <h5 class="mb-0">Search & Filters</h5>
+            </div>
+            <div class="card-body">
+                <form action="/admin/users" method="GET" class="row g-3">
+                    <div class="col-12">
+                        <label for="search" class="form-label">Search</label>
+                        <div class="input-group">
+                            <input type="text" name="search" id="search" class="form-control admin-select" 
+                                placeholder="Search by email..." value="<%= search || '' %>">
+                            <button type="submit" class="admin-btn admin-btn-primary">Search</button>
+                            <% if (search) { %>
+                                <a href="/admin/users" class="admin-btn admin-btn-secondary">Clear</a>
+                            <% } %>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <!-- Table -->

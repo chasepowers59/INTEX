@@ -1,68 +1,96 @@
 <%- include('../partials/header', { user: user }) %>
+<%- include('../admin/_shared_styles') %>
 
     <div class="container mt-4">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <!-- Page Header -->
+        <div class="admin-page-header">
             <h1>Donation Insights</h1>
-            <a href="/donations" class="btn">Back to List</a>
-        </div>
-
-        <div class="grid-3">
-            <div class="card">
-                <h3 style="color: var(--col-green);">$<%= totalRaised.toLocaleString() %>
-                </h3>
-                <p>Total Raised</p>
-            </div>
-            <div class="card">
-                <h3 style="color: var(--col-blue);">
-                    <%= totalDonations %>
-                </h3>
-                <p>Total Donations</p>
-            </div>
-            <div class="card">
-                <h3 style="color: var(--col-purple);">$<%= avgDonation %>
-                </h3>
-                <p>Average Donation</p>
+            <div class="btn-group">
+                <a href="/admin/donations" class="admin-btn admin-btn-secondary">Back to Donations</a>
+                <a href="/admin/dashboard" class="admin-btn admin-btn-secondary">Back to Dashboard</a>
             </div>
         </div>
 
-        <div class="card" style="margin-top: 2rem;">
-            <h3 style="margin-bottom: 1.5rem; color: var(--col-dark-pink);">Top Donors</h3>
-            <p style="margin-bottom: 2rem; color: var(--text-light);">Recognizing our most committed supporters.</p>
+        <!-- Stats Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="admin-table-card">
+                    <div class="card-body" style="padding: 2rem; text-align: center;">
+                        <h3 style="font-family: 'DM Serif Display', serif; font-size: 2.5rem; color: #28a745; margin-bottom: 0.5rem;">
+                            $<%= totalRaised.toLocaleString() %>
+                        </h3>
+                        <p style="font-family: 'Montserrat', sans-serif; color: #666; font-size: 1rem; margin: 0;">Total Raised</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="admin-table-card">
+                    <div class="card-body" style="padding: 2rem; text-align: center;">
+                        <h3 style="font-family: 'DM Serif Display', serif; font-size: 2.5rem; color: var(--brand-blue); margin-bottom: 0.5rem;">
+                            <%= totalDonations %>
+                        </h3>
+                        <p style="font-family: 'Montserrat', sans-serif; color: #666; font-size: 1rem; margin: 0;">Total Donations</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="admin-table-card">
+                    <div class="card-body" style="padding: 2rem; text-align: center;">
+                        <h3 style="font-family: 'DM Serif Display', serif; font-size: 2.5rem; color: var(--brand-lavender); margin-bottom: 0.5rem;">
+                            $<%= avgDonation %>
+                        </h3>
+                        <p style="font-family: 'Montserrat', sans-serif; color: #666; font-size: 1rem; margin: 0;">Average Donation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Donor</th>
-                        <th>Total Contributed</th>
-                        <th>Donation Count</th>
-                        <th>Last Donation</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% topDonors.forEach(d=> { %>
+        <!-- Top Donors Table -->
+        <div class="admin-table-card">
+            <div class="admin-table-header">
+                <h3 style="font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: #2C2C2C; margin: 0;">Top Donors</h3>
+                <p style="font-family: 'Montserrat', sans-serif; color: #666; font-size: 0.9rem; margin: 0.5rem 0 0 0;">Recognizing our most committed supporters.</p>
+            </div>
+            <div class="card-body">
+                <table class="table admin-table">
+                    <thead>
                         <tr>
-                            <td>
-                                <strong>
-                                    <%= d.participant_first_name %>
-                                        <%= d.participant_last_name %>
-                                </strong>
-                            </td>
-                            <td style="color: var(--col-green); font-weight: bold;">$<%= d.total_amount.toLocaleString()
-                                    %>
-                            </td>
-                            <td>
-                                <span
-                                    style="background: var(--col-cream); padding: 0.2rem 0.8rem; border-radius: 10px; font-size: 0.9rem;">
-                                    <%= d.donation_count %>
-                                </span>
-                            </td>
-                            <td>
-                                <%= d.last_donation ? new Date(d.last_donation).toLocaleDateString('en-US') : 'N/A' %>
-                            </td>
+                            <th>Donor</th>
+                            <th>Total Contributed</th>
+                            <th>Donation Count</th>
+                            <th>Last Donation</th>
                         </tr>
-                        <% }) %>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <% if (topDonors && topDonors.length > 0) { %>
+                            <% topDonors.forEach(d => { %>
+                                <tr>
+                                    <td>
+                                        <strong style="font-family: 'Montserrat', sans-serif;">
+                                            <%= d.participant_first_name %> <%= d.participant_last_name %>
+                                        </strong>
+                                    </td>
+                                    <td style="color: #28a745; font-weight: bold; font-family: 'Montserrat', sans-serif;">
+                                        $<%= parseFloat(d.total_amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
+                                    </td>
+                                    <td>
+                                        <span class="admin-badge" style="background: var(--brand-cream); color: #2C2C2C;">
+                                            <%= d.donation_count %>
+                                        </span>
+                                    </td>
+                                    <td style="font-family: 'Montserrat', sans-serif;">
+                                        <%= d.last_donation ? new Date(d.last_donation).toLocaleDateString('en-US') : 'N/A' %>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="4" class="admin-empty-state">No donors found.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 

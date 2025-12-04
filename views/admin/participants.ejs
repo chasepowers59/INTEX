@@ -6,19 +6,33 @@
         <div class="admin-page-header">
             <h1>Participant Maintenance</h1>
             <div class="btn-group">
+                <% if (user && user.participant_role === 'admin') { %>
+                    <a href="/admin/participants/add" class="admin-btn admin-btn-success">Add Participant</a>
+                <% } %>
                 <a href="/admin/dashboard" class="admin-btn admin-btn-secondary">Back to Dashboard</a>
             </div>
         </div>
 
-        <!-- Search Bar -->
-        <div class="admin-search-card">
-            <form action="/admin/participants" method="GET" class="admin-search-form">
-                <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="Search by name or city..."
-                        value="<%= search || '' %>">
-                    <button type="submit" class="btn btn-primary">Search</button>
-                </div>
-            </form>
+        <!-- Search and Filters Combined -->
+        <div class="admin-filter-card">
+            <div class="card-header">
+                <h5 class="mb-0">Search & Filters</h5>
+            </div>
+            <div class="card-body">
+                <form action="/admin/participants" method="GET" class="row g-3">
+                    <div class="col-12">
+                        <label for="search" class="form-label">Search</label>
+                        <div class="input-group">
+                            <input type="text" name="search" id="search" class="form-control admin-select" 
+                                placeholder="Search by name or city..." value="<%= search || '' %>">
+                            <button type="submit" class="admin-btn admin-btn-primary">Search</button>
+                            <% if (search) { %>
+                                <a href="/admin/participants" class="admin-btn admin-btn-secondary">Clear</a>
+                            <% } %>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <!-- Table -->

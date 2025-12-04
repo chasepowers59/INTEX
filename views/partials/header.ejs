@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ella Rises</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/img/Ella Rises Logo (2).PNG">
+    <link rel="shortcut icon" type="image/png" href="/img/Ella Rises Logo (2).PNG">
+    <link rel="apple-touch-icon" href="/img/Ella Rises Logo (2).PNG">
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome -->
@@ -20,33 +24,150 @@
 </head>
 
 <body>
-    <nav class="navbar">
-        <a href="/" class="logo-primary" style="text-decoration: none;">
-            <span class="logo-ella">Ella</span>
-            <span class="logo-rises">RISES</span>
-        </a>
-        <div class="nav-links">
-            <a href="/about" class="nav-link">About</a>
-            <a href="/programs" class="nav-link">Programs</a>
-            <a href="/events" class="nav-link">Events</a>
-            <a href="/get-involved" class="nav-link">Get Involved</a>
-            <a href="/donate" class="nav-link">Donate</a>
-            <a href="/press" class="nav-link">Press</a>
-            <a href="/contact" class="nav-link">Contact Us</a>
+    <!-- Top Utility Bar -->
+    <div class="header-top-bar">
+        <div class="container-fluid">
+            <div class="top-bar-content">
+                <div class="top-bar-left">
+                    <span class="top-bar-text">
+                        <i class="fas fa-heart me-1"></i>Empowering Latina Youth Since 2015
+                    </span>
+                </div>
+                <div class="top-bar-right">
+                    <a href="/donate" class="top-bar-link">
+                        <i class="fas fa-hand-holding-heart me-1"></i>Support Our Mission
+                    </a>
+                </div>
+            </div>
         </div>
-        <div class="nav-actions" style="display: flex; gap: 1rem; align-items: center;">
-            <% if (user) { %>
-                <% if (user.participant_role==='admin' ) { %>
-                    <a href="/admin/dashboard" class="btn">Dashboard</a>
-                    <% } else { %>
-                        <a href="/participants/<%= user.participant_id %>" class="btn">My Profile</a>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="navbar-modern">
+        <div class="container-fluid">
+            <div class="navbar-content">
+                <!-- Logo Section -->
+                <a href="/" class="navbar-logo">
+                    <div class="logo-container">
+                        <img src="/img/Ella Rises Logo (2).PNG" alt="Ella Rises Logo" class="logo-image">
+                    </div>
+                </a>
+
+                <!-- Navigation Links -->
+                <div class="navbar-nav-links">
+                    <a href="/about" class="nav-link-modern">
+                        <span>About</span>
+                    </a>
+                    <a href="/programs" class="nav-link-modern">
+                        <span>Programs</span>
+                    </a>
+                    <a href="/events" class="nav-link-modern">
+                        <span>Events</span>
+                    </a>
+                    <a href="/get-involved" class="nav-link-modern">
+                        <span>Get Involved</span>
+                    </a>
+                    <a href="/donate" class="nav-link-modern nav-link-donate">
+                        <i class="fas fa-heart me-1"></i>
+                        <span>Donate</span>
+                    </a>
+                    <a href="/press" class="nav-link-modern">
+                        <span>Press</span>
+                    </a>
+                    <a href="/contact" class="nav-link-modern">
+                        <span>Contact Us</span>
+                    </a>
+                </div>
+
+                <!-- User Actions -->
+                <div class="navbar-actions">
+                    <% if (user) { %>
+                        <% if (user.participant_role === 'admin') { %>
+                            <a href="/admin/dashboard" class="btn-nav btn-nav-primary">
+                                <i class="fas fa-tachometer-alt me-1"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        <% } else { %>
+                            <a href="/participants/<%= user.participant_id %>" class="btn-nav btn-nav-primary">
+                                <i class="fas fa-user me-1"></i>
+                                <span>My Profile</span>
+                            </a>
                         <% } %>
-                            <a href="/auth/logout" class="btn"
-                                style="background: white; color: var(--col-dark-gray);">Logout</a>
-                            <% } else { %>
-                                <a href="/auth/login" class="nav-link">Login</a>
-                                <% } %>
+                        <a href="/auth/logout" class="btn-nav btn-nav-secondary">
+                            <i class="fas fa-sign-out-alt me-1"></i>
+                            <span>Logout</span>
+                        </a>
+                    <% } else { %>
+                        <a href="/auth/login" class="btn-nav btn-nav-primary">
+                            <i class="fas fa-sign-in-alt me-1"></i>
+                            <span>Login</span>
+                        </a>
+                    <% } %>
+                </div>
+
+                <!-- Mobile Menu Toggle -->
+                <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div class="mobile-nav-menu" id="mobileNavMenu">
+            <a href="/about" class="mobile-nav-link">About</a>
+            <a href="/programs" class="mobile-nav-link">Programs</a>
+            <a href="/events" class="mobile-nav-link">Events</a>
+            <a href="/get-involved" class="mobile-nav-link">Get Involved</a>
+            <a href="/donate" class="mobile-nav-link">Donate</a>
+            <a href="/press" class="mobile-nav-link">Press</a>
+            <a href="/contact" class="mobile-nav-link">Contact Us</a>
+            <div class="mobile-nav-divider"></div>
+            <% if (user) { %>
+                <% if (user.participant_role === 'admin') { %>
+                    <a href="/admin/dashboard" class="mobile-nav-link">Dashboard</a>
+                <% } else { %>
+                    <a href="/participants/<%= user.participant_id %>" class="mobile-nav-link">My Profile</a>
+                <% } %>
+                <a href="/auth/logout" class="mobile-nav-link">Logout</a>
+            <% } else { %>
+                <a href="/auth/login" class="mobile-nav-link">Login</a>
+            <% } %>
         </div>
     </nav>
     <!-- Spacer for fixed navbar -->
-    <div style="height: 100px;"></div>
+    <div class="navbar-spacer"></div>
+
+    <!-- Mobile Menu Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mobileNavMenu = document.getElementById('mobileNavMenu');
+            
+            if (mobileMenuToggle && mobileNavMenu) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    mobileNavMenu.classList.toggle('active');
+                });
+                
+                // Close menu when clicking on a link
+                const mobileNavLinks = mobileNavMenu.querySelectorAll('.mobile-nav-link');
+                mobileNavLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenuToggle.classList.remove('active');
+                        mobileNavMenu.classList.remove('active');
+                    });
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    const isClickInsideNav = mobileNavMenu.contains(event.target) || mobileMenuToggle.contains(event.target);
+                    if (!isClickInsideNav && mobileNavMenu.classList.contains('active')) {
+                        mobileMenuToggle.classList.remove('active');
+                        mobileNavMenu.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>

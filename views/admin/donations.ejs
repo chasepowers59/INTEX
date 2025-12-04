@@ -6,7 +6,7 @@
         <div class="admin-page-header">
             <h1>Donation Maintenance</h1>
             <div class="btn-group">
-                <a href="/donations/insights" class="admin-btn admin-btn-info">View Donation Insights</a>
+                <a href="/donations/insights" class="admin-btn admin-btn-info">View Insights</a>
                 <% if (user && user.participant_role === 'admin') { %>
                     <a href="/admin/donations/add" class="admin-btn admin-btn-success">Add Donation</a>
                 <% } %>
@@ -14,36 +14,42 @@
             </div>
         </div>
 
-        <!-- Advanced Filters -->
+        <!-- Search and Filters Combined -->
         <div class="admin-filter-card">
             <div class="card-header">
-                <h5 class="mb-0">Filters</h5>
+                <h5 class="mb-0">Search & Filters</h5>
             </div>
             <div class="card-body">
                 <form action="/admin/donations" method="GET" class="row g-3">
-                    <div class="col-md-3">
-                        <label for="search" class="form-label">Search by Donor Name</label>
-                        <input type="text" name="search" id="search" class="form-control" placeholder="Donor name..."
+                    <!-- Search -->
+                    <div class="col-12">
+                        <label for="search" class="form-label">Search</label>
+                        <input type="text" name="search" id="search" class="form-control admin-select" 
+                            placeholder="Search by donor name..." 
                             value="<%= filters && filters.search ? filters.search : '' %>">
                     </div>
+                    <!-- Filters -->
                     <div class="col-md-3">
                         <label for="startDate" class="form-label">Start Date</label>
-                        <input type="date" name="startDate" id="startDate" class="form-control"
+                        <input type="date" name="startDate" id="startDate" class="form-control admin-select"
                             value="<%= filters && filters.startDate ? filters.startDate : '' %>">
                     </div>
                     <div class="col-md-3">
                         <label for="endDate" class="form-label">End Date</label>
-                        <input type="date" name="endDate" id="endDate" class="form-control"
+                        <input type="date" name="endDate" id="endDate" class="form-control admin-select"
                             value="<%= filters && filters.endDate ? filters.endDate : '' %>">
                     </div>
                     <div class="col-md-3">
                         <label for="minAmount" class="form-label">Minimum Amount ($)</label>
-                        <input type="number" step="0.01" name="minAmount" id="minAmount" class="form-control"
+                        <input type="number" step="0.01" name="minAmount" id="minAmount" class="form-control admin-select"
                             placeholder="0.00" value="<%= filters && filters.minAmount ? filters.minAmount : '' %>">
                     </div>
-                    <div class="col-12">
-                        <button type="submit" class="admin-btn admin-btn-primary">Apply Filters</button>
-                        <a href="/admin/donations" class="admin-btn admin-btn-secondary">Clear Filters</a>
+                    <div class="col-md-3">
+                        <label class="form-label" style="opacity: 0;">&nbsp;</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button type="submit" class="admin-btn admin-btn-primary" style="flex: 1;">Apply</button>
+                            <a href="/admin/donations" class="admin-btn admin-btn-secondary" style="flex: 1; text-align: center; text-decoration: none;">Clear</a>
+                        </div>
                     </div>
                 </form>
             </div>

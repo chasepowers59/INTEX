@@ -6,100 +6,788 @@
             --brand-lavender: #958EBF;
             --brand-pink: #FAD2D8;
             --brand-cream: #FDFBF7;
+            --brand-coral: #EE969E;
+            --brand-peach: #FFD1C7;
         }
 
-        .bg-brand-blue {
-            background-color: var(--brand-blue) !important;
+        body {
+            background: linear-gradient(135deg, #FFD1C7 0%, #FFE5DF 50%, #FDFBF7 100%);
+            min-height: 100vh;
         }
 
-        .bg-brand-lavender {
-            background-color: var(--brand-lavender) !important;
-        }
-
-        .bg-brand-pink {
-            background-color: var(--brand-pink) !important;
-        }
-
-        .text-brand-blue {
-            color: var(--brand-blue) !important;
-        }
-
-        .text-brand-lavender {
-            color: var(--brand-lavender) !important;
-        }
-
-        .dashboard-hero {
+        /* Hero Section */
+        .profile-hero {
             background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-lavender) 100%);
+            padding: 4rem 0 5rem 0;
+            margin-bottom: 2.5rem;
             color: white;
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
         }
 
-        .avatar-circle {
-            width: 80px;
-            height: 80px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border: 2px solid white;
+        .profile-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(135deg, #FFD1C7 0%, #FFE5DF 50%, #FDFBF7 100%);
+            clip-path: polygon(0 20%, 5% 15%, 10% 20%, 15% 15%, 20% 20%, 25% 15%, 30% 20%, 35% 15%, 40% 20%, 45% 15%, 50% 20%, 55% 15%, 60% 20%, 65% 15%, 70% 20%, 75% 15%, 80% 20%, 85% 15%, 90% 20%, 95% 15%, 100% 20%, 100% 100%, 0 100%);
+            z-index: 1;
+        }
+
+        .profile-hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .profile-hero-row {
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .profile-hero-left {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .profile-hero-right {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+
+        .profile-hero h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            color: white;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .avatar-large {
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 4px solid white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            font-weight: bold;
+            font-size: 3rem;
+            font-weight: 700;
             color: white;
-        }
-
-        .card-custom {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
             margin-bottom: 1.5rem;
-            overflow: hidden;
+            flex-shrink: 0;
         }
 
-        .card-header-custom {
-            background-color: white;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            padding: 1.5rem;
+        .profile-name-section {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            flex-wrap: wrap;
         }
 
-        .milestone-badge {
-            background-color: var(--brand-lavender);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
-            display: inline-block;
+        .profile-contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin: 1rem 0 1.25rem 0;
+            align-items: center;
         }
 
-        .event-card {
-            background-color: white;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            transition: transform 0.2s;
+        .profile-contact-info span {
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            font-size: 0.95rem;
         }
 
-        .event-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        /* Quick Stats Cards */
+        .stats-row {
+            margin-bottom: 2.5rem;
         }
 
-        .status-badge {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.75rem;
+        .stat-card {
+            background: white;
             border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            height: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-color: var(--brand-blue);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-icon.events { background: linear-gradient(135deg, var(--brand-blue), #6B8FA8); }
+        .stat-icon.milestones { background: linear-gradient(135deg, var(--brand-lavender), #7A6FA8); }
+        .stat-icon.surveys { background: linear-gradient(135deg, var(--brand-coral), #D87A84); }
+        .stat-icon.donations { background: linear-gradient(135deg, #28a745, #218838); }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: 'DM Serif Display', serif;
+            color: #2C2C2C;
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2.5rem;
+            overflow: hidden;
+            border: none;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 1.5rem 2rem;
+            border-bottom: 3px solid var(--brand-peach);
+        }
+
+        .section-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.5rem;
+            color: #2C2C2C;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--brand-blue);
+            font-size: 1.3rem;
+        }
+
+        .section-body {
+            padding: 2rem;
+        }
+
+        /* Navigation Tabs */
+        .profile-tabs-container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+            margin-bottom: 2.5rem;
+            min-height: 500px;
+        }
+
+        .nav-tabs-custom {
+            border: none;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-bottom: 4px solid var(--brand-peach);
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 0;
+            justify-content: flex-start;
+            align-items: stretch;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+
+        .nav-tabs-custom::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .nav-tabs-custom::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .nav-tabs-custom::-webkit-scrollbar-thumb {
+            background: rgba(141, 169, 196, 0.3);
+            border-radius: 3px;
+        }
+
+        .nav-tabs-custom::-webkit-scrollbar-thumb:hover {
+            background: rgba(141, 169, 196, 0.5);
+        }
+
+        .nav-tabs-custom .nav-item {
+            flex: 0 0 auto;
+            margin: 0;
+        }
+
+        .nav-tabs-custom .nav-link {
+            border: none;
+            border-radius: 0;
+            padding: 1.5rem 2.5rem;
+            font-weight: 700;
+            color: #666;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+            background: transparent;
+            position: relative;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+            text-transform: none;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            min-height: 70px;
+            border-bottom: 4px solid transparent;
+            margin-bottom: -4px;
+        }
+
+        .nav-tabs-custom .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 4px;
+            background: var(--brand-lavender);
+            transition: width 0.3s ease;
+        }
+
+        .nav-tabs-custom .nav-link[data-tab="milestones"]::before {
+            background: var(--brand-lavender);
+        }
+
+        .nav-tabs-custom .nav-link[data-tab="events"]::before {
+            background: var(--brand-blue);
+        }
+
+        .nav-tabs-custom .nav-link[data-tab="upcoming"]::before {
+            background: #28a745;
+        }
+
+        .nav-tabs-custom .nav-link[data-tab="surveys"]::before {
+            background: var(--brand-coral);
+        }
+
+        .nav-tabs-custom .nav-link[data-tab="donations"]::before {
+            background: #28a745;
+        }
+
+        .nav-tabs-custom .nav-link:hover {
+            background: rgba(141, 169, 196, 0.1);
+            color: var(--brand-blue);
+        }
+
+        .nav-tabs-custom .nav-link:hover::before {
+            width: 50%;
+        }
+
+        .nav-tabs-custom .nav-link.active {
+            background: transparent;
+            color: var(--brand-blue);
+            border-bottom-color: var(--brand-lavender);
+        }
+
+        .nav-tabs-custom .nav-link.active::before {
+            width: 100%;
+        }
+
+        .nav-tabs-custom .nav-link.active[data-tab="milestones"] {
+            color: var(--brand-lavender);
+            border-bottom-color: var(--brand-lavender);
+        }
+
+        .nav-tabs-custom .nav-link.active[data-tab="events"] {
+            color: var(--brand-blue);
+            border-bottom-color: var(--brand-blue);
+        }
+
+        .nav-tabs-custom .nav-link.active[data-tab="upcoming"] {
+            color: #28a745;
+            border-bottom-color: #28a745;
+        }
+
+        .nav-tabs-custom .nav-link.active[data-tab="surveys"] {
+            color: var(--brand-coral);
+            border-bottom-color: var(--brand-coral);
+        }
+
+        .nav-tabs-custom .nav-link.active[data-tab="donations"] {
+            color: #28a745;
+            border-bottom-color: #28a745;
+        }
+
+        .nav-tabs-custom .nav-link i {
+            font-size: 1.4rem;
+        }
+
+        .nav-tabs-custom .nav-link span:not(.tab-badge) {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .tab-content-custom {
+            padding: 0;
+            min-height: 400px;
+        }
+
+        .tab-pane-custom {
+            display: none;
+            padding: 3rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-pane-custom.active {
+            display: block;
+        }
+
+        .tab-pane-custom h4 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
             font-weight: 600;
         }
 
-        .status-completed {
-            background-color: #d1e7dd;
-            color: #0f5132;
+        .tab-pane-custom h4 i {
+            font-size: 1.8rem;
+            margin-right: 0.75rem;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tab-badge {
+            background: rgba(141, 169, 196, 0.2);
+            border-radius: 15px;
+            padding: 0.3rem 0.7rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-left: 0.5rem;
+            color: var(--brand-blue);
+        }
+
+        .nav-tabs-custom .nav-link.active .tab-badge {
+            background: rgba(141, 169, 196, 0.3);
+            color: inherit;
+        }
+
+        .nav-tabs-custom .nav-link[data-tab="milestones"].active .tab-badge {
+            background: rgba(149, 142, 191, 0.3);
+        }
+
+        .nav-tabs-custom .nav-link[data-tab="events"].active .tab-badge {
+            background: rgba(141, 169, 196, 0.3);
+        }
+
+        .nav-tabs-custom .nav-link[data-tab="upcoming"].active .tab-badge {
+            background: rgba(40, 167, 69, 0.3);
+        }
+
+        .nav-tabs-custom .nav-link[data-tab="surveys"].active .tab-badge {
+            background: rgba(238, 150, 158, 0.3);
+        }
+
+        .nav-tabs-custom .nav-link[data-tab="donations"].active .tab-badge {
+            background: rgba(40, 167, 69, 0.3);
+        }
+
+        /* Milestone Item */
+        .milestone-item {
+            display: flex;
+            align-items: center;
+            padding: 1.75rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 18px;
+            margin-bottom: 1.25rem;
+            border-left: 5px solid var(--brand-lavender);
+            transition: all 0.3s ease;
+            gap: 1.5rem;
+        }
+
+        .milestone-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .milestone-icon {
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, var(--brand-lavender), #7A6FA8);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(149, 142, 191, 0.3);
+        }
+
+        /* Event Card */
+        .event-card-modern {
+            background: white;
+            border: 2px solid #f0f0f0;
+            border-radius: 18px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .event-card-modern:last-child {
+            margin-bottom: 0;
+        }
+
+        .event-card-modern h5 {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .event-card-modern:hover {
+            border-color: var(--brand-blue);
+            box-shadow: 0 5px 20px rgba(141, 169, 196, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .event-badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .badge-upcoming {
+            background: linear-gradient(135deg, #28a745, #218838);
+            color: white;
+        }
+
+        .badge-attended {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+        }
+
+        .badge-registered {
+            background: #6c757d;
+            color: white;
+        }
+
+        /* Donation Summary */
+        .donation-summary {
+            background: linear-gradient(135deg, var(--brand-peach) 0%, #FFE5DF 100%);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .donation-total {
+            font-size: 3rem;
+            font-weight: 700;
+            font-family: 'DM Serif Display', serif;
+            color: var(--brand-blue);
+            margin: 0.5rem 0;
+        }
+
+        /* Survey Score Badge */
+        .score-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .score-excellent { background: linear-gradient(135deg, #28a745, #218838); }
+        .score-good { background: linear-gradient(135deg, #17a2b8, #138496); }
+        .score-fair { background: linear-gradient(135deg, #ffc107, #e0a800); }
+        .score-poor { background: linear-gradient(135deg, #dc3545, #c82333); }
+
+        /* Action Buttons */
+        .action-btn {
+            border-radius: 25px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .action-btn-primary {
+            background: white;
+            color: var(--brand-blue);
+            border-color: white;
+        }
+
+        .action-btn-primary:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            color: var(--brand-blue);
+        }
+
+        .action-btn-secondary {
+            background: transparent;
+            color: white;
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .action-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+            color: white;
+        }
+
+        /* Profile Info Card */
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            gap: 1rem;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            min-width: 140px;
+            flex-shrink: 0;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: #2C2C2C;
+            font-weight: 500;
+            font-family: 'Montserrat', sans-serif;
+            flex: 1;
+            word-break: break-word;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+
+        /* Main Content Layout */
+        .profile-content-row {
+            gap: 2rem;
+            align-items: flex-start;
+        }
+
+        .profile-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .profile-main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .profile-content-row {
+                gap: 2.5rem;
+            }
+
+            .profile-sidebar {
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .profile-hero {
+                padding: 3rem 0 4rem 0;
+            }
+
+            .profile-hero-row {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .profile-hero-right {
+                width: 100%;
+                align-items: stretch;
+            }
+
+            .profile-hero-right .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .profile-name-section {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .avatar-large {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .profile-contact-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+
+            .section-body {
+                padding: 1.5rem;
+            }
+
+            .info-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                padding: 1rem;
+            }
+
+            .info-label {
+                min-width: auto;
+            }
+
+            .nav-tabs-custom {
+                padding: 0;
+            }
+
+            .nav-tabs-custom .nav-link {
+                padding: 1.25rem 1.5rem;
+                font-size: 1rem;
+                min-height: 65px;
+            }
+
+            .nav-tabs-custom .nav-link i {
+                font-size: 1.2rem;
+            }
+
+            .nav-tabs-custom .nav-link span:not(.tab-badge) {
+                font-size: 1rem;
+            }
+
+            .tab-pane-custom {
+                padding: 2rem 1.5rem;
+            }
+
+            .tab-pane-custom h4 {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .tab-pane-custom h4 i {
+                font-size: 1.3rem;
+            }
+
+            .profile-tabs-container {
+                min-height: 400px;
+            }
+
+            .tab-content-custom {
+                min-height: 300px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .profile-hero {
+                padding: 1.5rem 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .stats-row {
+                margin-bottom: 2rem;
+            }
+
+            .section-card {
+                margin-bottom: 2rem;
+            }
+
+            .section-header {
+                padding: 1.25rem 1.5rem;
+            }
+
+            .section-body {
+                padding: 1.25rem;
+            }
         }
     </style>
 
@@ -107,208 +795,453 @@
         <!-- Flash Messages -->
         <% if (typeof messages !== 'undefined' && messages) { %>
             <% if (messages.success && messages.success.length > 0) { %>
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <%= messages.success[0] %>
+                <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 15px;">
+                    <i class="fas fa-check-circle me-2"></i><%= messages.success[0] %>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <% } %>
             <% if (messages.error && messages.error.length > 0) { %>
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <%= messages.error[0] %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 15px;">
+                    <i class="fas fa-exclamation-circle me-2"></i><%= messages.error[0] %>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <% } %>
         <% } %>
 
         <!-- Hero Section -->
-        <div class="dashboard-hero d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center">
-                <div class="avatar-circle me-4">
-                    <%= participant.participant_first_name.charAt(0) %>
-                        <%= participant.participant_last_name.charAt(0) %>
+        <div class="profile-hero">
+            <div class="profile-hero-content">
+                <div class="row profile-hero-row">
+                    <div class="col-12 col-lg-8 profile-hero-left">
+                        <div class="profile-name-section">
+                            <div class="avatar-large">
+                                <%= participant.participant_first_name.charAt(0) %><%= participant.participant_last_name.charAt(0) %>
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <h1>
+                                    <%= participant.participant_first_name %> <%= participant.participant_last_name %>
+                                </h1>
+                                <div class="profile-contact-info">
+                                    <span>
+                                        <i class="fas fa-map-marker-alt me-2"></i>
+                                        <%= participant.participant_city || 'Unknown City' %>
+                                    </span>
+                                    <span>
+                                        <i class="fas fa-envelope me-2"></i>
+                                        <%= participant.participant_email %>
+                                    </span>
+                                    <% if (participant.participant_phone) { %>
+                                        <span>
+                                            <i class="fas fa-phone me-2"></i>
+                                            <%= participant.participant_phone %>
+                                        </span>
+                                    <% } %>
+                                </div>
+                                <div>
+                                    <span class="badge bg-light text-dark px-3 py-2 rounded-pill" style="font-size: 0.9rem;">
+                                        <i class="fas fa-user-tag me-2"></i><%= participant.participant_role %>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-4 profile-hero-right">
+                        <% if (user.role === 'Manager') { %>
+                            <a href="/participants/edit/<%= participant.participant_id %>" class="action-btn action-btn-primary">
+                                <i class="fas fa-edit me-2"></i>Edit Profile
+                            </a>
+                        <% } else if (user.participant_id && user.participant_id == participant.participant_id) { %>
+                            <a href="/participants/edit-self" class="action-btn action-btn-primary">
+                                <i class="fas fa-edit me-2"></i>Edit Profile
+                            </a>
+                            <a href="/participants/change-password" class="action-btn action-btn-secondary">
+                                <i class="fas fa-key me-2"></i>Change Password
+                            </a>
+                        <% } %>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="display-6 fw-bold mb-1">
-                        <%= participant.participant_first_name %>
-                            <%= participant.participant_last_name %>
-                    </h1>
-                    <p class="mb-0 opacity-75">
-                        <i class="fas fa-map-marker-alt me-2"></i>
-                        <%= participant.participant_city || 'Unknown City' %>
-                            <span class="mx-2">|</span>
-                            <i class="fas fa-envelope me-2"></i>
-                            <%= participant.participant_email %>
-                    </p>
-                </div>
-            </div>
-            <div>
-                <% if (user.role==='Manager' ) { %>
-                    <a href="/participants/edit/<%= participant.participant_id %>" class="btn btn-light rounded-pill px-4">
-                        <i class="fas fa-edit me-2"></i>Edit Profile
-                    </a>
-                <% } else if (user.participant_id && user.participant_id == participant.participant_id) { %>
-                    <a href="/participants/edit-self" class="btn btn-light rounded-pill px-4">
-                        <i class="fas fa-edit me-2"></i>Edit Profile
-                    </a>
-                    <a href="/participants/change-password" class="btn btn-outline-light rounded-pill px-4 ms-2">
-                        <i class="fas fa-key me-2"></i>Change Password
-                    </a>
-                <% } %>
             </div>
         </div>
 
-        <div class="row g-4">
-            <!-- Left Column: Info & Milestones -->
-            <div class="col-lg-4">
-                <!-- Personal Info -->
-                <div class="card card-custom h-100">
-                    <div class="card-header-custom">
-                        <h5 class="fw-bold mb-0 text-dark">Profile Details</h5>
+        <!-- Quick Stats -->
+        <div class="row g-4 stats-row">
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon events">
+                        <i class="fas fa-calendar-alt"></i>
                     </div>
-                    <div class="card-body p-4">
-                        <ul class="list-unstyled mb-0">
-                            <li class="mb-3">
-                                <small class="text-muted d-block text-uppercase fw-bold"
-                                    style="font-size: 0.7rem;">Role</small>
-                                <span class="badge bg-brand-blue rounded-pill">
-                                    <%= participant.participant_role %>
-                                </span>
-                            </li>
-                            <li class="mb-3">
-                                <small class="text-muted d-block text-uppercase fw-bold"
-                                    style="font-size: 0.7rem;">School / Employer</small>
-                                <span class="fw-medium">
-                                    <%= participant.participant_school_or_employer || 'N/A' %>
-                                </span>
-                            </li>
-                            <li class="mb-3">
-                                <small class="text-muted d-block text-uppercase fw-bold"
-                                    style="font-size: 0.7rem;">Field of Interest</small>
-                                <span class="fw-medium">
-                                    <%= participant.participant_field_of_interest || 'N/A' %>
-                                </span>
-                            </li>
-                            <li>
-                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Date
-                                    of Birth</small>
-                                <span class="fw-medium">
-                                    <%= participant.participant_dob ? new
-                                        Date(participant.participant_dob).toLocaleDateString() : 'N/A' %>
-                                </span>
-                            </li>
-                        </ul>
-                    </div>
+                    <div class="stat-value"><%= registrations.length %></div>
+                    <div class="stat-label">Events</div>
                 </div>
             </div>
-
-            <!-- Right Column: Stats & Content -->
-            <div class="col-lg-8">
-                <!-- Stats Row -->
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <div class="card card-custom bg-brand-cream h-100 mb-0">
-                            <div class="card-body text-center p-3">
-                                <h3 class="fw-bold text-brand-blue mb-0">
-                                    <%= registrations.length %>
-                                </h3>
-                                <small class="text-muted text-uppercase fw-bold"
-                                    style="font-size: 0.7rem;">Events</small>
-                            </div>
-                        </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon milestones">
+                        <i class="fas fa-trophy"></i>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card card-custom bg-brand-cream h-100 mb-0">
-                            <div class="card-body text-center p-3">
-                                <h3 class="fw-bold text-brand-lavender mb-0">
-                                    <%= milestones.length %>
-                                </h3>
-                                <small class="text-muted text-uppercase fw-bold"
-                                    style="font-size: 0.7rem;">Milestones</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card card-custom bg-brand-cream h-100 mb-0">
-                            <div class="card-body text-center p-3">
-                                <h3 class="fw-bold text-brand-pink mb-0">
-                                    <%= surveys.length %>
-                                </h3>
-                                <small class="text-muted text-uppercase fw-bold"
-                                    style="font-size: 0.7rem;">Surveys</small>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="stat-value"><%= milestones.length %></div>
+                    <div class="stat-label">Milestones</div>
                 </div>
-
-                <!-- Milestones -->
-                <div class="card card-custom mb-4">
-                    <div class="card-header-custom d-flex justify-content-between align-items-center">
-                        <h5 class="fw-bold mb-0 text-dark">Milestones</h5>
-                        <% if (user.role==='Manager' || (user.participant_id && user.participant_id == participant.participant_id)) { %>
-                            <button class="btn btn-sm btn-outline-primary rounded-pill" data-bs-toggle="modal"
-                                data-bs-target="#addMilestoneModal">
-                                <i class="fas fa-plus me-1"></i>Add
-                            </button>
-                            <% } %>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon surveys">
+                        <i class="fas fa-clipboard-check"></i>
                     </div>
-                    <div class="card-body p-4">
-                        <% if (milestones && milestones.length> 0) { %>
-                            <% milestones.forEach(m=> { %>
-                                <div class="d-flex align-items-center mb-3 pb-3 border-bottom last-no-border">
-                                    <div class="me-3 text-brand-lavender">
-                                        <i class="fas fa-check-circle fa-lg"></i>
+                    <div class="stat-value"><%= surveys.length %></div>
+                    <div class="stat-label">Surveys</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon donations">
+                        <i class="fas fa-donate"></i>
+                    </div>
+                    <div class="stat-value"><%= donations.length %></div>
+                    <div class="stat-label">Donations</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Details Section -->
+        <div class="section-card mb-4">
+            <div class="section-header">
+                <h3 class="section-title">
+                    <i class="fas fa-user-circle"></i>
+                    Profile Details
+                </h3>
+            </div>
+            <div class="section-body">
+                <div class="row g-4">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="info-item" style="flex-direction: column; align-items: flex-start; padding: 0; border: none;">
+                            <div class="info-label mb-2">School / Employer</div>
+                            <div class="info-value" style="font-size: 1.1rem;">
+                                <%= participant.participant_school_or_employer || 'N/A' %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="info-item" style="flex-direction: column; align-items: flex-start; padding: 0; border: none;">
+                            <div class="info-label mb-2">Field of Interest</div>
+                            <div class="info-value" style="font-size: 1.1rem;">
+                                <%= participant.participant_field_of_interest || 'N/A' %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="info-item" style="flex-direction: column; align-items: flex-start; padding: 0; border: none;">
+                            <div class="info-label mb-2">Date of Birth</div>
+                            <div class="info-value" style="font-size: 1.1rem;">
+                                <%= participant.participant_dob ? new Date(participant.participant_dob).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A' %>
+                            </div>
+                        </div>
+                    </div>
+                    <% if (participant.participant_state || participant.participant_zip) { %>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="info-item" style="flex-direction: column; align-items: flex-start; padding: 0; border: none;">
+                                <div class="info-label mb-2">Location</div>
+                                <div class="info-value" style="font-size: 1.1rem;">
+                                    <%= participant.participant_state || '' %><% if (participant.participant_state && participant.participant_zip) { %> <%= participant.participant_zip %><% } else if (participant.participant_zip) { %><%= participant.participant_zip %><% } else { %>N/A<% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Donation Summary (if applicable) -->
+        <% if (donations && donations.length > 0) { %>
+            <% const totalDonated = donations.reduce((sum, d) => sum + parseFloat(d.donation_amount || 0), 0); %>
+            <div class="donation-summary mb-4">
+                <div style="font-size: 0.9rem; color: #666; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 0.5rem;">
+                    Total Contribution
+                </div>
+                <div class="donation-total">$<%= totalDonated.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
+                <div style="color: #666; font-size: 0.9rem;">
+                    <%= donations.length %> donation<%= donations.length !== 1 ? 's' : '' %>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- Main Content -->
+        <div class="profile-main-content">
+                <!-- Milestones Section -->
+                <div class="section-card">
+                    <div class="section-header d-flex justify-content-between align-items-center">
+                        <h3 class="section-title">
+                            <i class="fas fa-trophy"></i>
+                            My Milestones
+                        </h3>
+                        <% if (user.role === 'Manager' || (user.participant_id && user.participant_id == participant.participant_id)) { %>
+                            <button class="btn btn-sm btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addMilestoneModal">
+                                <i class="fas fa-plus me-1"></i>Add Milestone
+                            </button>
+                        <% } %>
+                    </div>
+                    <div class="section-body">
+                        <% if (milestones && milestones.length > 0) { %>
+                            <% milestones.forEach(m => { %>
+                                <div class="milestone-item">
+                                    <div class="milestone-icon">
+                                        <i class="fas fa-star"></i>
                                     </div>
-                                    <div>
-                                        <h6 class="mb-0 fw-bold">
+                                    <div style="flex: 1;">
+                                        <h5 class="mb-2 fw-bold" style="font-family: 'DM Serif Display', serif; color: #2C2C2C; font-size: 1.3rem;">
                                             <%= m.milestone_title %>
-                                        </h6>
-                                        <small class="text-muted">
-                                            <%= m.milestone_date ? new Date(m.milestone_date).toLocaleDateString()
-                                                : 'No Date' %>
-                                        </small>
+                                        </h5>
+                                        <div class="text-muted" style="font-size: 0.95rem;">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            <%= m.milestone_date ? new Date(m.milestone_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'No Date' %>
+                                        </div>
                                     </div>
                                 </div>
-                                <% }); %>
-                                    <% } else { %>
-                                        <p class="text-muted mb-0">No milestones recorded yet.</p>
-                                        <% } %>
+                            <% }); %>
+                        <% } else { %>
+                            <div class="empty-state">
+                                <i class="fas fa-trophy"></i>
+                                <p class="mb-0">No milestones recorded yet.<br>Start adding your achievements!</p>
+                            </div>
+                        <% } %>
                     </div>
                 </div>
 
                 <!-- Upcoming Events -->
-                <% if (upcomingEvents && upcomingEvents.length> 0) { %>
-                    <div class="card card-custom mb-4">
-                        <div class="card-header-custom">
-                            <h5 class="fw-bold mb-0 text-dark">Upcoming Events</h5>
+                <% if (upcomingEvents && upcomingEvents.length > 0) { %>
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <i class="fas fa-calendar-check"></i>
+                                Upcoming Events
+                            </h3>
                         </div>
-                        <div class="card-body p-4">
+                        <div class="section-body">
+                            <% upcomingEvents.forEach(reg => { %>
+                                <div class="event-card-modern">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div style="flex: 1;">
+                                            <h5 class="fw-bold mb-2" style="font-family: 'DM Serif Display', serif; color: var(--brand-blue); font-size: 1.4rem;">
+                                                <%= reg.event_name %>
+                                            </h5>
+                                            <span class="badge bg-light text-dark px-3 py-2" style="font-size: 0.85rem; font-weight: 600;">
+                                                <%= reg.event_type %>
+                                            </span>
+                                        </div>
+                                        <span class="event-badge badge-upcoming">Upcoming</span>
+                                    </div>
+                                    <div class="row g-3 mt-3">
+                                        <div class="col-md-6">
+                                            <div class="text-muted d-block mb-2" style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                <i class="fas fa-calendar me-1"></i>Date & Time
+                                            </div>
+                                            <div style="font-weight: 600; font-size: 1.05rem; color: #2C2C2C;">
+                                                <%= reg.start_time ? new Date(reg.start_time).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) : 'TBD' %>
+                                                <% if (reg.start_time) { %>
+                                                    <br><div class="text-muted mt-1" style="font-size: 0.95rem; font-weight: 500;"><%= new Date(reg.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) %></div>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="text-muted d-block mb-2" style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                <i class="fas fa-map-marker-alt me-1"></i>Location
+                                            </div>
+                                            <div style="font-weight: 600; font-size: 1.05rem; color: #2C2C2C;"><%= reg.location || 'TBD' %></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                <% } %>
+
+                <!-- Event History -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-history"></i>
+                            Event History
+                        </h3>
+                    </div>
+                    <div class="section-body">
+                        <% if (registrations && registrations.length > 0) { %>
+                            <% registrations.forEach(reg => { %>
+                                <% 
+                                    const hasSurvey = surveyRegistrationIds && surveyRegistrationIds.includes(reg.registration_id);
+                                    const now = new Date();
+                                    const eventDate = reg.start_time ? new Date(reg.start_time) : null;
+                                    const isPastEvent = eventDate && !isNaN(eventDate.getTime()) && eventDate.getTime() < now.getTime();
+                                    const canSubmitSurvey = isPastEvent && !hasSurvey;
+                                %>
+                                <div class="event-card-modern">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div style="flex: 1;">
+                                            <h5 class="fw-bold mb-2" style="font-family: 'DM Serif Display', serif; color: #2C2C2C; font-size: 1.4rem;">
+                                                <%= reg.event_name %>
+                                            </h5>
+                                            <span class="badge bg-light text-dark px-3 py-2" style="font-size: 0.85rem; font-weight: 600;">
+                                                <%= reg.event_type %>
+                                            </span>
+                                        </div>
+                                        <span class="event-badge <%= reg.registration_attended_flag ? 'badge-attended' : 'badge-registered' %>">
+                                            <%= reg.registration_attended_flag ? 'Attended' : (reg.registration_status || 'Registered') %>
+                                        </span>
+                                    </div>
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6">
+                                            <div class="text-muted d-block mb-2" style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                <i class="fas fa-calendar me-1"></i>Date
+                                            </div>
+                                            <div style="font-weight: 600; font-size: 1.05rem; color: #2C2C2C;">
+                                                <%= reg.start_time ? new Date(reg.start_time).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'TBD' %>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="text-muted d-block mb-2" style="font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                <i class="fas fa-map-marker-alt me-1"></i>Location
+                                            </div>
+                                            <div style="font-weight: 600; font-size: 1.05rem; color: #2C2C2C;"><%= reg.location || 'TBD' %></div>
+                                        </div>
+                                    </div>
+                                    <% if (canSubmitSurvey) { %>
+                                        <div class="mt-2">
+                                            <a href="/surveys/new/<%= reg.registration_id %>" class="btn btn-sm btn-success rounded-pill">
+                                                <i class="fas fa-clipboard-check me-1"></i>Take Survey
+                                            </a>
+                                        </div>
+                                    <% } else if (hasSurvey) { %>
+                                        <div class="mt-2">
+                                            <span class="badge bg-info rounded-pill px-3 py-2">
+                                                <i class="fas fa-check me-1"></i>Survey Submitted
+                                            </span>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <div class="empty-state">
+                                <i class="fas fa-calendar-times"></i>
+                                <p class="mb-0">No past event registrations found.</p>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Survey Feedback -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-clipboard-check"></i>
+                            Survey Feedback
+                        </h3>
+                    </div>
+                    <div class="section-body">
+                        <% if (surveys && surveys.length > 0) { %>
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle">
-                                    <thead class="table-light">
+                                    <thead style="background: #f8f9fa;">
                                         <tr>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Event</th>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Date & Time</th>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Location</th>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Status</th>
+                                            <th style="font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 1.25rem 1rem;">Event</th>
+                                            <th style="font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; padding: 1.25rem 1rem;">Satisfaction</th>
+                                            <th style="font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; padding: 1.25rem 1rem;">Usefulness</th>
+                                            <th style="font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; padding: 1.25rem 1rem;">Instructor</th>
+                                            <th style="font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; padding: 1.25rem 1rem;">Recommend</th>
+                                            <th style="font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; padding: 1.25rem 1rem;">Overall</th>
+                                            <th style="font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 1.25rem 1rem;">Date</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <% upcomingEvents.forEach(reg=> { %>
-                                            <tr>
-                                                <td>
-                                                    <span class="fw-medium"><%= reg.event_name %></span><br>
-                                                    <small class="text-muted"><%= reg.event_type %></small>
-                                                </td>
-                                                <td>
-                                                    <%= reg.start_time ? new Date(reg.start_time).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : 'TBD' %>
-                                                    <% if (reg.start_time) { %>
-                                                        <br><small class="text-muted"><%= new Date(reg.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) %></small>
+                                        <% surveys.forEach(survey => { %>
+                                            <% 
+                                                const getScoreClass = (score) => {
+                                                    const s = parseFloat(score);
+                                                    if (s >= 4) return 'score-excellent';
+                                                    if (s >= 3) return 'score-good';
+                                                    if (s >= 2) return 'score-fair';
+                                                    return 'score-poor';
+                                                };
+                                            %>
+                                            <tr style="font-size: 1.05rem;">
+                                                <td style="padding: 1.25rem 1rem;">
+                                                    <div class="fw-semibold" style="font-family: 'Montserrat', sans-serif; font-size: 1.05rem; margin-bottom: 0.25rem;">
+                                                        <%= survey.event_name %>
+                                                    </div>
+                                                    <% if (survey.survey_comments) { %>
+                                                        <div class="text-muted" style="font-size: 0.9rem; font-style: italic;">
+                                                            "<%= survey.survey_comments.substring(0, 60) %><%= survey.survey_comments.length > 60 ? '...' : '' %>"
+                                                        </div>
                                                     <% } %>
                                                 </td>
-                                                <td><%= reg.location || 'TBD' %></td>
-                                                <td>
-                                                    <span class="badge bg-primary rounded-pill">
-                                                        <%= reg.registration_status || 'Registered' %>
+                                                <td class="text-center" style="padding: 1.25rem 1rem;">
+                                                    <span class="score-badge <%= getScoreClass(survey.survey_satisfaction_score) %>" style="width: 55px; height: 55px; font-size: 1.1rem;">
+                                                        <%= survey.survey_satisfaction_score || 'N/A' %>
+                                                    </span>
+                                                </td>
+                                                <td class="text-center" style="padding: 1.25rem 1rem;">
+                                                    <span class="score-badge <%= getScoreClass(survey.survey_usefulness_score) %>" style="width: 55px; height: 55px; font-size: 1.1rem;">
+                                                        <%= survey.survey_usefulness_score || 'N/A' %>
+                                                    </span>
+                                                </td>
+                                                <td class="text-center" style="padding: 1.25rem 1rem;">
+                                                    <span class="score-badge <%= getScoreClass(survey.survey_instructor_score) %>" style="width: 55px; height: 55px; font-size: 1.1rem;">
+                                                        <%= survey.survey_instructor_score || 'N/A' %>
+                                                    </span>
+                                                </td>
+                                                <td class="text-center" style="padding: 1.25rem 1rem;">
+                                                    <span class="score-badge <%= getScoreClass(survey.survey_recommendation_score) %>" style="width: 55px; height: 55px; font-size: 1.1rem;">
+                                                        <%= survey.survey_recommendation_score || 'N/A' %>
+                                                    </span>
+                                                </td>
+                                                <td class="text-center" style="padding: 1.25rem 1rem;">
+                                                    <span class="score-badge score-good" style="width: 55px; height: 55px; font-size: 1.1rem;">
+                                                        <%= survey.survey_overall_score ? parseFloat(survey.survey_overall_score).toFixed(1) : 'N/A' %>
+                                                    </span>
+                                                </td>
+                                                <td style="font-family: 'Montserrat', sans-serif; padding: 1.25rem 1rem; font-size: 1.05rem;">
+                                                    <%= survey.survey_submission_date ? new Date(survey.survey_submission_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A' %>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <% } else { %>
+                            <div class="empty-state">
+                                <i class="fas fa-clipboard"></i>
+                                <p class="mb-0">No surveys submitted yet.<br>Complete events to share your feedback!</p>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Donation History -->
+                <% if (donations && donations.length > 0) { %>
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h3 class="section-title">
+                                <i class="fas fa-donate"></i>
+                                Donation History
+                            </h3>
+                        </div>
+                        <div class="section-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead style="background: #f8f9fa;">
+                                        <tr>
+                                            <th style="font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 1.25rem 1rem;">Date</th>
+                                            <th style="font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; text-align: right; padding: 1.25rem 1rem;">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% donations.forEach(donation => { %>
+                                            <tr style="font-size: 1.05rem;">
+                                                <td style="font-family: 'Montserrat', sans-serif; padding: 1.25rem 1rem; font-size: 1.05rem;">
+                                                    <i class="fas fa-calendar me-2 text-muted"></i>
+                                                    <%= donation.donation_date ? new Date(donation.donation_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A' %>
+                                                </td>
+                                                <td class="text-end" style="padding: 1.25rem 1rem;">
+                                                    <span class="fw-bold" style="color: var(--brand-blue); font-size: 1.3rem; font-family: 'DM Serif Display', serif;">
+                                                        $<%= parseFloat(donation.donation_amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
                                                     </span>
                                                 </td>
                                             </tr>
@@ -319,200 +1252,37 @@
                         </div>
                     </div>
                 <% } %>
-
-                <!-- Event History -->
-                <div class="card card-custom">
-                    <div class="card-header-custom">
-                        <h5 class="fw-bold mb-0 text-dark">Event History</h5>
-                    </div>
-                    <div class="card-body p-4">
-                        <% if (registrations && registrations.length> 0) { %>
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Event</th>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Date</th>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Status</th>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% registrations.forEach(reg=> { %>
-                                            <tr>
-                                                <td>
-                                                    <span class="fw-medium">
-                                                        <%= reg.event_name %>
-                                                    </span><br>
-                                                    <small class="text-muted">
-                                                        <%= reg.event_type %>
-                                                    </small>
-                                                </td>
-                                                <td>
-                                                    <%= reg.start_time ? new Date(reg.start_time).toLocaleDateString()
-                                                        : 'TBD' %>
-                                                </td>
-                                                <td>
-                                                    <% if (reg.registration_attended_flag) { %>
-                                                        <span class="badge bg-success rounded-pill">Attended</span>
-                                                        <% } else { %>
-                                                            <span class="badge bg-secondary rounded-pill">
-                                                                <%= reg.registration_status || 'Registered' %>
-                                                            </span>
-                                                            <% } %>
-                                                </td>
-                                                <td>
-                                                    <% 
-                                                        const hasSurvey = surveyRegistrationIds && surveyRegistrationIds.includes(reg.registration_id);
-                                                        // Check if event is in the past
-                                                        const now = new Date();
-                                                        const eventDate = reg.start_time ? new Date(reg.start_time) : null;
-                                                        const isPastEvent = eventDate && !isNaN(eventDate.getTime()) && eventDate.getTime() < now.getTime();
-                                                        // Show survey button for past events where user is registered and hasn't submitted a survey
-                                                        const canSubmitSurvey = isPastEvent && !hasSurvey;
-                                                    %>
-                                                    <% if (canSubmitSurvey) { %>
-                                                        <a href="/surveys/new/<%= reg.registration_id %>" class="btn btn-sm btn-outline-success" style="padding: 0.375rem 0.75rem; font-size: 0.875rem;">
-                                                            <i class="fas fa-clipboard-check me-1"></i>Take Survey
-                                                        </a>
-                                                    <% } else if (hasSurvey) { %>
-                                                        <span class="badge bg-info" style="padding: 0.375rem 0.75rem; font-size: 0.875rem;">Survey Submitted</span>
-                                                    <% } %>
-                                                </td>
-                                            </tr>
-                                            <% }); %>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <% } else { %>
-                                <p class="text-muted mb-0">No past event registrations found.</p>
-                                <% } %>
-                    </div>
-                </div>
-
-                <!-- Donation History -->
-                <div class="card card-custom mt-4">
-                    <div class="card-header-custom">
-                        <h5 class="fw-bold mb-0 text-dark">Donation History</h5>
-                    </div>
-                    <div class="card-body p-4">
-                        <% if (donations && donations.length> 0) { %>
-                            <% 
-                                const totalDonated = donations.reduce((sum, d) => sum + parseFloat(d.donation_amount || 0), 0);
-                            %>
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="text-muted">Total Donated:</span>
-                                    <span class="fw-bold text-brand-blue" style="font-size: 1.2rem;">$<%= totalDonated.toFixed(2) %></span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <span class="text-muted">Number of Donations:</span>
-                                    <span class="fw-bold"><%= donations.length %></span>
-                                </div>
-                            </div>
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Date</th>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Amount</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% donations.forEach(donation=> { %>
-                                            <tr>
-                                                <td>
-                                                    <%= donation.donation_date ? new Date(donation.donation_date).toLocaleDateString('en-US') : 'N/A' %>
-                                                </td>
-                                                <td class="fw-bold text-brand-blue">$<%= parseFloat(donation.donation_amount || 0).toFixed(2) %></td>
-                                            </tr>
-                                        <% }); %>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <% } else { %>
-                            <p class="text-muted mb-0">No donation history found.</p>
-                        <% } %>
-                    </div>
-                </div>
-
-                <!-- Surveys Table -->
-                <div class="card card-custom mt-4">
-                    <div class="card-header-custom">
-                        <h5 class="fw-bold mb-0 text-dark">Survey Feedback</h5>
-                    </div>
-                    <div class="card-body p-4">
-                        <% if (surveys && surveys.length> 0) { %>
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Event</th>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Satisfaction</th>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Usefulness</th>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Instructor</th>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Recommend</th>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Overall</th>
-                                            <th scope="col" class="text-uppercase" style="font-size: 0.75rem;">Date</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% surveys.forEach(survey=> { %>
-                                            <tr>
-                                                <td>
-                                                    <span class="fw-medium"><%= survey.event_name %></span>
-                                                    <% if (survey.survey_comments) { %>
-                                                        <br><small class="text-muted" style="font-size: 0.8rem;">"<%= survey.survey_comments.substring(0, 50) %><%= survey.survey_comments.length > 50 ? '...' : '' %>"</small>
-                                                    <% } %>
-                                                </td>
-                                                <td><span class="badge bg-info"><%= survey.survey_satisfaction_score || 'N/A' %></span></td>
-                                                <td><span class="badge bg-info"><%= survey.survey_usefulness_score || 'N/A' %></span></td>
-                                                <td><span class="badge bg-info"><%= survey.survey_instructor_score || 'N/A' %></span></td>
-                                                <td><span class="badge bg-info"><%= survey.survey_recommendation_score || 'N/A' %></span></td>
-                                                <td><span class="badge bg-primary"><%= survey.survey_overall_score ? parseFloat(survey.survey_overall_score).toFixed(1) : 'N/A' %></span></td>
-                                                <td>
-                                                    <%= survey.survey_submission_date ? new Date(survey.survey_submission_date).toLocaleDateString('en-US') : 'N/A' %>
-                                                </td>
-                                            </tr>
-                                        <% }); %>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <% } else { %>
-                            <p class="text-muted mb-0">No surveys submitted yet.</p>
-                        <% } %>
-                    </div>
-                </div>
-
-            </div>
         </div>
     </div>
 
-
     <!-- Add Milestone Modal -->
     <div class="modal fade" id="addMilestoneModal" tabindex="-1" aria-labelledby="addMilestoneModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addMilestoneModalLabel">Add Milestone</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);">
+                <div class="modal-header" style="background: linear-gradient(135deg, var(--brand-blue), var(--brand-lavender)); color: white; border-radius: 20px 20px 0 0;">
+                    <h5 class="modal-title fw-bold" id="addMilestoneModalLabel" style="font-family: 'DM Serif Display', serif;">
+                        <i class="fas fa-trophy me-2"></i>Add Milestone
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="/milestones/add" method="POST" id="addMilestoneForm">
-                    <div class="modal-body">
+                    <div class="modal-body p-4">
                         <input type="hidden" name="participant_id" value="<%= participant.participant_id %>">
                         <div class="mb-3">
-                            <label for="milestone_title" class="form-label">Milestone Title</label>
+                            <label for="milestone_title" class="form-label fw-bold" style="font-family: 'Montserrat', sans-serif;">Milestone Title</label>
                             <input type="text" class="form-control" id="milestone_title" name="milestone_title" required
-                                placeholder="e.g., High School Graduation, College Acceptance">
+                                placeholder="e.g., High School Graduation, College Acceptance" style="border-radius: 10px;">
                         </div>
                         <div class="mb-3">
-                            <label for="milestone_date" class="form-label">Date Achieved</label>
-                            <input type="date" class="form-control" id="milestone_date" name="milestone_date" required>
+                            <label for="milestone_date" class="form-label fw-bold" style="font-family: 'Montserrat', sans-serif;">Date Achieved</label>
+                            <input type="date" class="form-control" id="milestone_date" name="milestone_date" required style="border-radius: 10px;">
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Add Milestone</button>
+                    <div class="modal-footer" style="border-top: 1px solid #f0f0f0;">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4" style="background: linear-gradient(135deg, var(--brand-blue), var(--brand-lavender)); border: none;">
+                            <i class="fas fa-plus me-2"></i>Add Milestone
+                        </button>
                     </div>
                 </form>
             </div>

@@ -232,8 +232,15 @@ router.get('/:id', isAuthenticated, async (req, res) => {
         console.log('Surveys found:', surveys.length);
 
         console.log('Fetching donations...');
+        // Business Logic: Only show donations with valid dates (not null, not in the future) and valid amounts
+        // This ensures consistency with dashboard and insights calculations
+        const nowForDonations = new Date();
         const donations = await db('donations')
-            .where({ participant_id: req.params.id }) || [];
+            .where({ participant_id: req.params.id })
+            .whereNotNull('donation_date')
+            .whereNotNull('donation_amount')
+            .where('donation_date', '<=', nowForDonations) // Don't include future dates
+            .orderBy('donation_date', 'desc') || [];
         console.log('Donations found:', donations.length);
 
         // Calculate Averages

@@ -349,12 +349,18 @@
     <div class="info-card">
         <div class="action-section">
             <% if (user && user.participant_role === 'admin') { %>
+                <a href="/admin/surveys/edit/<%= survey.survey_id %>" class="admin-btn admin-btn-warning">
+                    <i class="fas fa-edit"></i> Edit Survey
+                </a>
                 <form action="/admin/surveys/delete/<%= survey.survey_id %>" method="POST" style="display: inline;" class="delete-survey-form">
                     <button type="submit" class="admin-btn admin-btn-danger">
-                        Delete Survey
+                        <i class="fas fa-trash"></i> Delete Survey
                     </button>
                 </form>
             <% } %>
+            <a href="/admin/surveys" class="admin-btn admin-btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Surveys
+            </a>
         </div>
     </div>
 </div>

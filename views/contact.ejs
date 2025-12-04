@@ -5,50 +5,6 @@
         background-color: var(--col-cream);
     }
 
-    /* Hero Banner with Wavy Edge */
-    .contact-hero {
-        background: linear-gradient(135deg, var(--col-blue) 0%, var(--col-purple) 100%);
-        padding: 5rem 0 6rem 0;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-        color: white;
-    }
-
-    .contact-hero::after {
-        content: '';
-        position: absolute;
-        bottom: -10px;
-        left: 0;
-        width: 100%;
-        height: 60px;
-        background: var(--col-cream);
-        clip-path: polygon(0 20%, 5% 15%, 10% 20%, 15% 15%, 20% 20%, 25% 15%, 30% 20%, 35% 15%, 40% 20%, 45% 15%, 50% 20%, 55% 15%, 60% 20%, 65% 15%, 70% 20%, 75% 15%, 80% 20%, 85% 15%, 90% 20%, 95% 15%, 100% 20%, 100% 100%, 0 100%);
-        z-index: 1;
-    }
-
-    .contact-hero-content {
-        position: relative;
-        z-index: 2;
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 0 2rem;
-    }
-
-    .contact-hero h1 {
-        font-family: 'DM Serif Display', serif;
-        font-size: clamp(2.5rem, 5vw, 4rem);
-        color: white;
-        margin-bottom: 1rem;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    .contact-hero p {
-        font-family: 'Montserrat', sans-serif;
-        font-size: 1.2rem;
-        color: rgba(255, 255, 255, 0.95);
-        line-height: 1.6;
-    }
 
     /* Main Container */
     .contact-container {
@@ -334,12 +290,10 @@
     }
 </style>
 
-<!-- Hero Banner -->
-<div class="contact-hero">
-    <div class="contact-hero-content">
-        <h1>Get in Touch</h1>
-        <p>We'd love to hear from you. Reach out to learn more about our programs, volunteer opportunities, or partnership possibilities.</p>
-    </div>
+<!-- Banner Section with Wavy Edge -->
+<div class="wavy-banner">
+    <h2>Contact Us</h2>
+    <p>We'd love to hear from you. Reach out to learn more about our programs, volunteer opportunities, or partnership possibilities.</p>
 </div>
 
 <!-- Main Content -->

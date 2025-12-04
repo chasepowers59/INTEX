@@ -1,0 +1,113 @@
+<%- include('../partials/header', { user: user }) %>
+<%- include('_shared_styles') %>
+
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <h1>Add New Participant</h1>
+        <div class="btn-group">
+            <a href="/admin/participants" class="admin-btn admin-btn-secondary">Back to Participants</a>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <% if (typeof messages !== 'undefined') { %>
+        <% if (messages.error && messages.error.length > 0) { %>
+            <div class="alert alert-danger admin-alert" role="alert">
+                <%= messages.error[0] %>
+            </div>
+        <% } %>
+        <% if (messages.success && messages.success.length > 0) { %>
+            <div class="alert alert-success admin-alert" role="alert">
+                <%= messages.success[0] %>
+            </div>
+        <% } %>
+    <% } %>
+
+    <!-- Add Participant Form -->
+    <div class="admin-table-card">
+        <div class="card-body" style="padding: 2rem;">
+            <form action="/admin/participants/add" method="POST">
+                <div class="row g-3">
+                    <!-- Required Fields -->
+                    <div class="col-md-6">
+                        <label for="participant_first_name" class="form-label">First Name *</label>
+                        <input type="text" class="form-control admin-select" id="participant_first_name"
+                            name="participant_first_name" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="participant_last_name" class="form-label">Last Name *</label>
+                        <input type="text" class="form-control admin-select" id="participant_last_name"
+                            name="participant_last_name" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="participant_email" class="form-label">Email Address *</label>
+                        <input type="email" class="form-control admin-select" id="participant_email"
+                            name="participant_email" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="participant_phone" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control admin-select" id="participant_phone"
+                            name="participant_phone" placeholder="(555) 123-4567">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="participant_dob" class="form-label">Date of Birth</label>
+                        <input type="date" class="form-control admin-select" id="participant_dob"
+                            name="participant_dob">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="participant_role" class="form-label">Role</label>
+                        <select class="form-control admin-select" id="participant_role" name="participant_role">
+                            <option value="participant">Participant</option>
+                            <option value="admin">Admin (Manager)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="participant_password" class="form-label">Password (Optional)</label>
+                        <input type="password" class="form-control admin-select" id="participant_password"
+                            name="participant_password" placeholder="Leave blank to set later">
+                    </div>
+                    <!-- Address Fields -->
+                    <div class="col-md-6">
+                        <label for="participant_city" class="form-label">City</label>
+                        <input type="text" class="form-control admin-select" id="participant_city"
+                            name="participant_city">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="participant_state" class="form-label">State</label>
+                        <input type="text" class="form-control admin-select" id="participant_state"
+                            name="participant_state" maxlength="2" placeholder="UT">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="participant_zip" class="form-label">ZIP Code</label>
+                        <input type="text" class="form-control admin-select" id="participant_zip"
+                            name="participant_zip" placeholder="84101">
+                    </div>
+                    <!-- Additional Fields -->
+                    <div class="col-md-6">
+                        <label for="participant_school_or_employer" class="form-label">School or Employer</label>
+                        <input type="text" class="form-control admin-select" id="participant_school_or_employer"
+                            name="participant_school_or_employer" placeholder="e.g., BYU, UVU, Tech Company">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="participant_field_of_interest" class="form-label">Field of Interest</label>
+                        <select class="form-control admin-select" id="participant_field_of_interest"
+                            name="participant_field_of_interest">
+                            <option value="">Select...</option>
+                            <option value="STEM">STEM</option>
+                            <option value="Arts">Arts</option>
+                            <option value="Both">Both</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="admin-btn admin-btn-success">Add Participant</button>
+                    <a href="/admin/participants" class="admin-btn admin-btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+

@@ -19,6 +19,8 @@ router.post('/users/:participant_id/reset-password', isManager, adminController.
 
 // ==================== PARTICIPANT MAINTENANCE ====================
 router.get('/participants', adminController.listParticipants);
+router.get('/participants/add', isManager, adminController.getAddParticipant);
+router.post('/participants/add', isManager, adminController.postAddParticipant);
 router.get('/participants/edit/:id', isManager, adminController.getEditParticipant);
 router.post('/participants/edit/:id', isManager, adminController.postEditParticipant);
 
@@ -33,6 +35,8 @@ router.post('/events/delete/:id', isManager, adminController.deleteEvent);
 // ==================== SURVEY MAINTENANCE ====================
 router.get('/surveys', adminController.listSurveys);
 router.get('/surveys/:id', adminController.getSurveyDetail);
+router.get('/surveys/edit/:id', isManager, adminController.getEditSurvey);
+router.post('/surveys/edit/:id', isManager, adminController.postEditSurvey);
 router.post('/surveys/delete/:id', isManager, adminController.deleteSurvey);
 
 // ==================== MILESTONE MAINTENANCE ====================
