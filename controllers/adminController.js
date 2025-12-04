@@ -693,6 +693,29 @@ exports.resetUserPassword = async (req, res) => {
     }
 };
 
+exports.deleteUser = async (req, res) => {
+    try {
+        const { participant_id } = req.params;
+        
+        // Prevent deleting yourself
+        if (parseInt(participant_id) === parseInt(req.user.participant_id)) {
+            req.flash('error', 'Cannot delete your own account');
+            return res.redirect('/admin/users');
+        }
+
+        // Delete the user (participant record)
+        // Note: This will cascade delete related records if foreign key constraints are set up
+        await knex('participants').where({ participant_id }).del();
+        
+        req.flash('success', 'User deleted successfully');
+        res.redirect('/admin/users');
+    } catch (err) {
+        console.error('Delete User Error:', err);
+        req.flash('error', 'Error deleting user. Please try again.');
+        res.redirect('/admin/users');
+    }
+};
+
 // ==================== PARTICIPANT MAINTENANCE ====================
 
 /**
@@ -859,6 +882,23 @@ exports.postEditParticipant = async (req, res) => {
     } catch (err) {
         console.error('Edit Participant Error:', err);
         res.status(500).send('Server Error');
+    }
+};
+
+exports.deleteParticipant = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Delete the participant record
+        // Note: This will cascade delete related records if foreign key constraints are set up
+        await knex('participants').where({ participant_id: id }).del();
+        
+        req.flash('success', 'Participant deleted successfully');
+        res.redirect('/admin/participants');
+    } catch (err) {
+        console.error('Delete Participant Error:', err);
+        req.flash('error', 'Error deleting participant. Please try again.');
+        res.redirect('/admin/participants');
     }
 };
 
@@ -1543,6 +1583,34 @@ exports.postAddDonation = async (req, res) => {
         res.redirect('/admin/donations');
     } catch (err) {
         console.error('Add Donation Error:', err);
+        res.status(500).send('Server Error');
+    }
+};
+
+exports.getDonationDetail = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const donation = await knex('donations')
+            .leftJoin('participants', 'donations.participant_id', 'participants.participant_id')
+            .where('donations.donation_id', id)
+            .select(
+                'donations.*',
+                'participants.participant_first_name',
+                'participants.participant_last_name',
+                'participants.participant_email',
+                'participants.participant_phone',
+                'participants.participant_city',
+                'participants.participant_state'
+            )
+            .first();
+
+        if (!donation) {
+            return res.status(404).send('Donation not found');
+        }
+
+        res.render('admin/donation_detail', { user: req.user, donation });
+    } catch (err) {
+        console.error('Get Donation Detail Error:', err);
         res.status(500).send('Server Error');
     }
 };

@@ -16,6 +16,7 @@ router.get('/dashboard', adminController.getDashboard);
 router.get('/users', adminController.listUsers);
 router.post('/users/:participant_id/role', isManager, adminController.updateUserRole);
 router.post('/users/:participant_id/reset-password', isManager, adminController.resetUserPassword);
+router.post('/users/delete/:participant_id', isManager, adminController.deleteUser);
 
 // ==================== PARTICIPANT MAINTENANCE ====================
 router.get('/participants', adminController.listParticipants);
@@ -23,6 +24,7 @@ router.get('/participants/add', isManager, adminController.getAddParticipant);
 router.post('/participants/add', isManager, adminController.postAddParticipant);
 router.get('/participants/edit/:id', isManager, adminController.getEditParticipant);
 router.post('/participants/edit/:id', isManager, adminController.postEditParticipant);
+router.post('/participants/delete/:id', isManager, adminController.deleteParticipant);
 
 // ==================== EVENT MAINTENANCE ====================
 router.get('/events', adminController.listEvents);
@@ -53,6 +55,7 @@ router.get('/donations/add', isManager, adminController.getAddDonation);
 router.post('/donations/add', isManager, adminController.postAddDonation);
 router.get('/donations/edit/:id', isManager, adminController.getEditDonation);
 router.post('/donations/edit/:id', isManager, adminController.postEditDonation);
+router.get('/donations/:id', adminController.getDonationDetail);
 router.post('/donations/delete/:id', isManager, adminController.deleteDonation);
 
 module.exports = router;

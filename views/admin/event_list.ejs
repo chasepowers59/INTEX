@@ -3,11 +3,11 @@
     <div class="container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
             <h1 class="mb-4">Manage Events</h1>
-            <a href="/events/add" class="btn">Create Event</a>
+            <a href="/admin/events/add" class="btn">Create Event</a>
         </div>
 
         <!-- Search Bar -->
-        <form action="/events" method="GET" class="mb-4">
+        <form action="/admin/events" method="GET" class="mb-4">
             <div style="display: flex; gap: 1rem;">
                 <input type="text" name="search" class="form-control" placeholder="Search by event name..."
                     value="<%= search || '' %>">
@@ -42,9 +42,9 @@
                                 <%= e.event_location %>
                             </td>
                             <td style="display: flex; gap: 0.5rem;">
-                                <a href="/events/edit/<%= e.event_instance_id %>" class="btn"
+                                <a href="/admin/events/edit/<%= e.event_instance_id %>" class="btn"
                                     style="padding: 0.5rem 1rem; font-size: 0.8rem; background-color: var(--col-blue);">Edit</a>
-                                <form action="/events/delete/<%= e.event_instance_id %>" method="POST"
+                                <form action="/admin/events/delete/<%= e.event_instance_id %>" method="POST"
                                     onsubmit="return confirm('Are you sure?');" style="margin: 0;">
                                     <button type="submit" class="btn"
                                         style="padding: 0.5rem 1rem; font-size: 0.8rem; background-color: var(--col-dark-pink);">Delete</button>

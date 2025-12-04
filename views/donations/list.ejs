@@ -3,7 +3,7 @@
     <div class="container mt-4">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
             <h1>Donations</h1>
-            <% if (user.role==='Manager' ) { %>
+            <% if (user && (user.participant_role === 'admin' || user.participant_role === 'manager')) { %>
                 <a href="/donations/add" class="btn">Record Donation</a>
                 <% } %>
         </div>

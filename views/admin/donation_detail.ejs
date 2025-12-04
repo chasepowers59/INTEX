@@ -1,0 +1,214 @@
+<%- include('../partials/header', { user: user }) %>
+<%- include('_shared_styles') %>
+
+<style>
+    /* Donation Detail Specific Styles */
+    .donation-detail-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Hero Header Card */
+    .donation-hero-card {
+        background: linear-gradient(135deg, var(--brand-blue), var(--brand-lavender));
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        color: white;
+    }
+
+    .donation-hero-card h1 {
+        font-family: 'DM Serif Display', serif;
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: white;
+    }
+
+    .donation-hero-card .donation-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        margin-top: 1.5rem;
+    }
+
+    .donation-hero-card .meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .donation-hero-card .meta-label {
+        font-size: 0.85rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .donation-hero-card .meta-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .donation-amount {
+        font-size: 3rem;
+        font-family: 'DM Serif Display', serif;
+        font-weight: 700;
+        color: white;
+        margin: 1rem 0;
+    }
+
+    /* Information Cards */
+    .info-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .info-card-header {
+        font-family: 'DM Serif Display', serif;
+        font-size: 1.5rem;
+        color: var(--brand-blue);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #666;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        font-size: 1.1rem;
+        color: var(--col-dark-gray);
+        text-align: right;
+    }
+
+    .info-value a {
+        color: var(--brand-blue);
+        text-decoration: none;
+    }
+
+    .info-value a:hover {
+        text-decoration: underline;
+    }
+
+    .badge-anonymous {
+        background: #f0f0f0;
+        color: #666;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-style: italic;
+    }
+</style>
+
+<div class="container mt-4 donation-detail-container">
+    <!-- Hero Header -->
+    <div class="donation-hero-card">
+        <h1>Donation Details</h1>
+        <div class="donation-amount">
+            $<%= parseFloat(donation.donation_amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
+        </div>
+        <div class="donation-meta">
+            <div class="meta-item">
+                <span class="meta-label">Donation Date</span>
+                <span class="meta-value">
+                    <%= donation.donation_date ? new Date(donation.donation_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A' %>
+                </span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Donation ID</span>
+                <span class="meta-value"><%= donation.donation_id %></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donor Information Card -->
+    <div class="info-card">
+        <h2 class="info-card-header">
+            <i class="fas fa-user-circle me-2"></i>Donor Information
+        </h2>
+        <div class="info-row">
+            <span class="info-label">Donor Name</span>
+            <span class="info-value">
+                <% if (donation.participant_first_name && donation.participant_last_name) { %>
+                    <%= donation.participant_first_name %> <%= donation.participant_last_name %>
+                <% } else { %>
+                    <span class="badge-anonymous">Guest / Anonymous</span>
+                <% } %>
+            </span>
+        </div>
+        <% if (donation.participant_email) { %>
+            <div class="info-row">
+                <span class="info-label">Email</span>
+                <span class="info-value">
+                    <a href="mailto:<%= donation.participant_email %>"><%= donation.participant_email %></a>
+                </span>
+            </div>
+        <% } %>
+        <% if (donation.participant_phone) { %>
+            <div class="info-row">
+                <span class="info-label">Phone</span>
+                <span class="info-value"><%= donation.participant_phone %></span>
+            </div>
+        <% } %>
+        <% if (donation.participant_city || donation.participant_state) { %>
+            <div class="info-row">
+                <span class="info-label">Location</span>
+                <span class="info-value">
+                    <%= [donation.participant_city, donation.participant_state].filter(Boolean).join(', ') || 'N/A' %>
+                </span>
+            </div>
+        <% } %>
+        <% if (donation.participant_id) { %>
+            <div class="info-row">
+                <span class="info-label">Participant Profile</span>
+                <span class="info-value">
+                    <a href="/participants/<%= donation.participant_id %>" class="admin-btn admin-btn-info" style="text-decoration: none; display: inline-block;">
+                        <i class="fas fa-user me-1"></i>View Profile
+                    </a>
+                </span>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Action Buttons -->
+    <div style="display: flex; gap: 1rem; margin-top: 2rem; margin-bottom: 2rem;">
+        <a href="/admin/donations" class="admin-btn admin-btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Donations
+        </a>
+        <% if (user && user.participant_role === 'admin') { %>
+            <a href="/admin/donations/edit/<%= donation.donation_id %>" class="admin-btn admin-btn-warning">
+                <i class="fas fa-edit me-1"></i>Edit Donation
+            </a>
+            <form action="/admin/donations/delete/<%= donation.donation_id %>" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this donation? This action cannot be undone.');">
+                <button type="submit" class="admin-btn admin-btn-danger">
+                    <i class="fas fa-trash me-1"></i>Delete Donation
+                </button>
+            </form>
+        <% } %>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+

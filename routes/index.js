@@ -36,8 +36,4 @@ router.get('/press', (req, res) => {
     res.render('press', { user: req.user });
 });
 
-router.get('/teapot', (req, res) => {
-    res.status(418).send("I'm a teapot");
-});
-
 module.exports = router;

@@ -19,7 +19,7 @@
                 <button type="submit" class="events-search-btn">Search</button>
             </form>
 
-            <% if (user && user.role==='Manager' ) { %>
+            <% if (user && (user.participant_role === 'admin' || user.participant_role === 'manager')) { %>
                 <div class="events-action-buttons">
                     <a href="/events/definitions/add" class="events-action-btn events-action-btn-purple">New Definition</a>
                     <a href="/events/add" class="events-action-btn events-action-btn-green">Schedule Event</a>
@@ -110,7 +110,7 @@
                                     
                                     <% if (user) { %>
                                         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                                            <% if (user.role==='Manager' ) { %>
+                                            <% if (user && (user.participant_role === 'admin' || user.participant_role === 'manager')) { %>
                                                 <!-- Manager Actions: Always show Edit/Delete -->
                                                 <div style="display: flex; gap: 0.5rem;">
                                                     <a href="/events/edit/<%= event.event_instance_id %>" class="btn"

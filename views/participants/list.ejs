@@ -10,7 +10,7 @@
                 </span>
             </h2>
 
-            <% if (user.role==='Manager' ) { %>
+            <% if (user && (user.participant_role === 'admin' || user.participant_role === 'manager')) { %>
                 <a href="/participants/add" class="btn btn-success"><i class="fas fa-plus"></i> Add New</a>
                 <% } %>
         </div>

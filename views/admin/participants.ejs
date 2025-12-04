@@ -59,6 +59,9 @@
                                             <% if (user && user.participant_role === 'admin') { %>
                                                 <a href="/admin/participants/edit/<%= p.participant_id %>"
                                                     class="admin-btn admin-btn-primary">Edit</a>
+                                                <form action="/admin/participants/delete/<%= p.participant_id %>" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this participant? This action cannot be undone.');">
+                                                    <button type="submit" class="admin-btn admin-btn-danger">Delete</button>
+                                                </form>
                                             <% } %>
                                             <a href="/participants/<%= p.participant_id %>" class="admin-btn admin-btn-info">View Details</a>
                                         </div>

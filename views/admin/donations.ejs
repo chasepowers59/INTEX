@@ -82,6 +82,7 @@
                                     <td><%= d.donation_date ? new Date(d.donation_date).toLocaleDateString('en-US') : 'N/A' %></td>
                                     <td>
                                         <div class="admin-action-buttons">
+                                            <a href="/admin/donations/<%= d.donation_id %>" class="admin-btn admin-btn-info">View Details</a>
                                             <% if (user && user.participant_role === 'admin') { %>
                                                 <form action="/admin/donations/delete/<%= d.donation_id %>" method="POST"
                                                     style="display: inline;" class="delete-form">

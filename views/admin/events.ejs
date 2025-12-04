@@ -6,6 +6,7 @@
         <div class="admin-page-header">
             <h1>Event Maintenance</h1>
             <div class="btn-group">
+                <a href="/events/insights" class="admin-btn admin-btn-info">View Insights</a>
                 <% if (user && user.participant_role === 'admin') { %>
                     <a href="/admin/events/add" class="admin-btn admin-btn-success">Create Event</a>
                 <% } %>

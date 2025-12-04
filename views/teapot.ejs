@@ -4,79 +4,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>418 - I'm a Teapot</title>
+    <title>418 - I'm a Teapot | Ella Rises</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #f8f9fa;
+            background: linear-gradient(135deg, #FFD1C7 0%, #94AAB9 25%, #978EC4 50%, #F9AFB1 75%, #FFD1C7 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            text-align: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating Confetti */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #FFD1C7;
+            position: absolute;
+            animation: confettiFall linear infinite;
+        }
+
+        .confetti:nth-child(1) { left: 10%; animation-duration: 3s; animation-delay: 0s; background: #94AAB9; }
+        .confetti:nth-child(2) { left: 20%; animation-duration: 4s; animation-delay: 0.5s; background: #978EC4; }
+        .confetti:nth-child(3) { left: 30%; animation-duration: 3.5s; animation-delay: 1s; background: #F9AFB1; }
+        .confetti:nth-child(4) { left: 40%; animation-duration: 4.5s; animation-delay: 1.5s; background: #FFD1C7; }
+        .confetti:nth-child(5) { left: 50%; animation-duration: 3s; animation-delay: 2s; background: #9AB59D; }
+        .confetti:nth-child(6) { left: 60%; animation-duration: 4s; animation-delay: 0.3s; background: #94AAB9; }
+        .confetti:nth-child(7) { left: 70%; animation-duration: 3.5s; animation-delay: 1.2s; background: #978EC4; }
+        .confetti:nth-child(8) { left: 80%; animation-duration: 4.2s; animation-delay: 0.8s; background: #F9AFB1; }
+        .confetti:nth-child(9) { left: 90%; animation-duration: 3.8s; animation-delay: 1.7s; background: #FFD1C7; }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
         }
 
         .teapot-container {
-            background: white;
-            padding: 3rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 4rem 3rem;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            max-width: 700px;
             width: 90%;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            animation: floatIn 0.8s ease-out;
         }
 
-        h1 {
-            font-size: 4rem;
-            color: #d63384;
-            /* Pinkish color */
+        @keyframes floatIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .teapot-number {
+            font-size: 8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #d63384, #978EC4, #94AAB9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            font-family: 'DM Serif Display', serif;
+            animation: pulse 2s ease-in-out infinite;
+            line-height: 1;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .teapot-title {
+            font-size: 3rem;
+            color: #3A3F3B;
             margin-bottom: 1rem;
-            font-weight: bold;
+            font-family: 'DM Serif Display', serif;
+            font-weight: 700;
         }
 
-        p {
+        .teapot-subtitle {
             font-size: 1.5rem;
-            color: #6c757d;
+            color: #666;
             margin-bottom: 2rem;
+            font-style: italic;
+            line-height: 1.6;
         }
 
-        img {
-            max-width: 100%;
+        .teapot-emoji {
+            font-size: 8rem;
+            display: block;
+            margin: 2rem 0;
+            animation: bounce 2s ease-in-out infinite, rotate 4s linear infinite;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(-5deg); }
+            75% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .teapot-poem {
+            background: linear-gradient(135deg, rgba(255, 209, 199, 0.3), rgba(148, 170, 185, 0.3));
+            padding: 2rem;
+            border-radius: 20px;
+            margin: 2rem 0;
+            border-left: 4px solid #978EC4;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #3A3F3B;
+            font-family: 'DM Serif Display', serif;
+        }
+
+        .teapot-poem p {
+            margin: 0.5rem 0;
+        }
+
+        .rfc-info {
+            background: rgba(148, 170, 185, 0.1);
+            padding: 1.5rem;
             border-radius: 15px;
-            margin-bottom: 2rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin: 2rem 0;
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        .rfc-info strong {
+            color: #3A3F3B;
+            font-weight: 600;
         }
 
         .btn-home {
-            background-color: #0d6efd;
+            background: linear-gradient(135deg, #94AAB9, #978EC4);
             color: white;
-            padding: 0.8rem 2rem;
-            font-size: 1.2rem;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
             border-radius: 50px;
             text-decoration: none;
-            transition: transform 0.2s;
+            display: inline-block;
+            margin-top: 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(148, 170, 185, 0.3);
+            border: none;
         }
 
         .btn-home:hover {
-            transform: scale(1.05);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(148, 170, 185, 0.4);
             color: white;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        .sparkle:nth-child(1) { top: 20%; left: 15%; animation-delay: 0s; }
+        .sparkle:nth-child(2) { top: 30%; right: 20%; animation-delay: 0.5s; }
+        .sparkle:nth-child(3) { bottom: 25%; left: 25%; animation-delay: 1s; }
+        .sparkle:nth-child(4) { bottom: 30%; right: 15%; animation-delay: 1.5s; }
+
+        @media (max-width: 768px) {
+            .teapot-container {
+                padding: 3rem 2rem;
+            }
+
+            .teapot-number {
+                font-size: 5rem;
+            }
+
+            .teapot-title {
+                font-size: 2rem;
+            }
+
+            .teapot-emoji {
+                font-size: 5rem;
+            }
+
+            .teapot-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .teapot-poem {
+                font-size: 1rem;
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
 
 <body>
+    <!-- Confetti Animation -->
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+    <div class="confetti"></div>
+
     <div class="teapot-container">
-        <h1>418</h1>
-        <h2>I'm a Teapot</h2>
-        <p>The requested entity body is short and stout.<br>Tip me over and pour me out.</p>
+        <!-- Sparkle Effects -->
+        <span class="sparkle"></span>
+        <span class="sparkle"></span>
+        <span class="sparkle"></span>
+        <span class="sparkle"></span>
 
-        <img src="https://images.unsplash.com/photo-1550966871-3ed3c6227753?auto=format&fit=crop&w=600&q=80"
-            alt="A nice ceramic teapot">
+        <div class="teapot-number">418</div>
+        <h1 class="teapot-title">I'm a Teapot</h1>
+        <p class="teapot-subtitle">The requested entity body is short and stout</p>
 
-        <div>
-            <a href="/" class="btn-home">Return Home</a>
+        <div class="teapot-emoji">🫖</div>
+
+        <div class="teapot-poem">
+            <p><strong>I'm a little teapot,</strong></p>
+            <p>Short and stout,</p>
+            <p>Here is my handle,</p>
+            <p>Here is my spout.</p>
+            <p style="margin-top: 1rem;"><em>When I get all steamed up,</em></p>
+            <p><em>Hear me shout:</em></p>
+            <p style="font-size: 1.4rem; color: #978EC4; margin-top: 0.5rem;"><strong>"Tip me over and pour me out!"</strong></p>
         </div>
+
+        <div class="rfc-info">
+            <p><strong>RFC 2324 - Hyper Text Coffee Pot Control Protocol (HTCPCP/1.0)</strong></p>
+            <p style="margin-top: 0.5rem;">This HTTP status code was defined in 1998 as an April Fools' joke, but it's become a beloved part of web development culture!</p>
+        </div>
+
+        <a href="/" class="btn-home">
+            <i class="fas fa-home" style="margin-right: 0.5rem;"></i>Return to Ella Rises
+        </a>
     </div>
+
+    <!-- FontAwesome for icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </body>
 
 </html>

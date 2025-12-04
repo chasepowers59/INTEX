@@ -846,8 +846,8 @@
                         </div>
                     </div>
                     <div class="col-12 col-lg-4 profile-hero-right">
-                        <% if (user.role === 'Manager') { %>
-                            <a href="/participants/edit/<%= participant.participant_id %>" class="action-btn action-btn-primary">
+                        <% if (user.participant_role === 'admin' || user.participant_role === 'manager') { %>
+                            <a href="/admin/participants/edit/<%= participant.participant_id %>" class="action-btn action-btn-primary">
                                 <i class="fas fa-edit me-2"></i>Edit Profile
                             </a>
                         <% } else if (user.participant_id && user.participant_id == participant.participant_id) { %>
@@ -974,7 +974,7 @@
                             <i class="fas fa-trophy"></i>
                             My Milestones
                         </h3>
-                        <% if (user.role === 'Manager' || (user.participant_id && user.participant_id == participant.participant_id)) { %>
+                        <% if ((user.participant_role === 'admin' || user.participant_role === 'manager') || (user.participant_id && user.participant_id == participant.participant_id)) { %>
                             <button class="btn btn-sm btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addMilestoneModal">
                                 <i class="fas fa-plus me-1"></i>Add Milestone
                             </button>
