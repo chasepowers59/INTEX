@@ -11,7 +11,7 @@ const flash = require('connect-flash');
 
 const app = express();
 app.set('trust proxy', 1); // Trust first proxy (Elastic Beanstalk Load Balancer)
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 
 // Database Connection
 const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
