@@ -1,4 +1,5 @@
 # Ella Rises - INTEX Project 2025
+URL: https://intexsection1group2.is404.net/
 Admin Login: email: ella.johnson0@learners.net and password: EllaJohnson
 User Login: Create your own or you can use email: cvpowers@byu.edu and password: chase0903
 
