@@ -387,15 +387,17 @@ exports.getDashboard = async (req, res) => {
 
         // Event Attendance Over Time (Last 6 Months)
         // Business Logic: Show registration trends for the last 6 months
-        // Only include past events (not future events) for accurate historical trends
+        // Include all events through the end of the current month to match donation trends
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        // Set to end of current month to include all data through December
+        const endOfCurrentMonth = new Date(nowDate.getFullYear(), nowDate.getMonth() + 1, 0, 23, 59, 59);
         let attendanceOverTime = [];
         if (rIds.length > 0) {
             attendanceOverTime = await knex('registrations')
                 .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
                 .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
-                .where('event_instances.event_date_time_start', '<=', nowDate) // Don't include future events
+                .where('event_instances.event_date_time_start', '<=', endOfCurrentMonth) // Include all events through end of current month
                 .whereIn('registrations.registration_id', rIds)
                 .select(
                     knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
@@ -408,7 +410,7 @@ exports.getDashboard = async (req, res) => {
             attendanceOverTime = await knex('registrations')
                 .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
                 .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
-                .where('event_instances.event_date_time_start', '<=', nowDate) // Don't include future events
+                .where('event_instances.event_date_time_start', '<=', endOfCurrentMonth) // Include all events through end of current month
                 .select(
                     knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
                     knex.raw("COUNT(*) as count")
@@ -419,14 +421,14 @@ exports.getDashboard = async (req, res) => {
 
         // Satisfaction Trends Over Time (Last 6 Months)
         // Business Logic: Show satisfaction trends for the last 6 months
-        // Only include surveys with valid satisfaction scores and past events
+        // Include all events through the end of the current month to match donation trends
         let satisfactionOverTime = [];
         if (rIds.length > 0) {
             satisfactionOverTime = await knex('surveys')
                 .join('registrations', 'surveys.registration_id', 'registrations.registration_id')
                 .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
                 .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
-                .where('event_instances.event_date_time_start', '<=', nowDate) // Don't include future events
+                .where('event_instances.event_date_time_start', '<=', endOfCurrentMonth) // Include all events through end of current month
                 .whereNotNull('survey_satisfaction_score')
                 .whereIn('surveys.registration_id', rIds)
                 .select(
@@ -441,7 +443,7 @@ exports.getDashboard = async (req, res) => {
                 .join('registrations', 'surveys.registration_id', 'registrations.registration_id')
                 .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
                 .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
-                .where('event_instances.event_date_time_start', '<=', nowDate) // Don't include future events
+                .where('event_instances.event_date_time_start', '<=', endOfCurrentMonth) // Include all events through end of current month
                 .whereNotNull('survey_satisfaction_score')
                 .select(
                     knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
@@ -454,12 +456,12 @@ exports.getDashboard = async (req, res) => {
         // Donation Trends Over Time (Last 6 Months)
         // Business Logic: Show donation trends for the last 6 months from actual database data
         // Only include donations with valid dates (not null, not in the future) and valid amounts
-        // Use nowDate (already defined above) instead of creating a new Date()
+        // Use endOfCurrentMonth to include all donations through the end of the current month
         let donationOverTimeQuery = knex('donations')
             .whereNotNull('donation_date')
             .whereNotNull('donation_amount')
             .where('donation_date', '>=', sixMonthsAgo)
-            .where('donation_date', '<=', nowDate); // Don't include future dates
+            .where('donation_date', '<=', endOfCurrentMonth); // Include all donations through end of current month
         
         // Apply participant filter if filters are active
         if (pIds.length > 0) {
@@ -479,8 +481,8 @@ exports.getDashboard = async (req, res) => {
         const donationOverTime = donationOverTimeRaw.filter(item => {
             if (!item.month) return false;
             const monthDate = new Date(item.month);
-            // Only include months that are not in the future and have valid totals
-            return monthDate <= nowDate && item.total && parseFloat(item.total) > 0;
+            // Only include months that are within the range and have valid totals
+            return monthDate <= endOfCurrentMonth && item.total && parseFloat(item.total) > 0;
         });
         
         // Debug: Log donation over time data

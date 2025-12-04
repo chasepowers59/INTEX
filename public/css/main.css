@@ -220,10 +220,10 @@ a {
 }
 
 .logo-container {
-    background: white;
+    background: transparent;
     border-radius: 12px;
     padding: 0.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
@@ -231,8 +231,8 @@ a {
 }
 
 .navbar-logo:hover .logo-container {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     transform: translateY(-2px);
+    opacity: 0.9;
 }
 
 .logo-image {
@@ -240,6 +240,24 @@ a {
     width: auto;
     object-fit: contain;
     display: block;
+    background: transparent !important;
+    mix-blend-mode: multiply;
+}
+
+/* Ensure all logo images have transparent backgrounds and blend with background */
+img[src*="Logo"]:not(.footer-logo-img), 
+img[alt*="Logo"]:not(.footer-logo-img),
+.logo-image,
+.login-logo-img,
+.header-logo-img {
+    background: transparent !important;
+    background-color: transparent !important;
+    mix-blend-mode: multiply;
+}
+
+/* Footer logo needs special handling for cream background */
+.footer-logo-img {
+    mix-blend-mode: multiply;
 }
 
 /* Navigation Links */
@@ -632,8 +650,10 @@ a {
     height: 120px;
     width: auto;
     object-fit: contain;
-    filter: brightness(0) invert(1); /* Makes logo white for login page */
+    background: transparent;
     transition: transform 0.3s ease;
+    mix-blend-mode: multiply;
+    filter: none;
 }
 
 .logo-alternative:hover .login-logo-img {
@@ -1020,27 +1040,24 @@ a {
 
 /* Footer */
 .site-footer {
-    background: linear-gradient(135deg, var(--col-blue) 0%, var(--col-purple) 100%);
-    color: white;
+    background: var(--col-cream);
+    color: var(--col-dark-gray);
     padding: 3rem 2rem;
     margin-top: 4rem;
     position: relative;
     overflow: hidden;
+    width: 100%;
+    border-top: none;
 }
 
 .site-footer::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    content: none;
 }
 
 .footer-container {
     max-width: 1200px;
     margin: 0 auto;
+    width: 100%;
 }
 
 .footer-content {
@@ -1058,6 +1075,7 @@ a {
     padding: 0;
 }
 
+
 .footer-logo a {
     display: inline-block;
     background: transparent;
@@ -1069,11 +1087,12 @@ a {
     display: inline-block;
     text-decoration: none;
     transition: opacity 0.3s ease, transform 0.3s ease;
-    background: transparent !important;
-    padding: 0;
+    background: var(--col-cream) !important;
+    padding: 0.5rem;
     border: none;
     line-height: 0;
     box-shadow: none;
+    border-radius: 0;
 }
 
 .logo-alternative-footer:hover {
@@ -1094,16 +1113,15 @@ a {
     opacity: 1;
     border: none;
     outline: none;
-    /* Use screen blend mode to make white transparent against dark background */
-    mix-blend-mode: screen;
-    filter: contrast(1.2) brightness(1.1);
+    mix-blend-mode: multiply;
+    filter: none;
 }
 
 .footer-copyright {
     margin: 1rem 0 1.5rem 0;
     font-family: 'Montserrat', sans-serif;
     font-size: 0.95rem;
-    color: rgba(255, 255, 255, 0.95);
+    color: var(--col-dark-gray);
     font-weight: 400;
 }
 
@@ -1117,7 +1135,7 @@ a {
 }
 
 .footer-links a {
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--col-dark-gray);
     text-decoration: none;
     font-family: 'Montserrat', sans-serif;
     font-size: 0.9rem;
@@ -1127,13 +1145,13 @@ a {
 }
 
 .footer-links a:hover {
-    color: white;
+    color: var(--col-blue);
     transform: translateY(-2px);
     text-decoration: none;
 }
 
 .footer-divider {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(58, 63, 59, 0.5);
     font-size: 0.9rem;
     margin: 0 0.25rem;
 }
