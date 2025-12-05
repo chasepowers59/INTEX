@@ -11,9 +11,12 @@ router.use(isAuthenticated);
 router.use(isReadOnlyOrManager);
 
 router.get('/dashboard', adminController.getDashboard);
+router.get('/dashboard/data', adminController.getDashboardData);
 
 // ==================== USER MAINTENANCE ====================
 router.get('/users', adminController.listUsers);
+router.get('/users/edit/:participant_id', isManager, adminController.getEditUser);
+router.post('/users/edit/:participant_id', isManager, adminController.postEditUser);
 router.post('/users/:participant_id/role', isManager, adminController.updateUserRole);
 router.post('/users/:participant_id/reset-password', isManager, adminController.resetUserPassword);
 router.post('/users/delete/:participant_id', isManager, adminController.deleteUser);
@@ -25,6 +28,9 @@ router.post('/participants/add', isManager, adminController.postAddParticipant);
 router.get('/participants/edit/:id', isManager, adminController.getEditParticipant);
 router.post('/participants/edit/:id', isManager, adminController.postEditParticipant);
 router.post('/participants/delete/:id', isManager, adminController.deleteParticipant);
+
+// ==================== REGISTRATION MAINTENANCE ====================
+router.get('/registrations', adminController.listRegistrations);
 
 // ==================== EVENT MAINTENANCE ====================
 router.get('/events', adminController.listEvents);

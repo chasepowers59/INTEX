@@ -1,0 +1,94 @@
+<%- include('../partials/header', { user: user }) %>
+<%- include('_shared_styles') %>
+
+    <div class="container mt-4">
+        <!-- Page Header -->
+        <div class="admin-page-header">
+            <h1>Recent Registrations</h1>
+            <div class="btn-group">
+                <a href="/admin/dashboard" class="admin-btn admin-btn-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="admin-filter-card mb-4">
+            <div class="card-body">
+                <p class="mb-0" style="color: #666; font-family: 'Montserrat', sans-serif;">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Showing the most recent registrations for upcoming events. Only active (future) registrations are displayed.
+                </p>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="admin-table-card">
+            <div class="card-body">
+                <table class="table admin-table">
+                    <thead>
+                        <tr>
+                            <th>Registered Date</th>
+                            <th>Participant</th>
+                            <th>Event</th>
+                            <th>Event Type</th>
+                            <th>Event Date</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (registrations && registrations.length > 0) { %>
+                            <% registrations.forEach(reg => { %>
+                                <tr>
+                                    <td>
+                                        <%= reg.registration_created_at ? new Date(reg.registration_created_at).toLocaleDateString('en-US', { 
+                                            year: 'numeric', 
+                                            month: 'short', 
+                                            day: 'numeric',
+                                            hour: 'numeric',
+                                            minute: '2-digit'
+                                        }) : 'N/A' %>
+                                    </td>
+                                    <td style="font-family: 'Montserrat', sans-serif; font-weight: 600;">
+                                        <%= reg.participant_first_name %> <%= reg.participant_last_name %>
+                                        <br>
+                                        <small style="color: #999; font-weight: normal;"><%= reg.participant_email %></small>
+                                    </td>
+                                    <td style="font-family: 'Montserrat', sans-serif;">
+                                        <%= reg.event_name %>
+                                    </td>
+                                    <td>
+                                        <span class="admin-badge bg-info"><%= reg.event_type %></span>
+                                    </td>
+                                    <td style="font-family: 'Montserrat', sans-serif;">
+                                        <%= reg.event_date_time_start ? new Date(reg.event_date_time_start).toLocaleDateString('en-US', { 
+                                            weekday: 'short',
+                                            year: 'numeric', 
+                                            month: 'short', 
+                                            day: 'numeric',
+                                            hour: 'numeric',
+                                            minute: '2-digit'
+                                        }) : 'TBD' %>
+                                    </td>
+                                    <td style="font-family: 'Montserrat', sans-serif;">
+                                        <%= reg.event_location || 'N/A' %>
+                                    </td>
+                                    <td>
+                                        <span class="admin-badge bg-<%= reg.registration_status === 'Registered' ? 'success' : 'secondary' %>">
+                                            <%= reg.registration_status || 'Registered' %>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="7" class="admin-empty-state">No recent registrations found.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+

@@ -83,7 +83,7 @@ npm install
 Create a `.env` file in the root directory with:
 ```
 NODE_ENV=development
-PORT=8080
+PORT=3000
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=your_username
@@ -107,7 +107,7 @@ npm run seed
 npm start
 ```
 
-The application will be available at `http://localhost:8080`
+The application will be available at `http://localhost:3000`
 
 ## Project Structure
 

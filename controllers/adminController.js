@@ -17,12 +17,25 @@ function calculateTrend(current, previous) {
 
 exports.getDashboard = async (req, res) => {
     try {
-        const { eventType, city, role } = req.query;
-        console.log('Dashboard Filters:', { eventType, city, role });
+        let { eventType, city, milestoneCount, ageRange } = req.query;
+        console.log('Dashboard Filters:', { eventType, city, milestoneCount, ageRange });
+
+        // Validate filter values to prevent unexpected input
+        const validMilestoneCounts = ['', 'has', '1', '2', '3', '4', '5', '5+'];
+        const validAgeRanges = ['', '1-10', '11-15', '16-21', '21+'];
+        
+        if (milestoneCount && !validMilestoneCounts.includes(milestoneCount)) {
+            console.warn('Unexpected milestoneCount value:', milestoneCount);
+            milestoneCount = ''; // Reset to default
+        }
+        
+        if (ageRange && !validAgeRanges.includes(ageRange)) {
+            console.warn('Unexpected ageRange value:', ageRange);
+            ageRange = ''; // Reset to default
+        }
 
         // 0. Fetch Filter Options (Dynamic)
         const cities = await knex('participants').distinct('participant_city').whereNotNull('participant_city').orderBy('participant_city').pluck('participant_city');
-        const roles = await knex('participants').distinct('participant_role').whereNotNull('participant_role').orderBy('participant_role').pluck('participant_role');
         const eventTypes = await knex('event_definitions').distinct('event_type').orderBy('event_type').pluck('event_type');
 
         // Base Data Fetching Strategy: Build filtered ID sets first
@@ -42,10 +55,6 @@ exports.getDashboard = async (req, res) => {
             filteredParticipantIds = filteredParticipantIds.where('participant_city', city);
             filteredRegistrationIds = filteredRegistrationIds.where('participants.participant_city', city);
         }
-        if (role && role !== '') {
-            filteredParticipantIds = filteredParticipantIds.where('participant_role', role);
-            filteredRegistrationIds = filteredRegistrationIds.where('participants.participant_role', role);
-        }
         if (eventType && eventType !== '') {
             filteredRegistrationIds = filteredRegistrationIds.where('event_definitions.event_type', eventType);
             filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', function () {
@@ -55,17 +64,146 @@ exports.getDashboard = async (req, res) => {
                     .where('event_definitions.event_type', eventType);
             });
         }
-
-        // Get filtered IDs and ensure they are integers
-        const pIdsRaw = await filteredParticipantIds.pluck('participant_id');
-        const rIdsRaw = await filteredRegistrationIds.pluck('registration_id');
         
-        // Convert to integers and filter out any invalid values
+        // Milestone Count Filter
+        if (milestoneCount && milestoneCount !== '') {
+            if (milestoneCount === 'has') {
+                // Participants who have at least one milestone
+                // Use raw SQL subquery to ensure HAVING clause works correctly
+                filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', 
+                    knex.raw(`(
+                        SELECT participant_id 
+                        FROM milestones 
+                        GROUP BY participant_id 
+                        HAVING COUNT(milestone_id) >= 1
+                    )`)
+                );
+            } else if (milestoneCount === '1') {
+                // Participants with exactly 1 milestone
+                filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', 
+                    knex.raw(`(
+                        SELECT participant_id 
+                        FROM milestones 
+                        GROUP BY participant_id 
+                        HAVING COUNT(milestone_id) = 1
+                    )`)
+                );
+            } else if (milestoneCount === '2') {
+                // Participants with exactly 2 milestones
+                filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', 
+                    knex.raw(`(
+                        SELECT participant_id 
+                        FROM milestones 
+                        GROUP BY participant_id 
+                        HAVING COUNT(milestone_id) = 2
+                    )`)
+                );
+            } else if (milestoneCount === '3') {
+                // Participants with exactly 3 milestones
+                filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', 
+                    knex.raw(`(
+                        SELECT participant_id 
+                        FROM milestones 
+                        GROUP BY participant_id 
+                        HAVING COUNT(milestone_id) = 3
+                    )`)
+                );
+            } else if (milestoneCount === '4') {
+                // Participants with exactly 4 milestones
+                filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', 
+                    knex.raw(`(
+                        SELECT participant_id 
+                        FROM milestones 
+                        GROUP BY participant_id 
+                        HAVING COUNT(milestone_id) = 4
+                    )`)
+                );
+            } else if (milestoneCount === '5') {
+                // Participants with exactly 5 milestones
+                filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', 
+                    knex.raw(`(
+                        SELECT participant_id 
+                        FROM milestones 
+                        GROUP BY participant_id 
+                        HAVING COUNT(milestone_id) = 5
+                    )`)
+                );
+            } else if (milestoneCount === '5+') {
+                // Participants with 5 or more milestones
+                filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', function() {
+                    this.select('participant_id')
+                        .from('milestones')
+                        .groupBy('participant_id')
+                        .havingRaw('COUNT(milestone_id) >= 5');
+                });
+            }
+        }
+        
+        // Age Range Filter
+        if (ageRange && ageRange !== '') {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth();
+            const currentDay = today.getDate();
+            
+            if (ageRange === '1-10') {
+                // 1-10: born between (currentYear - 10) and (currentYear - 1), inclusive
+                // Someone who is 1 was born 1 year ago, someone who is 10 was born 10 years ago
+                const minDate = new Date(currentYear - 10, currentMonth, currentDay);
+                minDate.setHours(0, 0, 0, 0);
+                const maxDate = new Date(currentYear - 1, currentMonth, currentDay);
+                maxDate.setHours(23, 59, 59, 999);
+                filteredParticipantIds = filteredParticipantIds.where('participant_dob', '>=', minDate)
+                    .where('participant_dob', '<=', maxDate);
+            } else if (ageRange === '11-15') {
+                // 11-15: born between (currentYear - 15) and (currentYear - 11), inclusive
+                const minDate = new Date(currentYear - 15, currentMonth, currentDay);
+                minDate.setHours(0, 0, 0, 0);
+                const maxDate = new Date(currentYear - 11, currentMonth, currentDay);
+                maxDate.setHours(23, 59, 59, 999);
+                filteredParticipantIds = filteredParticipantIds.where('participant_dob', '>=', minDate)
+                    .where('participant_dob', '<=', maxDate);
+            } else if (ageRange === '16-21') {
+                // 16-21: born between (currentYear - 21) and (currentYear - 16), inclusive
+                const minDate = new Date(currentYear - 21, currentMonth, currentDay);
+                minDate.setHours(0, 0, 0, 0);
+                const maxDate = new Date(currentYear - 16, currentMonth, currentDay);
+                maxDate.setHours(23, 59, 59, 999);
+                filteredParticipantIds = filteredParticipantIds.where('participant_dob', '>=', minDate)
+                    .where('participant_dob', '<=', maxDate);
+            } else if (ageRange === '21+') {
+                // 21+: born on or before (currentYear - 21)
+                const cutoffDate = new Date(currentYear - 21, currentMonth, currentDay);
+                cutoffDate.setHours(23, 59, 59, 999);
+                filteredParticipantIds = filteredParticipantIds.where('participant_dob', '<=', cutoffDate);
+            }
+            // Also filter out participants with null DOB for age range filters
+            filteredParticipantIds = filteredParticipantIds.whereNotNull('participant_dob');
+        }
+
+        // Get filtered participant IDs first
+        const pIdsRaw = await filteredParticipantIds.pluck('participant_id');
         const pIds = pIdsRaw.map(id => parseInt(id)).filter(id => !isNaN(id) && id > 0);
+        
+        // Now filter registration IDs to only include registrations from filtered participants
+        // This ensures milestone count and age range filters apply to charts that use rIds
+        // Use registrations.participant_id (not participants.participant_id) since we're selecting from registrations table
+        if (pIds.length > 0) {
+            filteredRegistrationIds = filteredRegistrationIds.whereIn('registrations.participant_id', pIds);
+        } else {
+            // If no participants match the filters, set filteredRegistrationIds to return no results
+            filteredRegistrationIds = filteredRegistrationIds.whereRaw('1 = 0'); // Always false condition
+        }
+        
+        // Get filtered registration IDs
+        const rIdsRaw = await filteredRegistrationIds.pluck('registration_id');
         const rIds = rIdsRaw.map(id => parseInt(id)).filter(id => !isNaN(id) && id > 0);
 
         // Calculate KPIs: All metrics use the filtered ID sets to ensure consistency
         const totalParticipants = pIds.length;
+        
+        // Check if any filters are active (used by multiple KPIs)
+        const hasFilters = (city && city !== '') || (eventType && eventType !== '') || (milestoneCount && milestoneCount !== '') || (ageRange && ageRange !== '');
 
         // KPI 1: Average Satisfaction Score
         // Business Logic: Calculate average satisfaction across all surveys for filtered registrations.
@@ -91,26 +229,25 @@ exports.getDashboard = async (req, res) => {
                 : '0.0';
         }
 
-        // KPI 2: Higher Education Milestones
-        // Business Logic: Count milestones related to higher education achievement.
-        // This metric tracks program success in helping participants pursue post-secondary education.
-        // We use keyword matching because milestone titles are free-form text, allowing flexibility
-        // while still capturing education-related achievements.
-        const higherEdKeywords = ['College', 'FAFSA', 'Scholarship', 'University', 'Degree'];
-        let milestoneQuery = knex('milestones')
-            .where(builder => {
-                higherEdKeywords.forEach(keyword => {
-                    builder.orWhere('milestone_title', 'ilike', `%${keyword}%`);
-                });
-            });
+        // KPI 2: Total Milestones
+        // Business Logic: Count all milestones recorded in the system.
+        // This metric tracks overall participant achievements and successes.
+        // Only apply participant filter if filters are actually active
+        let milestoneQuery = knex('milestones');
         
-        // Apply participant filter if filters are active
-        if (pIds.length > 0) {
-            milestoneQuery = milestoneQuery.whereIn('participant_id', pIds);
+        if (hasFilters) {
+            // Only filter if we have valid participant IDs from filters
+            if (pIds.length > 0) {
+                milestoneQuery = milestoneQuery.whereIn('participant_id', pIds);
+            } else {
+                // If filters are active but no participants match, return 0
+                milestoneQuery = milestoneQuery.whereRaw('1 = 0'); // Always false condition
+            }
         }
+        // If no filters are active, count all milestones (no whereIn clause needed)
         
         const milestoneResult = await milestoneQuery.count('milestone_id as count').first();
-        const milestoneCount = parseInt(milestoneResult.count || 0);
+        const totalMilestoneCount = parseInt(milestoneResult.count || 0);
 
         // KPI 4: Total Donations
         // Business Logic: Sum all donations from the database, ensuring we only count actual donations
@@ -221,15 +358,15 @@ exports.getDashboard = async (req, res) => {
         // Use a single 'nowDate' reference to ensure consistency across all date calculations
         const nowDate = new Date();
         
-        // KPI 9: Active Registrations (Upcoming Events)
+        // KPI 9: Most Recent Event Registrations (Upcoming Events)
         // Business Logic: Count registrations for future events
-        // Apply participant filter if filters are active for consistency
+        // Apply participant filter only if filters are active for consistency
         let activeRegistrationsQuery = knex('registrations')
             .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
             .where('event_instances.event_date_time_start', '>', nowDate);
         
-        // Apply participant filter if filters are active
-        if (pIds.length > 0) {
+        // Apply participant filter only if filters are active
+        if (hasFilters && pIds.length > 0) {
             activeRegistrationsQuery = activeRegistrationsQuery.whereIn('registrations.participant_id', pIds);
         }
         
@@ -240,6 +377,26 @@ exports.getDashboard = async (req, res) => {
         const currentMonthStart = new Date(nowDate.getFullYear(), nowDate.getMonth(), 1);
         const previousMonthStart = new Date(nowDate.getFullYear(), nowDate.getMonth() - 1, 1);
         const previousMonthEnd = new Date(nowDate.getFullYear(), nowDate.getMonth(), 0);
+        
+        // KPI 10: New Users (This Month)
+        // Business Logic: Count distinct participants who registered for an event this month
+        // Since participants table doesn't have created_at, we use registration_created_at as a proxy
+        // for when a user joined the system (their first registration)
+        let newUsersQuery = knex('registrations')
+            .whereNotNull('registration_created_at')
+            .where('registration_created_at', '>=', currentMonthStart)
+            .where('registration_created_at', '<=', nowDate);
+        
+        // Apply participant filter only if filters are active
+        if (hasFilters && pIds.length > 0) {
+            newUsersQuery = newUsersQuery.whereIn('participant_id', pIds);
+        }
+        
+        // Count distinct participants who registered this month
+        const newUsersResult = await newUsersQuery
+            .countDistinct('participant_id as count')
+            .first();
+        const newUsers = parseInt(newUsersResult.count || 0);
         
         // Debug: Log date ranges for troubleshooting
         console.log('Dashboard Date Ranges:', {
@@ -358,22 +515,34 @@ exports.getDashboard = async (req, res) => {
             .avg('surveys.survey_satisfaction_score as avg_score')
             .groupBy('event_definitions.event_type');
 
-        const cityDistribution = await knex('participants')
-            .whereIn('participant_id', pIds)
-            .select('participant_city')
-            .count('participant_id as count')
-            .groupBy('participant_city')
-            .orderBy('count', 'desc')
-            .limit(5);
+        // City Distribution Chart (Top 5 Cities)
+        // Business Logic: Show top 5 cities by participant count, filtered by active filters
+        let cityDistribution = [];
+        if (pIds.length > 0) {
+            cityDistribution = await knex('participants')
+                .whereIn('participant_id', pIds)
+                .select('participant_city')
+                .count('participant_id as count')
+                .groupBy('participant_city')
+                .orderBy('count', 'desc')
+                .limit(5);
+        } else {
+            // If filters result in no participants, return empty array
+            cityDistribution = [];
+        }
 
         // Impact Data (Attended vs Missed)
-        const impactStats = await knex('registrations')
-            .whereIn('registration_id', rIds)
-            .select(
-                knex.raw("SUM(CASE WHEN registration_attended_flag = true THEN 1 ELSE 0 END) as attended"),
-                knex.raw("SUM(CASE WHEN registration_attended_flag = false THEN 1 ELSE 0 END) as missed")
-            )
-            .first();
+        // Business Logic: Show attended vs missed registrations, filtered by active filters
+        let impactStats = { attended: 0, missed: 0 };
+        if (rIds.length > 0) {
+            impactStats = await knex('registrations')
+                .whereIn('registration_id', rIds)
+                .select(
+                    knex.raw("SUM(CASE WHEN registration_attended_flag = true THEN 1 ELSE 0 END) as attended"),
+                    knex.raw("SUM(CASE WHEN registration_attended_flag = false THEN 1 ELSE 0 END) as missed")
+                )
+                .first();
+        }
 
         const impactData = [
             parseInt(impactStats ? impactStats.attended : 0) || 0,
@@ -393,20 +562,24 @@ exports.getDashboard = async (req, res) => {
         // Set to end of current month to include all data through December
         const endOfCurrentMonth = new Date(nowDate.getFullYear(), nowDate.getMonth() + 1, 0, 23, 59, 59);
         let attendanceOverTime = [];
-        if (rIds.length > 0) {
-            attendanceOverTime = await knex('registrations')
-                .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
-                .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
-                .where('event_instances.event_date_time_start', '<=', endOfCurrentMonth) // Include all events through end of current month
-                .whereIn('registrations.registration_id', rIds)
-                .select(
-                    knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
-                    knex.raw("COUNT(*) as count")
-                )
-                .groupBy('month')
-                .orderBy('month', 'asc');
+        if (hasFilters) {
+            // Filters are active - use filtered registration IDs
+            if (rIds.length > 0) {
+                attendanceOverTime = await knex('registrations')
+                    .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+                    .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
+                    .where('event_instances.event_date_time_start', '<=', endOfCurrentMonth) // Include all events through end of current month
+                    .whereIn('registrations.registration_id', rIds)
+                    .select(
+                        knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
+                        knex.raw("COUNT(*) as count")
+                    )
+                    .groupBy('month')
+                    .orderBy('month', 'asc');
+            }
+            // If filters are active but rIds.length === 0, attendanceOverTime remains empty array
         } else {
-            // If no filters, calculate from all registrations
+            // No filters active - calculate from all registrations
             attendanceOverTime = await knex('registrations')
                 .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
                 .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
@@ -423,22 +596,28 @@ exports.getDashboard = async (req, res) => {
         // Business Logic: Show satisfaction trends for the last 6 months
         // Include all events through the end of the current month to match donation trends
         let satisfactionOverTime = [];
-        if (rIds.length > 0) {
-            satisfactionOverTime = await knex('surveys')
-                .join('registrations', 'surveys.registration_id', 'registrations.registration_id')
-                .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
-                .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
-                .where('event_instances.event_date_time_start', '<=', endOfCurrentMonth) // Include all events through end of current month
-                .whereNotNull('survey_satisfaction_score')
-                .whereIn('surveys.registration_id', rIds)
-                .select(
-                    knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
-                    knex.raw("AVG(survey_satisfaction_score) as avg_score")
-                )
-                .groupBy('month')
-                .orderBy('month', 'asc');
+        // IMPORTANT: Always use rIds when milestone count or age range filters are active
+        // This ensures these participant-centric filters work correctly for satisfaction trends
+        if (hasFilters || (milestoneCount && milestoneCount !== '') || (ageRange && ageRange !== '')) {
+            // Filters are active - use filtered registration IDs
+            if (rIds.length > 0) {
+                satisfactionOverTime = await knex('surveys')
+                    .join('registrations', 'surveys.registration_id', 'registrations.registration_id')
+                    .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+                    .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
+                    .where('event_instances.event_date_time_start', '<=', endOfCurrentMonth) // Include all events through end of current month
+                    .whereNotNull('survey_satisfaction_score')
+                    .whereIn('surveys.registration_id', rIds)
+                    .select(
+                        knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
+                        knex.raw("AVG(survey_satisfaction_score) as avg_score")
+                    )
+                    .groupBy('month')
+                    .orderBy('month', 'asc');
+            }
+            // If filters are active but rIds.length === 0, satisfactionOverTime remains empty array
         } else {
-            // If no filters, calculate from all surveys
+            // No filters active - calculate from all surveys
             satisfactionOverTime = await knex('surveys')
                 .join('registrations', 'surveys.registration_id', 'registrations.registration_id')
                 .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
@@ -463,10 +642,25 @@ exports.getDashboard = async (req, res) => {
             .where('donation_date', '>=', sixMonthsAgo)
             .where('donation_date', '<=', endOfCurrentMonth); // Include all donations through end of current month
         
-        // Apply participant filter if filters are active
-        if (pIds.length > 0) {
-            donationOverTimeQuery = donationOverTimeQuery.whereIn('participant_id', pIds);
+        // Apply participant filter based on active filters
+        // IMPORTANT: Always filter by pIds when milestone count or age range filters are active
+        // This ensures these participant-centric filters work correctly for donation trends
+        if (hasFilters) {
+            if (pIds.length > 0) {
+                donationOverTimeQuery = donationOverTimeQuery.whereIn('participant_id', pIds);
+            } else {
+                // Filters are active but no participants match - return empty data
+                donationOverTimeQuery = donationOverTimeQuery.whereRaw('1 = 0');
+            }
+        } else if ((milestoneCount && milestoneCount !== '') || (ageRange && ageRange !== '')) {
+            // Even if hasFilters is false (no city/eventType), if milestone/age filters are active, filter by pIds
+            if (pIds.length > 0) {
+                donationOverTimeQuery = donationOverTimeQuery.whereIn('participant_id', pIds);
+            } else {
+                donationOverTimeQuery = donationOverTimeQuery.whereRaw('1 = 0');
+            }
         }
+        // If no filters are active at all, show all donations (no whereIn needed)
         
         const donationOverTimeRaw = await donationOverTimeQuery
             .select(
@@ -553,7 +747,7 @@ exports.getDashboard = async (req, res) => {
         res.render('admin/dashboard', {
             user: req.user,
             kpis: {
-                milestoneCount: milestoneCount,
+                milestoneCount: totalMilestoneCount,
                 satisfactionScore,
                 totalParticipants,
                 totalDonations,
@@ -562,6 +756,7 @@ exports.getDashboard = async (req, res) => {
                 totalEvents,
                 attendanceRate,
                 activeRegistrations,
+                newUsers,
                 trends: {
                     participants: participantsTrend,
                     donations: donationsTrend,
@@ -578,8 +773,8 @@ exports.getDashboard = async (req, res) => {
                 city: cityDistribution,
                 impact: impactData
             },
-            filters: { eventType, city, role },
-            options: { cities, roles, eventTypes },
+            filters: { eventType, city, milestoneCount, ageRange },
+            options: { cities, eventTypes },
             attendanceOverTime,
             satisfactionOverTime,
             donationOverTime,
@@ -590,6 +785,577 @@ exports.getDashboard = async (req, res) => {
     } catch (err) {
         console.error('Dashboard Error:', err);
         res.status(500).send('Server Error');
+    }
+};
+
+// API endpoint for AJAX dashboard filtering
+exports.getDashboardData = async (req, res) => {
+    try {
+        let { eventType, city, milestoneCount, ageRange } = req.query;
+        
+        // Validate filter values to prevent unexpected input
+        const validMilestoneCounts = ['', 'has', '1', '2', '3', '4', '5', '5+'];
+        const validAgeRanges = ['', '1-10', '11-15', '16-21', '21+'];
+        
+        if (milestoneCount && !validMilestoneCounts.includes(milestoneCount)) {
+            console.warn('Unexpected milestoneCount value:', milestoneCount);
+            milestoneCount = ''; // Reset to default
+        }
+        
+        if (ageRange && !validAgeRanges.includes(ageRange)) {
+            console.warn('Unexpected ageRange value:', ageRange);
+            ageRange = ''; // Reset to default
+        }
+        
+        // Reuse the same logic from getDashboard but return JSON
+        // Fetch Filter Options (Dynamic)
+        const cities = await knex('participants').distinct('participant_city').whereNotNull('participant_city').orderBy('participant_city').pluck('participant_city');
+        const eventTypes = await knex('event_definitions').distinct('event_type').orderBy('event_type').pluck('event_type');
+
+        // Build filtered ID sets
+        let filteredParticipantIds = knex('participants').select('participant_id');
+        let filteredRegistrationIds = knex('registrations')
+            .join('participants', 'registrations.participant_id', 'participants.participant_id')
+            .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+            .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
+            .select('registrations.registration_id');
+
+        if (city && city !== '') {
+            filteredParticipantIds = filteredParticipantIds.where('participant_city', city);
+            filteredRegistrationIds = filteredRegistrationIds.where('participants.participant_city', city);
+        }
+        if (eventType && eventType !== '') {
+            filteredRegistrationIds = filteredRegistrationIds.where('event_definitions.event_type', eventType);
+            filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', function () {
+                this.select('participant_id').from('registrations')
+                    .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+                    .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
+                    .where('event_definitions.event_type', eventType);
+            });
+        }
+        
+        // Milestone Count Filter
+        if (milestoneCount && milestoneCount !== '') {
+            if (milestoneCount === 'has') {
+                // Participants who have at least one milestone
+                // Use raw SQL subquery to ensure HAVING clause works correctly
+                filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', 
+                    knex.raw(`(
+                        SELECT participant_id 
+                        FROM milestones 
+                        GROUP BY participant_id 
+                        HAVING COUNT(milestone_id) >= 1
+                    )`)
+                );
+            } else if (milestoneCount === '1') {
+                // Participants with exactly 1 milestone
+                filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', 
+                    knex.raw(`(
+                        SELECT participant_id 
+                        FROM milestones 
+                        GROUP BY participant_id 
+                        HAVING COUNT(milestone_id) = 1
+                    )`)
+                );
+            } else if (milestoneCount === '2') {
+                // Participants with exactly 2 milestones
+                filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', 
+                    knex.raw(`(
+                        SELECT participant_id 
+                        FROM milestones 
+                        GROUP BY participant_id 
+                        HAVING COUNT(milestone_id) = 2
+                    )`)
+                );
+            } else if (milestoneCount === '3') {
+                // Participants with exactly 3 milestones
+                filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', 
+                    knex.raw(`(
+                        SELECT participant_id 
+                        FROM milestones 
+                        GROUP BY participant_id 
+                        HAVING COUNT(milestone_id) = 3
+                    )`)
+                );
+            } else if (milestoneCount === '4') {
+                // Participants with exactly 4 milestones
+                filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', 
+                    knex.raw(`(
+                        SELECT participant_id 
+                        FROM milestones 
+                        GROUP BY participant_id 
+                        HAVING COUNT(milestone_id) = 4
+                    )`)
+                );
+            } else if (milestoneCount === '5') {
+                // Participants with exactly 5 milestones
+                filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', 
+                    knex.raw(`(
+                        SELECT participant_id 
+                        FROM milestones 
+                        GROUP BY participant_id 
+                        HAVING COUNT(milestone_id) = 5
+                    )`)
+                );
+            } else if (milestoneCount === '5+') {
+                // Participants with 5 or more milestones
+                filteredParticipantIds = filteredParticipantIds.whereIn('participant_id', function() {
+                    this.select('participant_id')
+                        .from('milestones')
+                        .groupBy('participant_id')
+                        .havingRaw('COUNT(milestone_id) >= 5');
+                });
+            }
+        }
+        
+        // Age Range Filter
+        if (ageRange && ageRange !== '') {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth();
+            const currentDay = today.getDate();
+            
+            if (ageRange === '1-10') {
+                // 1-10: born between (currentYear - 10) and (currentYear - 1), inclusive
+                // Someone who is 1 was born 1 year ago, someone who is 10 was born 10 years ago
+                const minDate = new Date(currentYear - 10, currentMonth, currentDay);
+                minDate.setHours(0, 0, 0, 0);
+                const maxDate = new Date(currentYear - 1, currentMonth, currentDay);
+                maxDate.setHours(23, 59, 59, 999);
+                filteredParticipantIds = filteredParticipantIds.where('participant_dob', '>=', minDate)
+                    .where('participant_dob', '<=', maxDate);
+            } else if (ageRange === '11-15') {
+                // 11-15: born between (currentYear - 15) and (currentYear - 11), inclusive
+                const minDate = new Date(currentYear - 15, currentMonth, currentDay);
+                minDate.setHours(0, 0, 0, 0);
+                const maxDate = new Date(currentYear - 11, currentMonth, currentDay);
+                maxDate.setHours(23, 59, 59, 999);
+                filteredParticipantIds = filteredParticipantIds.where('participant_dob', '>=', minDate)
+                    .where('participant_dob', '<=', maxDate);
+            } else if (ageRange === '16-21') {
+                // 16-21: born between (currentYear - 21) and (currentYear - 16), inclusive
+                const minDate = new Date(currentYear - 21, currentMonth, currentDay);
+                minDate.setHours(0, 0, 0, 0);
+                const maxDate = new Date(currentYear - 16, currentMonth, currentDay);
+                maxDate.setHours(23, 59, 59, 999);
+                filteredParticipantIds = filteredParticipantIds.where('participant_dob', '>=', minDate)
+                    .where('participant_dob', '<=', maxDate);
+            } else if (ageRange === '21+') {
+                // 21+: born on or before (currentYear - 21)
+                const cutoffDate = new Date(currentYear - 21, currentMonth, currentDay);
+                cutoffDate.setHours(23, 59, 59, 999);
+                filteredParticipantIds = filteredParticipantIds.where('participant_dob', '<=', cutoffDate);
+            }
+            // Also filter out participants with null DOB for age range filters
+            filteredParticipantIds = filteredParticipantIds.whereNotNull('participant_dob');
+        }
+
+        // Get filtered participant IDs first
+        const pIdsRaw = await filteredParticipantIds.pluck('participant_id');
+        const pIds = pIdsRaw.map(id => parseInt(id)).filter(id => !isNaN(id) && id > 0);
+        
+        // Debug: Log filtered participant IDs
+        console.log('Filtered Participant IDs (pIds) - AJAX:', {
+            count: pIds.length,
+            sample: pIds.slice(0, 10),
+            filters: { eventType, city, milestoneCount, ageRange }
+        });
+        
+        // Now filter registration IDs to only include registrations from filtered participants
+        // This ensures milestone count and age range filters apply to charts that use rIds
+        // IMPORTANT: Always filter by pIds when milestone/age filters are active, even if other filters aren't
+        // This ensures milestone and age filters work correctly
+        if (pIds.length > 0) {
+            filteredRegistrationIds = filteredRegistrationIds.whereIn('registrations.participant_id', pIds);
+        } else {
+            // If no participants match the filters, set filteredRegistrationIds to return no results
+            filteredRegistrationIds = filteredRegistrationIds.whereRaw('1 = 0'); // Always false condition
+        }
+        
+        // Get filtered registration IDs
+        const rIdsRaw = await filteredRegistrationIds.pluck('registration_id');
+        const rIds = rIdsRaw.map(id => parseInt(id)).filter(id => !isNaN(id) && id > 0);
+        
+        // Debug: Log filtered registration IDs
+        console.log('Filtered Registration IDs (rIds) - AJAX:', {
+            count: rIds.length,
+            sample: rIds.slice(0, 10)
+        });
+
+        const totalParticipants = pIds.length;
+        const hasFilters = (city && city !== '') || (eventType && eventType !== '') || (milestoneCount && milestoneCount !== '') || (ageRange && ageRange !== '');
+
+        // Calculate all KPIs (same logic as getDashboard)
+        let satisfactionScore = '0.0';
+        if (rIds.length > 0) {
+            const avgSatisfactionResult = await knex('surveys')
+                .whereIn('registration_id', rIds)
+                .whereNotNull('survey_satisfaction_score')
+                .avg('survey_satisfaction_score as avg')
+                .first();
+            satisfactionScore = avgSatisfactionResult && avgSatisfactionResult.avg
+                ? parseFloat(avgSatisfactionResult.avg).toFixed(1)
+                : '0.0';
+        } else {
+            const avgSatisfactionResult = await knex('surveys')
+                .whereNotNull('survey_satisfaction_score')
+                .avg('survey_satisfaction_score as avg')
+                .first();
+            satisfactionScore = avgSatisfactionResult && avgSatisfactionResult.avg
+                ? parseFloat(avgSatisfactionResult.avg).toFixed(1)
+                : '0.0';
+        }
+
+        let milestoneQuery = knex('milestones');
+        if (hasFilters) {
+            if (pIds.length > 0) {
+                milestoneQuery = milestoneQuery.whereIn('participant_id', pIds);
+            } else {
+                milestoneQuery = milestoneQuery.whereRaw('1 = 0');
+            }
+        }
+        const milestoneResult = await milestoneQuery.count('milestone_id as count').first();
+        const totalMilestoneCount = parseInt(milestoneResult.count || 0);
+
+        const nowForDonations = new Date();
+        let totalDonationsQuery = knex('donations')
+            .whereNotNull('donation_date')
+            .whereNotNull('donation_amount')
+            .where('donation_date', '<=', nowForDonations);
+        if (pIds.length > 0) {
+            totalDonationsQuery = totalDonationsQuery.whereIn('participant_id', pIds);
+        }
+        const totalDonationsResult = await totalDonationsQuery.sum('donation_amount as total').first();
+        const totalDonations = totalDonationsResult && totalDonationsResult.total 
+            ? parseFloat(totalDonationsResult.total) 
+            : 0;
+
+        let npsQuery = knex('surveys').whereNotNull('survey_recommendation_score');
+        if (rIds.length > 0) {
+            npsQuery = npsQuery.whereIn('registration_id', rIds);
+        }
+        const surveyStats = await npsQuery
+            .select(
+                knex.raw("COUNT(*) as total"),
+                knex.raw("SUM(CASE WHEN survey_recommendation_score >= 4 THEN 1 ELSE 0 END) as promoters"),
+                knex.raw("SUM(CASE WHEN survey_recommendation_score <= 2 THEN 1 ELSE 0 END) as detractors")
+            )
+            .first();
+        let npsScore = 0;
+        if (surveyStats && surveyStats.total > 0) {
+            const promoters = parseInt(surveyStats.promoters || 0);
+            const detractors = parseInt(surveyStats.detractors || 0);
+            const total = parseInt(surveyStats.total);
+            npsScore = Math.round(((promoters - detractors) / total) * 100);
+        }
+
+        let attendanceQuery = knex('registrations').where('registration_attended_flag', true);
+        if (rIds.length > 0) {
+            attendanceQuery = attendanceQuery.whereIn('registration_id', rIds);
+        }
+        const attendanceResult = await attendanceQuery.count('registration_id as count').first();
+        const attendanceCount = parseInt(attendanceResult.count || 0);
+
+        const totalEventsResult = await knex('event_instances').count('event_instance_id as count').first();
+        const totalEvents = parseInt(totalEventsResult.count || 0);
+
+        let totalRegistrationsQuery = knex('registrations');
+        if (rIds.length > 0) {
+            totalRegistrationsQuery = totalRegistrationsQuery.whereIn('registration_id', rIds);
+        }
+        const totalRegistrations = await totalRegistrationsQuery.count('registration_id as count').first();
+        const totalRegCount = parseInt(totalRegistrations.count || 0);
+        const attendanceRate = totalRegCount > 0 
+            ? Math.round((attendanceCount / totalRegCount) * 100) 
+            : 0;
+
+        const nowDate = new Date();
+        let activeRegistrationsQuery = knex('registrations')
+            .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+            .where('event_instances.event_date_time_start', '>', nowDate);
+        if (hasFilters && pIds.length > 0) {
+            activeRegistrationsQuery = activeRegistrationsQuery.whereIn('registrations.participant_id', pIds);
+        }
+        const activeRegistrationsResult = await activeRegistrationsQuery.count('registrations.registration_id as count').first();
+        const activeRegistrations = parseInt(activeRegistrationsResult.count || 0);
+
+        const currentMonthStart = new Date(nowDate.getFullYear(), nowDate.getMonth(), 1);
+        const previousMonthStart = new Date(nowDate.getFullYear(), nowDate.getMonth() - 1, 1);
+        const previousMonthEnd = new Date(nowDate.getFullYear(), nowDate.getMonth(), 0);
+
+        let newUsersQuery = knex('registrations')
+            .whereNotNull('registration_created_at')
+            .where('registration_created_at', '>=', currentMonthStart)
+            .where('registration_created_at', '<=', nowDate);
+        if (hasFilters && pIds.length > 0) {
+            newUsersQuery = newUsersQuery.whereIn('participant_id', pIds);
+        }
+        const newUsersResult = await newUsersQuery.countDistinct('participant_id as count').first();
+        const newUsers = parseInt(newUsersResult.count || 0);
+
+        // Trends
+        let currentParticipants = { count: 0 };
+        let prevParticipants = { count: 0 };
+        if (pIds.length > 0) {
+            currentParticipants = await knex('registrations')
+                .whereIn('participant_id', pIds)
+                .whereNotNull('registration_created_at')
+                .where('registration_created_at', '>=', currentMonthStart)
+                .countDistinct('participant_id as count')
+                .first();
+            prevParticipants = await knex('registrations')
+                .whereIn('participant_id', pIds)
+                .whereNotNull('registration_created_at')
+                .where('registration_created_at', '>=', previousMonthStart)
+                .where('registration_created_at', '<', currentMonthStart)
+                .countDistinct('participant_id as count')
+                .first();
+        }
+        const participantsTrend = calculateTrend(parseInt(currentParticipants.count || 0), parseInt(prevParticipants.count || 0));
+
+        let currentDonationsQuery = knex('donations')
+            .whereNotNull('donation_date')
+            .whereNotNull('donation_amount')
+            .where('donation_date', '>=', currentMonthStart)
+            .where('donation_date', '<=', nowDate);
+        let prevDonationsQuery = knex('donations')
+            .whereNotNull('donation_date')
+            .whereNotNull('donation_amount')
+            .where('donation_date', '>=', previousMonthStart)
+            .where('donation_date', '<', currentMonthStart);
+        if (pIds.length > 0) {
+            currentDonationsQuery = currentDonationsQuery.whereIn('participant_id', pIds);
+            prevDonationsQuery = prevDonationsQuery.whereIn('participant_id', pIds);
+        }
+        const currentDonations = await currentDonationsQuery.sum('donation_amount as total').first();
+        const prevDonations = await prevDonationsQuery.sum('donation_amount as total').first();
+        const donationsTrend = calculateTrend(
+            parseFloat(currentDonations && currentDonations.total ? currentDonations.total : 0), 
+            parseFloat(prevDonations && prevDonations.total ? prevDonations.total : 0)
+        );
+
+        let currentSatisfaction = { avg: null };
+        let prevSatisfaction = { avg: null };
+        if (rIds.length > 0) {
+            currentSatisfaction = await knex('surveys')
+                .whereIn('registration_id', rIds)
+                .whereNotNull('survey_submission_date')
+                .where('survey_submission_date', '>=', currentMonthStart)
+                .avg('survey_satisfaction_score as avg')
+                .first();
+            prevSatisfaction = await knex('surveys')
+                .whereIn('registration_id', rIds)
+                .whereNotNull('survey_submission_date')
+                .where('survey_submission_date', '>=', previousMonthStart)
+                .where('survey_submission_date', '<', currentMonthStart)
+                .avg('survey_satisfaction_score as avg')
+                .first();
+        }
+        const satisfactionTrend = calculateTrend(
+            parseFloat(currentSatisfaction.avg || 0), 
+            parseFloat(prevSatisfaction.avg || 0)
+        );
+
+        let currentMilestones = { count: 0 };
+        let prevMilestones = { count: 0 };
+        if (pIds.length > 0) {
+            currentMilestones = await knex('milestones')
+                .whereIn('participant_id', pIds)
+                .whereNotNull('milestone_date')
+                .where('milestone_date', '>=', currentMonthStart)
+                .count('milestone_id as count')
+                .first();
+            prevMilestones = await knex('milestones')
+                .whereIn('participant_id', pIds)
+                .whereNotNull('milestone_date')
+                .where('milestone_date', '>=', previousMonthStart)
+                .where('milestone_date', '<', currentMonthStart)
+                .count('milestone_id as count')
+                .first();
+        }
+        const milestonesTrend = calculateTrend(parseInt(currentMilestones.count || 0), parseInt(prevMilestones.count || 0));
+
+        // Chart data
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        const endOfCurrentMonth = new Date(nowDate.getFullYear(), nowDate.getMonth() + 1, 0, 23, 59, 59);
+        
+        let attendanceOverTime = [];
+        if (hasFilters) {
+            // Filters are active - use filtered registration IDs
+            if (rIds.length > 0) {
+                attendanceOverTime = await knex('registrations')
+                    .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+                    .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
+                    .where('event_instances.event_date_time_start', '<=', endOfCurrentMonth)
+                    .whereIn('registrations.registration_id', rIds)
+                    .select(
+                        knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
+                        knex.raw("COUNT(*) as count")
+                    )
+                    .groupBy('month')
+                    .orderBy('month', 'asc');
+            }
+            // If filters are active but rIds.length === 0, attendanceOverTime remains empty array
+        } else {
+            // No filters active - calculate from all registrations
+            attendanceOverTime = await knex('registrations')
+                .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+                .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
+                .where('event_instances.event_date_time_start', '<=', endOfCurrentMonth)
+                .select(
+                    knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
+                    knex.raw("COUNT(*) as count")
+                )
+                .groupBy('month')
+                .orderBy('month', 'asc');
+        }
+
+        let satisfactionOverTime = [];
+        // IMPORTANT: Always use rIds when milestone count or age range filters are active
+        // This ensures these participant-centric filters work correctly for satisfaction trends
+        if (hasFilters || (milestoneCount && milestoneCount !== '') || (ageRange && ageRange !== '')) {
+            // Filters are active - use filtered registration IDs
+            if (rIds.length > 0) {
+                satisfactionOverTime = await knex('surveys')
+                    .join('registrations', 'surveys.registration_id', 'registrations.registration_id')
+                    .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+                    .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
+                    .where('event_instances.event_date_time_start', '<=', endOfCurrentMonth)
+                    .whereNotNull('survey_satisfaction_score')
+                    .whereIn('surveys.registration_id', rIds)
+                    .select(
+                        knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
+                        knex.raw("AVG(survey_satisfaction_score) as avg_score")
+                    )
+                    .groupBy('month')
+                    .orderBy('month', 'asc');
+            }
+            // If filters are active but rIds.length === 0, satisfactionOverTime remains empty array
+        } else {
+            // No filters active - calculate from all surveys
+            satisfactionOverTime = await knex('surveys')
+                .join('registrations', 'surveys.registration_id', 'registrations.registration_id')
+                .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+                .where('event_instances.event_date_time_start', '>=', sixMonthsAgo)
+                .where('event_instances.event_date_time_start', '<=', endOfCurrentMonth)
+                .whereNotNull('survey_satisfaction_score')
+                .select(
+                    knex.raw("DATE_TRUNC('month', event_instances.event_date_time_start) as month"),
+                    knex.raw("AVG(survey_satisfaction_score) as avg_score")
+                )
+                .groupBy('month')
+                .orderBy('month', 'asc');
+        }
+
+        let donationOverTimeQuery = knex('donations')
+            .whereNotNull('donation_date')
+            .whereNotNull('donation_amount')
+            .where('donation_date', '>=', sixMonthsAgo)
+            .where('donation_date', '<=', endOfCurrentMonth);
+        // Apply participant filter based on active filters
+        // IMPORTANT: Always filter by pIds when milestone count or age range filters are active
+        // This ensures these participant-centric filters work correctly for donation trends
+        if (hasFilters) {
+            if (pIds.length > 0) {
+                donationOverTimeQuery = donationOverTimeQuery.whereIn('participant_id', pIds);
+            } else {
+                // Filters are active but no participants match - return empty data
+                donationOverTimeQuery = donationOverTimeQuery.whereRaw('1 = 0');
+            }
+        } else if ((milestoneCount && milestoneCount !== '') || (ageRange && ageRange !== '')) {
+            // Even if hasFilters is false (no city/eventType), if milestone/age filters are active, filter by pIds
+            if (pIds.length > 0) {
+                donationOverTimeQuery = donationOverTimeQuery.whereIn('participant_id', pIds);
+            } else {
+                donationOverTimeQuery = donationOverTimeQuery.whereRaw('1 = 0');
+            }
+        }
+        // If no filters are active at all, show all donations (no whereIn needed)
+        const donationOverTimeRaw = await donationOverTimeQuery
+            .select(
+                knex.raw("DATE_TRUNC('month', donation_date) as month"),
+                knex.raw("SUM(donation_amount) as total")
+            )
+            .groupBy('month')
+            .orderBy('month', 'asc');
+        const donationOverTime = donationOverTimeRaw.filter(item => {
+            if (!item.month) return false;
+            const monthDate = new Date(item.month);
+            return monthDate <= endOfCurrentMonth && item.total && parseFloat(item.total) > 0;
+        });
+
+        // City Distribution Chart (Top 5 Cities)
+        // Business Logic: Show top 5 cities by participant count, filtered by active filters
+        let cityDistribution = [];
+        if (pIds.length > 0) {
+            cityDistribution = await knex('participants')
+                .whereIn('participant_id', pIds)
+                .select('participant_city')
+                .count('participant_id as count')
+                .groupBy('participant_city')
+                .orderBy('count', 'desc')
+                .limit(5);
+        } else {
+            // If filters result in no participants, return empty array
+            cityDistribution = [];
+        }
+
+        let impactStats = { attended: 0, missed: 0 };
+        if (rIds.length > 0) {
+            impactStats = await knex('registrations')
+                .whereIn('registration_id', rIds)
+                .select(
+                    knex.raw("SUM(CASE WHEN registration_attended_flag = true THEN 1 ELSE 0 END) as attended"),
+                    knex.raw("SUM(CASE WHEN registration_attended_flag = false THEN 1 ELSE 0 END) as missed")
+                )
+                .first();
+        } else {
+            impactStats = await knex('registrations')
+                .select(
+                    knex.raw("SUM(CASE WHEN registration_attended_flag = true THEN 1 ELSE 0 END) as attended"),
+                    knex.raw("SUM(CASE WHEN registration_attended_flag = false THEN 1 ELSE 0 END) as missed")
+                )
+                .first();
+        }
+
+        const cityLabels = cityDistribution.map(c => c.participant_city);
+        const cityCounts = cityDistribution.map(c => parseInt(c.count));
+        const attendanceData = [
+            parseInt(impactStats ? impactStats.attended : 0) || 0,
+            parseInt(impactStats ? impactStats.missed : 0) || 0
+        ];
+
+        res.json({
+            kpis: {
+                milestoneCount: totalMilestoneCount,
+                satisfactionScore,
+                totalParticipants,
+                totalDonations,
+                npsScore,
+                attendanceCount,
+                totalEvents,
+                attendanceRate,
+                activeRegistrations,
+                newUsers,
+                trends: {
+                    participants: participantsTrend,
+                    donations: donationsTrend,
+                    satisfaction: satisfactionTrend,
+                    milestones: milestonesTrend
+                }
+            },
+            attendanceOverTime,
+            satisfactionOverTime,
+            donationOverTime,
+            cityLabels,
+            cityCounts,
+            attendanceData,
+            filters: { eventType, city, milestoneCount, ageRange }
+        });
+    } catch (err) {
+        console.error('Dashboard Data Error:', err);
+        res.status(500).json({ error: 'Server Error' });
     }
 };
 
@@ -693,6 +1459,64 @@ exports.resetUserPassword = async (req, res) => {
     }
 };
 
+exports.getEditUser = async (req, res) => {
+    try {
+        const { participant_id } = req.params;
+        const user = await knex('participants').where({ participant_id }).first();
+        if (!user) {
+            req.flash('error', 'User not found');
+            return res.redirect('/admin/users');
+        }
+        res.render('admin/user_edit', { user: req.user, editUser: user });
+    } catch (err) {
+        console.error('Get Edit User Error:', err);
+        req.flash('error', 'Error loading user. Please try again.');
+        res.redirect('/admin/users');
+    }
+};
+
+exports.postEditUser = async (req, res) => {
+    try {
+        const { participant_id } = req.params;
+        const { participant_email, participant_first_name, participant_last_name } = req.body;
+
+        // Check if user exists
+        const existingUser = await knex('participants').where({ participant_id }).first();
+        if (!existingUser) {
+            req.flash('error', 'User not found');
+            return res.redirect('/admin/users');
+        }
+
+        // Check if email is already taken by another user
+        if (participant_email) {
+            const emailExists = await knex('participants')
+                .where({ participant_email })
+                .where('participant_id', '!=', participant_id)
+                .first();
+            if (emailExists) {
+                req.flash('error', 'Email address is already in use by another user');
+                return res.redirect(`/admin/users/edit/${participant_id}`);
+            }
+        }
+
+        // Update user
+        await knex('participants')
+            .where({ participant_id })
+            .update({
+                participant_email: participant_email || existingUser.participant_email,
+                participant_first_name: participant_first_name || null,
+                participant_last_name: participant_last_name || null
+            });
+
+        req.flash('success', 'User updated successfully');
+        res.redirect('/admin/users');
+    } catch (err) {
+        console.error('Edit User Error:', err);
+        req.flash('error', 'Error updating user. Please try again.');
+        res.redirect(`/admin/users/edit/${req.params.participant_id}`);
+    }
+};
+
 exports.deleteUser = async (req, res) => {
     try {
         const { participant_id } = req.params;
@@ -728,12 +1552,30 @@ exports.deleteUser = async (req, res) => {
  */
 exports.listParticipants = async (req, res) => {
     try {
-        const { search } = req.query;
+        const { search, newUsers } = req.query;
         // Query Strategy: Select fields needed for the list view
         // We calculate age client-side rather than using SQL date functions for better control
         let query = knex('participants')
             .select('participant_id', 'participant_first_name', 'participant_last_name', 'participant_dob', 'participant_city')
             .orderBy('participant_last_name', 'asc');
+        
+        // Filter for new users (participants who registered this month)
+        if (newUsers === 'true' || newUsers === '1') {
+            const now = new Date();
+            const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            currentMonthStart.setHours(0, 0, 0, 0);
+            
+            // Filter participants whose first registration was this month
+            query = query.whereIn('participant_id', function() {
+                this.select('participant_id')
+                    .from('registrations')
+                    .whereNotNull('registration_created_at')
+                    .where('registration_created_at', '>=', currentMonthStart)
+                    .where('registration_created_at', '<=', now)
+                    .groupBy('participant_id')
+                    .havingRaw('MIN(registration_created_at) >= ?', [currentMonthStart]);
+            });
+        }
 
         // Multi-field Search Logic: Search across name and location
         // This allows managers to find participants by any identifying information.
@@ -774,21 +1616,65 @@ exports.listParticipants = async (req, res) => {
         // Business Logic: Calculate age from date of birth for display purposes.
         // We do this in the controller rather than SQL to handle edge cases (leap years, month boundaries)
         // more reliably. The calculation accounts for whether the birthday has occurred this year.
+        // IMPORTANT: Parse date string manually to avoid timezone issues when PostgreSQL DATE type
+        // is returned as a string (YYYY-MM-DD format). Using new Date() with date strings can cause
+        // timezone conversion issues that shift the date incorrectly.
         const participantsWithAge = participants.map(p => {
             let age = null;
             if (p.participant_dob) {
-                const dob = new Date(p.participant_dob);
-                const today = new Date();
-                age = today.getFullYear() - dob.getFullYear();
-                const monthDiff = today.getMonth() - dob.getMonth();
-                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-                    age--;
+                try {
+                    let birthYear, birthMonth, birthDay;
+                    
+                    // Handle different date formats from PostgreSQL
+                    if (p.participant_dob instanceof Date) {
+                        // If it's already a Date object, extract components directly
+                        birthYear = p.participant_dob.getFullYear();
+                        birthMonth = p.participant_dob.getMonth();
+                        birthDay = p.participant_dob.getDate();
+                    } else {
+                        // If it's a string, parse it manually
+                        const dateStr = String(p.participant_dob);
+                        const dateParts = dateStr.split('-');
+                        
+                        if (dateParts.length === 3) {
+                            birthYear = parseInt(dateParts[0], 10);
+                            birthMonth = parseInt(dateParts[1], 10) - 1; // JavaScript months are 0-indexed
+                            birthDay = parseInt(dateParts[2], 10);
+                        } else {
+                            // Try parsing as ISO string or other format
+                            const tempDate = new Date(p.participant_dob);
+                            if (!isNaN(tempDate.getTime())) {
+                                birthYear = tempDate.getFullYear();
+                                birthMonth = tempDate.getMonth();
+                                birthDay = tempDate.getDate();
+                            } else {
+                                throw new Error('Invalid date format');
+                            }
+                        }
+                    }
+                    
+                    // Validate parsed values
+                    if (!isNaN(birthYear) && !isNaN(birthMonth) && !isNaN(birthDay) && birthYear > 1900 && birthYear < 2100) {
+                        // Create local date objects (not UTC) to avoid timezone issues
+                        const dob = new Date(birthYear, birthMonth, birthDay);
+                        const today = new Date();
+                        
+                        // Calculate age by comparing years, then months, then days
+                        age = today.getFullYear() - dob.getFullYear();
+                        const monthDiff = today.getMonth() - dob.getMonth();
+                        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+                            age--;
+                        }
+                    }
+                } catch (err) {
+                    // If date parsing fails, age remains null
+                    console.error('Error parsing date of birth for participant:', p.participant_id, p.participant_dob, err);
                 }
             }
             return { ...p, age };
         });
 
-        res.render('admin/participants', { user: req.user, participants: participantsWithAge, search });
+        res.render('admin/participants', { user: req.user, participants: participantsWithAge, search, newUsers });
     } catch (err) {
         console.error('List Participants Error:', err);
         res.status(500).send('Server Error');
@@ -926,7 +1812,7 @@ exports.listEvents = async (req, res) => {
                 'event_instances.event_capacity',
                 'event_definitions.event_name'
             )
-            .orderBy('event_instances.event_date_time_start', 'desc');
+            .orderBy('event_definitions.event_name', 'asc');
 
         // Multi-field Search: Search by event name or location
         // This helps managers find events by either identifying information
@@ -1047,7 +1933,7 @@ exports.listSurveys = async (req, res) => {
                 'surveys.survey_submission_date',
                 'surveys.survey_comments'
             )
-            .orderBy('surveys.survey_submission_date', 'desc');
+            .orderBy('participants.participant_last_name', 'asc');
 
         // Text Search Filter: Multi-field search across participant names, event names, and comments
         // Business Logic: Surveys contain rich information across multiple related tables.
@@ -1346,7 +2232,7 @@ exports.listMilestones = async (req, res) => {
                 'participants.participant_last_name',
                 'participants.participant_id'
             )
-            .orderBy('milestones.milestone_date', 'desc');
+            .orderBy('milestones.milestone_title', 'asc');
 
         // Text Search: Search by milestone title or participant name
         // Business Logic: Supports both single-word and full name searches for participants.
@@ -1494,7 +2380,7 @@ exports.listDonations = async (req, res) => {
                 'participants.participant_last_name',
                 'participants.participant_id'
             )
-            .orderBy('donations.donation_date', 'desc');
+            .orderByRaw('participants.participant_last_name ASC NULLS LAST');
 
         // Text Search: Search by donor name (for participant-linked donations)
         // Business Logic: Helps managers find donations from specific participants.
@@ -1659,6 +2545,47 @@ exports.deleteDonation = async (req, res) => {
         res.redirect('/admin/donations');
     } catch (err) {
         console.error('Delete Donation Error:', err);
+        res.status(500).send('Server Error');
+    }
+};
+
+// ==================== REGISTRATION MAINTENANCE ====================
+
+/**
+ * List Registrations: Display recent event registrations
+ * 
+ * Business Logic: Shows the most recent registrations for upcoming events.
+ * This allows managers to see who has recently registered for events.
+ */
+exports.listRegistrations = async (req, res) => {
+    try {
+        const now = new Date();
+        
+        // Fetch recent registrations for upcoming events
+        // Join with participants, event_instances, and event_definitions to get full details
+        const registrations = await knex('registrations')
+            .join('participants', 'registrations.participant_id', 'participants.participant_id')
+            .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
+            .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
+            .where('event_instances.event_date_time_start', '>', now) // Only upcoming events
+            .select(
+                'registrations.registration_id',
+                'registrations.registration_status',
+                'registrations.registration_created_at',
+                'participants.participant_first_name',
+                'participants.participant_last_name',
+                'participants.participant_email',
+                'event_definitions.event_name',
+                'event_definitions.event_type',
+                'event_instances.event_date_time_start',
+                'event_instances.event_location'
+            )
+            .orderBy('participants.participant_last_name', 'asc')
+            .limit(100); // Limit to 100 results
+        
+        res.render('admin/registrations', { user: req.user, registrations });
+    } catch (err) {
+        console.error('List Registrations Error:', err);
         res.status(500).send('Server Error');
     }
 };

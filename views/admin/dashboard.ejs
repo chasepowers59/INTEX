@@ -267,7 +267,102 @@
         .section-card-body {
             padding: 2rem;
         }
+
+        /* Toast Notification Styles */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #EE969E, #D87A84);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            min-width: 300px;
+            max-width: 500px;
+            font-family: 'Montserrat', sans-serif;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .toast-notification.show {
+            display: flex;
+        }
+
+        .toast-notification.fade-out {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+
+        .toast-notification-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .toast-notification-content {
+            flex: 1;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .toast-notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .toast-notification-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
     </style>
+
+    <!-- Toast Notification -->
+    <div id="toastNotification" class="toast-notification">
+        <div class="toast-notification-icon">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="toast-notification-content">
+            No results found matching the selected filters. Try adjusting your filter criteria.
+        </div>
+        <button class="toast-notification-close" onclick="hideToast()" aria-label="Close notification">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
 
     <div class="container py-4">
         <!-- Improved Header -->
@@ -336,7 +431,7 @@
                     </div>
                     <div class="kpi-item-value"><%= kpis.totalParticipants %></div>
                     <p style="color: #999; font-size: 0.9rem; margin: 0.5rem 0 0 0; font-family: 'Montserrat', sans-serif;">
-                        <% if (filters && (filters.city || filters.role || filters.eventType)) { %>
+                        <% if (filters && (filters.city || filters.eventType || filters.milestoneCount || filters.ageRange)) { %>
                             Participants matching current filters
                         <% } else { %>
                             Total registered participants in the system
@@ -357,7 +452,7 @@
                     </div>
                     <div class="kpi-item-value"><%= kpis.satisfactionScore %><span style="font-size: 1.2rem; color: #999;">/5</span></div>
                     <p style="color: #999; font-size: 0.9rem; margin: 0.5rem 0 0 0; font-family: 'Montserrat', sans-serif;">
-                        <% if (filters && (filters.city || filters.role || filters.eventType)) { %>
+                        <% if (filters && (filters.city || filters.eventType || filters.milestoneCount || filters.ageRange)) { %>
                             Average satisfaction (filtered surveys)
                         <% } else { %>
                             Average satisfaction score from all surveys
@@ -371,17 +466,17 @@
                 <!-- Milestones -->
                 <div class="kpi-item pink">
                     <div class="kpi-item-header">
-                        <span class="kpi-item-title">Education Milestones</span>
+                        <span class="kpi-item-title">Total Milestones</span>
                         <div class="kpi-item-icon">
                             <i class="fas fa-trophy"></i>
                         </div>
                     </div>
                     <div class="kpi-item-value"><%= kpis.milestoneCount %></div>
                     <p style="color: #999; font-size: 0.9rem; margin: 0.5rem 0 0 0; font-family: 'Montserrat', sans-serif;">
-                        <% if (filters && (filters.city || filters.role || filters.eventType)) { %>
-                            Education milestones (filtered participants)
+                        <% if (filters && (filters.city || filters.eventType || filters.milestoneCount || filters.ageRange)) { %>
+                            Milestones (filtered participants)
                         <% } else { %>
-                            Total higher education achievements recorded
+                            Total achievements recorded
                         <% } %>
                     </p>
                     <a href="/admin/milestones" class="kpi-item-link">
@@ -399,7 +494,7 @@
                     </div>
                     <div class="kpi-item-value" style="font-size: 2rem;">$<%= parseFloat(kpis.totalDonations || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}) %></div>
                     <p style="color: #999; font-size: 0.9rem; margin: 0.5rem 0 0 0; font-family: 'Montserrat', sans-serif;">
-                        <% if (filters && (filters.city || filters.role || filters.eventType)) { %>
+                        <% if (filters && (filters.city || filters.eventType || filters.milestoneCount || filters.ageRange)) { %>
                             Donations from filtered participants only
                         <% } else { %>
                             Total funds raised to date (all donations)
@@ -420,7 +515,7 @@
                     </div>
                     <div class="kpi-item-value"><%= kpis.attendanceRate || 0 %>%</div>
                     <p style="color: #999; font-size: 0.9rem; margin: 0.5rem 0 0 0; font-family: 'Montserrat', sans-serif;">
-                        <% if (filters && (filters.city || filters.role || filters.eventType)) { %>
+                        <% if (filters && (filters.city || filters.eventType || filters.milestoneCount || filters.ageRange)) { %>
                             Attendance rate for filtered registrations
                         <% } else { %>
                             Overall attendance rate (attended / registered)
@@ -431,24 +526,45 @@
                     </a>
                 </div>
 
-                <!-- Active Registrations -->
+                <!-- Most Recent Event Registrations -->
                 <div class="kpi-item purple">
                     <div class="kpi-item-header">
-                        <span class="kpi-item-title">Active Registrations</span>
+                        <span class="kpi-item-title">Most Recent Event Registrations</span>
                         <div class="kpi-item-icon">
                             <i class="fas fa-user-check"></i>
                         </div>
                     </div>
                     <div class="kpi-item-value"><%= kpis.activeRegistrations || 0 %></div>
                     <p style="color: #999; font-size: 0.9rem; margin: 0.5rem 0 0 0; font-family: 'Montserrat', sans-serif;">
-                        <% if (filters && (filters.city || filters.role || filters.eventType)) { %>
+                        <% if (filters && (filters.city || filters.eventType || filters.milestoneCount || filters.ageRange)) { %>
                             Upcoming registrations (filtered)
                         <% } else { %>
                             Total upcoming event registrations
                         <% } %>
                     </p>
-                    <a href="/admin/participants" class="kpi-item-link">
-                        View All Participants <i class="fas fa-arrow-right"></i>
+                    <a href="/admin/registrations" class="kpi-item-link">
+                        View Recent Registrations <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- New Users -->
+                <div class="kpi-item light-pink">
+                    <div class="kpi-item-header">
+                        <span class="kpi-item-title">New Users</span>
+                        <div class="kpi-item-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-item-value"><%= kpis.newUsers || 0 %></div>
+                    <p style="color: #999; font-size: 0.9rem; margin: 0.5rem 0 0 0; font-family: 'Montserrat', sans-serif;">
+                        <% if (filters && (filters.city || filters.eventType || filters.milestoneCount || filters.ageRange)) { %>
+                            New users (filtered, this month)
+                        <% } else { %>
+                            New users this month
+                        <% } %>
+                    </p>
+                    <a href="/admin/participants?newUsers=true" class="kpi-item-link">
+                        View New Users <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
             </div>
@@ -462,7 +578,7 @@
                 </div>
                 <div class="card-body">
                     <form action="/admin/dashboard" method="GET" class="row g-3">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="eventType" class="form-label">Event Type</label>
                             <select name="eventType" id="eventType" class="admin-select form-select">
                                 <option value="">All Event Types</option>
@@ -475,7 +591,7 @@
                                 <% } %>
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label for="city" class="form-label">Participant City</label>
                             <select name="city" id="city" class="admin-select form-select">
                                 <option value="">All Cities</option>
@@ -488,17 +604,27 @@
                                 <% } %>
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <label for="role" class="form-label">Participant Role</label>
-                            <select name="role" id="role" class="admin-select form-select">
-                                <option value="">All Roles</option>
-                                <% if (options && options.roles && options.roles.length > 0) { %>
-                                    <% options.roles.forEach(role => { %>
-                                        <option value="<%= role %>" <%= filters && filters.role === role ? 'selected' : '' %>>
-                                            <%= role %>
-                                        </option>
-                                    <% }); %>
-                                <% } %>
+                        <div class="col-md-3">
+                            <label for="milestoneCount" class="form-label">Milestone Count</label>
+                            <select name="milestoneCount" id="milestoneCount" class="admin-select form-select">
+                                <option value="" <%= !filters || !filters.milestoneCount || filters.milestoneCount === '' ? 'selected' : '' %>>All Participants</option>
+                                <option value="has" <%= filters && filters.milestoneCount === 'has' ? 'selected' : '' %>>Has Milestones</option>
+                                <option value="1" <%= filters && filters.milestoneCount === '1' ? 'selected' : '' %>>1 Milestone</option>
+                                <option value="2" <%= filters && filters.milestoneCount === '2' ? 'selected' : '' %>>2 Milestones</option>
+                                <option value="3" <%= filters && filters.milestoneCount === '3' ? 'selected' : '' %>>3 Milestones</option>
+                                <option value="4" <%= filters && filters.milestoneCount === '4' ? 'selected' : '' %>>4 Milestones</option>
+                                <option value="5" <%= filters && filters.milestoneCount === '5' ? 'selected' : '' %>>5 Milestones</option>
+                                <option value="5+" <%= filters && filters.milestoneCount === '5+' ? 'selected' : '' %>>5+ Milestones</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="ageRange" class="form-label">Age Range</label>
+                            <select name="ageRange" id="ageRange" class="admin-select form-select">
+                                <option value="" <%= !filters || !filters.ageRange || filters.ageRange === '' ? 'selected' : '' %>>All Ages</option>
+                                <option value="1-10" <%= filters && filters.ageRange === '1-10' ? 'selected' : '' %>>1-10</option>
+                                <option value="11-15" <%= filters && filters.ageRange === '11-15' ? 'selected' : '' %>>11-15</option>
+                                <option value="16-21" <%= filters && filters.ageRange === '16-21' ? 'selected' : '' %>>16-21</option>
+                                <option value="21+" <%= filters && filters.ageRange === '21+' ? 'selected' : '' %>>21+</option>
                             </select>
                         </div>
                         <div class="col-12">
@@ -577,7 +703,22 @@
             </div>
         </div>
 
-        <!-- 5. Advanced Analytics Dashboard -->
+        <!-- 5. Participant Demographics Chart -->
+        <div class="dashboard-section">
+            <div class="card section-card">
+                <div class="section-card-header">
+                    <h5 class="fw-bold mb-1" style="font-family: 'DM Serif Display', serif; font-size: 1.4rem;">Participant Demographics</h5>
+                    <p class="text-muted mb-0" style="font-size: 0.95rem; font-family: 'Montserrat', sans-serif;">Top 5 cities by participant count</p>
+                </div>
+                <div class="section-card-body">
+                    <div style="height: 350px; position: relative;">
+                        <canvas id="demographicsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Advanced Analytics Dashboard -->
         <div class="dashboard-section">
             <div class="card section-card mb-4">
                 <div class="section-card-header">
@@ -592,7 +733,7 @@
             </div>
         </div>
 
-        <!-- 6. Recent Activity & Top Performers -->
+        <!-- 7. Recent Activity & Top Performers -->
         <div class="dashboard-section">
             <h2 class="section-title mb-4" style="font-family: 'DM Serif Display', serif; font-size: 2rem; color: #2C2C2C; text-align: center;">
                 Activity & Highlights
@@ -691,7 +832,7 @@
             </div>
         </div>
 
-        <!-- 7. Upcoming Events Section -->
+        <!-- 8. Upcoming Events Section -->
         <div class="dashboard-section">
             <div class="card section-card">
                 <div class="section-card-header d-flex justify-content-between align-items-center">
@@ -738,32 +879,25 @@
             </div>
         </div>
 
-        <!-- 8. Participant Demographics Chart -->
-        <div class="dashboard-section">
-            <div class="card section-card">
-                <div class="section-card-header">
-                    <h5 class="fw-bold mb-1" style="font-family: 'DM Serif Display', serif; font-size: 1.4rem;">Participant Demographics</h5>
-                    <p class="text-muted mb-0" style="font-size: 0.95rem; font-family: 'Montserrat', sans-serif;">Top 5 cities by participant count</p>
-                </div>
-                <div class="section-card-body">
-                    <div style="height: 350px; position: relative;">
-                        <canvas id="demographicsChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Data from EJS (Safe Injection)
-        const cityLabels = <%- JSON.stringify(cityLabels || []) %>;
-        const cityData = <%- JSON.stringify(cityCounts || []) %>;
-        const impactData = <%- JSON.stringify(attendanceData || [0, 0]) %>;
-        const attendanceOverTime = <%- JSON.stringify(attendanceOverTime || []) %>;
-        const satisfactionOverTime = <%- JSON.stringify(satisfactionOverTime || []) %>;
-        const donationOverTime = <%- JSON.stringify(donationOverTime || []) %>;
+        let cityLabels = <%- JSON.stringify(cityLabels || []) %>;
+        let cityData = <%- JSON.stringify(cityCounts || []) %>;
+        let impactData = <%- JSON.stringify(attendanceData || [0, 0]) %>;
+        let attendanceOverTime = <%- JSON.stringify(attendanceOverTime || []) %>;
+        let satisfactionOverTime = <%- JSON.stringify(satisfactionOverTime || []) %>;
+        let donationOverTime = <%- JSON.stringify(donationOverTime || []) %>;
+
+        // Store chart instances for updating
+        let attendanceChart = null;
+        let satisfactionChart = null;
+        let donationChart = null;
+        let demographicsChart = null;
+        let impactChart = null;
 
         // Helper function to format month labels
         function formatMonth(dateString) {
@@ -777,7 +911,7 @@
         if (ctxAttendance) {
             const attendanceLabels = attendanceOverTime.map(item => formatMonth(item.month));
             const attendanceCounts = attendanceOverTime.map(item => parseInt(item.count || 0));
-            new Chart(ctxAttendance.getContext('2d'), {
+            attendanceChart = new Chart(ctxAttendance.getContext('2d'), {
                 type: 'line',
                 data: {
                     labels: attendanceLabels,
@@ -814,7 +948,7 @@
         if (ctxSatisfaction) {
             const satisfactionLabels = satisfactionOverTime.map(item => formatMonth(item.month));
             const satisfactionScores = satisfactionOverTime.map(item => parseFloat(item.avg_score || 0).toFixed(1));
-            new Chart(ctxSatisfaction.getContext('2d'), {
+            satisfactionChart = new Chart(ctxSatisfaction.getContext('2d'), {
                 type: 'line',
                 data: {
                     labels: satisfactionLabels,
@@ -862,7 +996,7 @@
             const donationLabels = validDonationData.map(item => formatMonth(item.month));
             const donationAmounts = validDonationData.map(item => parseFloat(item.total || 0));
             
-            new Chart(ctxDonation.getContext('2d'), {
+            donationChart = new Chart(ctxDonation.getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: donationLabels,
@@ -900,7 +1034,7 @@
         // Demographics Chart (Vertical Bar)
         const ctxDemographics = document.getElementById('demographicsChart');
         if (ctxDemographics) {
-            new Chart(ctxDemographics.getContext('2d'), {
+            demographicsChart = new Chart(ctxDemographics.getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: cityLabels,
@@ -936,7 +1070,7 @@
         // Impact Chart (Doughnut)
         const ctxImpact = document.getElementById('impactChart');
         if (ctxImpact) {
-            new Chart(ctxImpact.getContext('2d'), {
+            impactChart = new Chart(ctxImpact.getContext('2d'), {
                 type: 'doughnut',
                 data: {
                     labels: ['Attended', 'Missed'],
@@ -957,6 +1091,281 @@
                 }
             });
         }
+
+        // AJAX Filtering Implementation
+        // Toast Notification Functions (global scope for onclick handler)
+        window.showToast = function() {
+            const toast = document.getElementById('toastNotification');
+            console.log('showToast called, toast element:', toast);
+            if (toast) {
+                toast.classList.remove('fade-out');
+                toast.classList.add('show');
+                console.log('Toast should be visible now');
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    window.hideToast();
+                }, 5000);
+            } else {
+                console.error('Toast notification element not found!');
+            }
+        };
+
+        window.hideToast = function() {
+            const toast = document.getElementById('toastNotification');
+            if (toast) {
+                toast.classList.add('fade-out');
+                setTimeout(() => {
+                    toast.classList.remove('show', 'fade-out');
+                }, 300);
+            }
+        };
+
+        // Check if filters are active and totalParticipants count is 0
+        function checkZeroResults(filters, totalParticipants) {
+            // Check if any filters are active
+            const hasFilters = filters && (
+                (filters.city && filters.city !== '') ||
+                (filters.eventType && filters.eventType !== '') ||
+                (filters.milestoneCount && filters.milestoneCount !== '') ||
+                (filters.ageRange && filters.ageRange !== '')
+            );
+            
+            // Convert totalParticipants to number for comparison
+            const totalParticipantsCount = parseInt(totalParticipants) || 0;
+            
+            // Debug logging
+            console.log('checkZeroResults:', { hasFilters, totalParticipants, totalParticipantsCount, filters });
+            
+            // Show toast if filters are active and totalParticipants is 0
+            if (hasFilters && totalParticipantsCount === 0) {
+                console.log('Showing toast notification - filters active and totalParticipants is 0');
+                window.showToast();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterForm = document.querySelector('form[action="/admin/dashboard"]');
+            const clearFiltersLink = document.querySelector('a[href="/admin/dashboard"]');
+            
+            // Check on initial page load
+            <% if (typeof filters !== 'undefined' && typeof kpis !== 'undefined') { %>
+            checkZeroResults(
+                { 
+                    city: '<%= filters && filters.city ? filters.city : "" %>',
+                    eventType: '<%= filters && filters.eventType ? filters.eventType : "" %>',
+                    milestoneCount: '<%= filters && filters.milestoneCount ? filters.milestoneCount : "" %>',
+                    ageRange: '<%= filters && filters.ageRange ? filters.ageRange : "" %>'
+                },
+                <%= kpis.totalParticipants || 0 %>
+            );
+            <% } %>
+            
+            // Store initial scroll position
+            let scrollPosition = 0;
+            
+            // Intercept form submission
+            if (filterForm) {
+                filterForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    // Save current scroll position
+                    scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+                    
+                    // Get form data
+                    const formData = new FormData(filterForm);
+                    const params = new URLSearchParams(formData);
+                    
+                    // Show loading indicator
+                    const submitBtn = filterForm.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.textContent;
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Loading...';
+                    
+                    try {
+                        // Fetch filtered data
+                        const response = await fetch(`/admin/dashboard/data?${params.toString()}`);
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch dashboard data');
+                        }
+                        const data = await response.json();
+                        
+                        // Update KPI values
+                        updateKPIs(data.kpis);
+                        
+                        // Check for zero results after filter update
+                        console.log('AJAX response data:', data);
+                        checkZeroResults(data.filters || {}, data.kpis?.totalParticipants || 0);
+                        
+                        // Update charts
+                        updateCharts(data);
+                        
+                        // Update filter indicators
+                        updateFilterIndicators(data.filters);
+                        
+                        // Update URL without page refresh
+                        const newUrl = `/admin/dashboard?${params.toString()}`;
+                        window.history.pushState({ path: newUrl }, '', newUrl);
+                        
+                        // Restore scroll position
+                        window.scrollTo(0, scrollPosition);
+                        
+                    } catch (error) {
+                        console.error('Error fetching dashboard data:', error);
+                        alert('Error loading filtered data. Please try again.');
+                    } finally {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                    }
+                });
+            }
+            
+            // Handle clear filters link
+            if (clearFiltersLink) {
+                clearFiltersLink.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+                    
+                    try {
+                        const response = await fetch('/admin/dashboard/data');
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch dashboard data');
+                        }
+                        const data = await response.json();
+                        
+                        updateKPIs(data.kpis);
+                        updateCharts(data);
+                        updateFilterIndicators({});
+                        
+                        // Reset form
+                        if (filterForm) {
+                            filterForm.reset();
+                        }
+                        
+                        window.history.pushState({ path: '/admin/dashboard' }, '', '/admin/dashboard');
+                        window.scrollTo(0, scrollPosition);
+                    } catch (error) {
+                        console.error('Error clearing filters:', error);
+                        window.location.href = '/admin/dashboard';
+                    }
+                });
+            }
+            
+            // Function to update KPI values
+            function updateKPIs(kpis) {
+                // Update each KPI card by finding the title and updating the value
+                const kpiCards = document.querySelectorAll('.kpi-item');
+                kpiCards.forEach(card => {
+                    const titleElement = card.querySelector('.kpi-item-title');
+                    const valueElement = card.querySelector('.kpi-item-value');
+                    if (titleElement && valueElement) {
+                        const title = titleElement.textContent.trim();
+                        let newValue = '';
+                        
+                        switch(title) {
+                            case 'Total Participants':
+                                newValue = kpis.totalParticipants;
+                                break;
+                            case 'Average Satisfaction':
+                                // This KPI has "/5" suffix, so we need to update the innerHTML
+                                valueElement.innerHTML = `${kpis.satisfactionScore}<span style="font-size: 1.2rem; color: #999;">/5</span>`;
+                                return; // Skip the textContent update below
+                            case 'Total Milestones':
+                                newValue = kpis.milestoneCount;
+                                break;
+                            case 'Total Donations':
+                                // This KPI has a different font size, preserve the style
+                                valueElement.style.fontSize = '2rem';
+                                newValue = `$${parseFloat(kpis.totalDonations || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+                                break;
+                            case 'Attendance Rate':
+                                newValue = `${kpis.attendanceRate}%`;
+                                break;
+                            case 'Most Recent Event Registrations':
+                                newValue = kpis.activeRegistrations;
+                                break;
+                            case 'New Users':
+                                newValue = kpis.newUsers || 0;
+                                break;
+                        }
+                        
+                        if (newValue !== '') {
+                            valueElement.textContent = newValue;
+                        }
+                    }
+                });
+            }
+            
+            // Function to update charts
+            function updateCharts(data) {
+                // Update attendance chart
+                if (attendanceChart && data.attendanceOverTime && Array.isArray(data.attendanceOverTime)) {
+                    const attendanceLabels = data.attendanceOverTime.map(item => formatMonth(item.month)).filter(label => label);
+                    const attendanceCounts = data.attendanceOverTime.map(item => parseInt(item.count || 0));
+                    if (attendanceLabels.length > 0) {
+                        attendanceChart.data.labels = attendanceLabels;
+                        attendanceChart.data.datasets[0].data = attendanceCounts;
+                        attendanceChart.update('none'); // 'none' mode for smoother update
+                    }
+                }
+                
+                // Update satisfaction chart
+                if (satisfactionChart && data.satisfactionOverTime && Array.isArray(data.satisfactionOverTime)) {
+                    const satisfactionLabels = data.satisfactionOverTime.map(item => formatMonth(item.month)).filter(label => label);
+                    const satisfactionScores = data.satisfactionOverTime.map(item => parseFloat(item.avg_score || 0));
+                    if (satisfactionLabels.length > 0) {
+                        satisfactionChart.data.labels = satisfactionLabels;
+                        satisfactionChart.data.datasets[0].data = satisfactionScores;
+                        satisfactionChart.update('none');
+                    }
+                }
+                
+                // Update donation chart
+                if (donationChart && data.donationOverTime && Array.isArray(data.donationOverTime)) {
+                    const now = new Date();
+                    const validDonationData = data.donationOverTime.filter(item => {
+                        if (!item.month) return false;
+                        const monthDate = new Date(item.month);
+                        return monthDate <= now;
+                    });
+                    const donationLabels = validDonationData.map(item => formatMonth(item.month)).filter(label => label);
+                    const donationAmounts = validDonationData.map(item => parseFloat(item.total || 0));
+                    if (donationLabels.length > 0) {
+                        donationChart.data.labels = donationLabels;
+                        donationChart.data.datasets[0].data = donationAmounts;
+                        donationChart.update('none');
+                    }
+                }
+                
+                // Update demographics chart
+                if (demographicsChart && data.cityLabels && data.cityCounts && Array.isArray(data.cityLabels) && Array.isArray(data.cityCounts)) {
+                    if (data.cityLabels.length > 0) {
+                        demographicsChart.data.labels = data.cityLabels;
+                        demographicsChart.data.datasets[0].data = data.cityCounts;
+                        demographicsChart.update('none');
+                    }
+                }
+                
+                // Update impact chart
+                if (impactChart && data.attendanceData && Array.isArray(data.attendanceData) && data.attendanceData.length >= 2) {
+                    impactChart.data.datasets[0].data = data.attendanceData;
+                    impactChart.update('none');
+                }
+            }
+            
+            // Function to update filter indicators in KPI descriptions
+            function updateFilterIndicators(filters) {
+                const hasFilters = filters.city || filters.eventType || filters.milestoneCount || filters.ageRange;
+                // The descriptions are already handled server-side, but we could update them here if needed
+            }
+            
+            // Handle browser back/forward buttons
+            window.addEventListener('popstate', function(e) {
+                if (e.state && e.state.path) {
+                    window.location.href = e.state.path;
+                }
+            });
+        });
     </script>
 
     <%- include('../partials/footer') %>

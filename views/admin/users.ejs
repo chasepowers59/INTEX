@@ -80,6 +80,7 @@
                                     <td>
                                         <div class="admin-action-buttons">
                                             <% if (user && user.participant_role === 'admin') { %>
+                                                <a href="/admin/users/edit/<%= u.participant_id %>" class="admin-btn admin-btn-primary">Edit</a>
                                                 <button type="button" class="admin-btn admin-btn-warning reset-password-btn" 
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#resetPasswordModal"
