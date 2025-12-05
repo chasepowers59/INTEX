@@ -93,6 +93,10 @@
                                 <i class="fas fa-tachometer-alt me-1"></i>
                                 <span>Dashboard</span>
                             </a>
+                            <a href="/participants/<%= user.participant_id %>" class="btn-nav btn-nav-primary">
+                                <i class="fas fa-user me-1"></i>
+                                <span>My Profile</span>
+                            </a>
                         <% } else { %>
                             <a href="/participants/<%= user.participant_id %>" class="btn-nav btn-nav-primary">
                                 <i class="fas fa-user me-1"></i>
@@ -133,6 +137,7 @@
             <% if (user) { %>
                 <% if (user.participant_role === 'admin') { %>
                     <a href="/admin/dashboard" class="mobile-nav-link">Dashboard</a>
+                    <a href="/participants/<%= user.participant_id %>" class="mobile-nav-link">My Profile</a>
                 <% } else { %>
                     <a href="/participants/<%= user.participant_id %>" class="mobile-nav-link">My Profile</a>
                 <% } %>

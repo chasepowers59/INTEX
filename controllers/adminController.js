@@ -379,22 +379,31 @@ exports.getDashboard = async (req, res) => {
         const previousMonthEnd = new Date(nowDate.getFullYear(), nowDate.getMonth(), 0);
         
         // KPI 10: New Users (This Month)
-        // Business Logic: Count distinct participants who registered for an event this month
-        // Since participants table doesn't have created_at, we use registration_created_at as a proxy
-        // for when a user joined the system (their first registration)
-        let newUsersQuery = knex('registrations')
-            .whereNotNull('registration_created_at')
-            .where('registration_created_at', '>=', currentMonthStart)
-            .where('registration_created_at', '<=', nowDate);
+        // Business Logic: Count participants who created accounts (have email and password) this month
+        // Since participants table doesn't have created_at, we use the earliest registration_created_at
+        // as a proxy for when a user account was created (when they first registered for an event)
+        // Only count participants who have both email and password (actual account holders, not visitor records)
+        let newUsersQuery = knex('participants')
+            .whereNotNull('participant_email')
+            .whereNotNull('participant_password')
+            .whereIn('participant_id', function() {
+                this.select('participant_id')
+                    .from('registrations')
+                    .whereNotNull('registration_created_at')
+                    .where('registration_created_at', '>=', currentMonthStart)
+                    .where('registration_created_at', '<=', nowDate)
+                    .groupBy('participant_id')
+                    .havingRaw('MIN(registration_created_at) >= ?', [currentMonthStart]);
+            });
         
         // Apply participant filter only if filters are active
         if (hasFilters && pIds.length > 0) {
             newUsersQuery = newUsersQuery.whereIn('participant_id', pIds);
         }
         
-        // Count distinct participants who registered this month
+        // Count distinct participants who created accounts this month
         const newUsersResult = await newUsersQuery
-            .countDistinct('participant_id as count')
+            .count('participant_id as count')
             .first();
         const newUsers = parseInt(newUsersResult.count || 0);
         
@@ -1083,14 +1092,27 @@ exports.getDashboardData = async (req, res) => {
         const previousMonthStart = new Date(nowDate.getFullYear(), nowDate.getMonth() - 1, 1);
         const previousMonthEnd = new Date(nowDate.getFullYear(), nowDate.getMonth(), 0);
 
-        let newUsersQuery = knex('registrations')
-            .whereNotNull('registration_created_at')
-            .where('registration_created_at', '>=', currentMonthStart)
-            .where('registration_created_at', '<=', nowDate);
+        // KPI: New Users (This Month)
+        // Business Logic: Count participants who created accounts (have email and password) this month
+        // Since participants table doesn't have created_at, we use the earliest registration_created_at
+        // as a proxy for when a user account was created (when they first registered for an event)
+        // Only count participants who have both email and password (actual account holders, not visitor records)
+        let newUsersQuery = knex('participants')
+            .whereNotNull('participant_email')
+            .whereNotNull('participant_password')
+            .whereIn('participant_id', function() {
+                this.select('participant_id')
+                    .from('registrations')
+                    .whereNotNull('registration_created_at')
+                    .where('registration_created_at', '>=', currentMonthStart)
+                    .where('registration_created_at', '<=', nowDate)
+                    .groupBy('participant_id')
+                    .havingRaw('MIN(registration_created_at) >= ?', [currentMonthStart]);
+            });
         if (hasFilters && pIds.length > 0) {
             newUsersQuery = newUsersQuery.whereIn('participant_id', pIds);
         }
-        const newUsersResult = await newUsersQuery.countDistinct('participant_id as count').first();
+        const newUsersResult = await newUsersQuery.count('participant_id as count').first();
         const newUsers = parseInt(newUsersResult.count || 0);
 
         // Trends
@@ -1527,9 +1549,42 @@ exports.deleteUser = async (req, res) => {
             return res.redirect('/admin/users');
         }
 
-        // Delete the user (participant record)
-        // Note: This will cascade delete related records if foreign key constraints are set up
-        await knex('participants').where({ participant_id }).del();
+        // Delete the user (participant record) and all related records
+        // Use transaction to ensure all-or-nothing deletion
+        // Deletion order: surveys -> registrations -> milestones -> donations (unlink) -> participant
+        await knex.transaction(async (trx) => {
+            // 1. Get all registration IDs for this participant
+            const registrationIds = await trx('registrations')
+                .where({ participant_id })
+                .pluck('registration_id');
+            
+            // 2. Delete surveys (via registrations)
+            if (registrationIds.length > 0) {
+                await trx('surveys')
+                    .whereIn('registration_id', registrationIds)
+                    .del();
+            }
+            
+            // 3. Delete registrations
+            await trx('registrations')
+                .where({ participant_id })
+                .del();
+            
+            // 4. Delete milestones
+            await trx('milestones')
+                .where({ participant_id })
+                .del();
+            
+            // 5. Unlink donations (set participant_id to null to preserve donation history)
+            await trx('donations')
+                .where({ participant_id })
+                .update({ participant_id: null });
+            
+            // 6. Finally delete the participant record
+            await trx('participants')
+                .where({ participant_id })
+                .del();
+        });
         
         req.flash('success', 'User deleted successfully');
         res.redirect('/admin/users');
@@ -1559,22 +1614,27 @@ exports.listParticipants = async (req, res) => {
             .select('participant_id', 'participant_first_name', 'participant_last_name', 'participant_dob', 'participant_city')
             .orderBy('participant_last_name', 'asc');
         
-        // Filter for new users (participants who registered this month)
+        // Filter for new users (participants who created accounts with email and password this month)
         if (newUsers === 'true' || newUsers === '1') {
             const now = new Date();
             const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
             currentMonthStart.setHours(0, 0, 0, 0);
             
-            // Filter participants whose first registration was this month
-            query = query.whereIn('participant_id', function() {
-                this.select('participant_id')
-                    .from('registrations')
-                    .whereNotNull('registration_created_at')
-                    .where('registration_created_at', '>=', currentMonthStart)
-                    .where('registration_created_at', '<=', now)
-                    .groupBy('participant_id')
-                    .havingRaw('MIN(registration_created_at) >= ?', [currentMonthStart]);
-            });
+            // Filter participants who:
+            // 1. Have both email and password (actual account holders, not visitor records)
+            // 2. Created their account this month (first registration was this month)
+            query = query
+                .whereNotNull('participant_email')
+                .whereNotNull('participant_password')
+                .whereIn('participant_id', function() {
+                    this.select('participant_id')
+                        .from('registrations')
+                        .whereNotNull('registration_created_at')
+                        .where('registration_created_at', '>=', currentMonthStart)
+                        .where('registration_created_at', '<=', now)
+                        .groupBy('participant_id')
+                        .havingRaw('MIN(registration_created_at) >= ?', [currentMonthStart]);
+                });
         }
 
         // Multi-field Search Logic: Search across name and location
@@ -1775,9 +1835,42 @@ exports.deleteParticipant = async (req, res) => {
     try {
         const { id } = req.params;
         
-        // Delete the participant record
-        // Note: This will cascade delete related records if foreign key constraints are set up
-        await knex('participants').where({ participant_id: id }).del();
+        // Delete the participant record and all related records
+        // Use transaction to ensure all-or-nothing deletion
+        // Deletion order: surveys -> registrations -> milestones -> donations (unlink) -> participant
+        await knex.transaction(async (trx) => {
+            // 1. Get all registration IDs for this participant
+            const registrationIds = await trx('registrations')
+                .where({ participant_id: id })
+                .pluck('registration_id');
+            
+            // 2. Delete surveys (via registrations)
+            if (registrationIds.length > 0) {
+                await trx('surveys')
+                    .whereIn('registration_id', registrationIds)
+                    .del();
+            }
+            
+            // 3. Delete registrations
+            await trx('registrations')
+                .where({ participant_id: id })
+                .del();
+            
+            // 4. Delete milestones
+            await trx('milestones')
+                .where({ participant_id: id })
+                .del();
+            
+            // 5. Unlink donations (set participant_id to null to preserve donation history)
+            await trx('donations')
+                .where({ participant_id: id })
+                .update({ participant_id: null });
+            
+            // 6. Finally delete the participant record
+            await trx('participants')
+                .where({ participant_id: id })
+                .del();
+        });
         
         req.flash('success', 'Participant deleted successfully');
         res.redirect('/admin/participants');

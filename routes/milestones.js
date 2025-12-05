@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const knex = require('knex');
-const knexConfig = require('../knexfile');
-const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
+const knex = require('knex')(require('../knexfile')[process.env.NODE_ENV || 'development']);
 const { isAuthenticated, isManager } = require('../middleware/authMiddleware');
 
 const { generateId } = require('../utils/idGenerator');
@@ -15,8 +13,8 @@ router.get('/test', (req, res) => {
 // Add Milestone Form
 router.get('/add', isAuthenticated, isManager, async (req, res) => {
     try {
-        const participants = await db('participants').select('participant_id', 'participant_first_name', 'participant_last_name');
-        const templates = await db('milestone_templates').orderBy('title', 'asc');
+        const participants = await knex('participants').select('participant_id', 'participant_first_name', 'participant_last_name');
+        const templates = await knex('milestone_templates').orderBy('title', 'asc');
         res.render('milestones/form', { user: req.user, participants, templates });
     } catch (err) {
         console.error(err);
@@ -45,7 +43,7 @@ router.post('/add', isAuthenticated, async (req, res) => {
 
         const milestoneId = generateId();
 
-        await db('milestones').insert({
+        await knex('milestones').insert({
             milestone_id: milestoneId,
             participant_id: participant_id,
             milestone_title: milestone_title,
@@ -69,7 +67,7 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
         const { id } = req.params;
         const { milestone_title, milestone_date } = req.body;
 
-        const milestone = await db('milestones').where({ milestone_id: id }).first();
+        const milestone = await knex('milestones').where({ milestone_id: id }).first();
         if (!milestone) return res.status(404).send('Milestone not found');
 
         // Access Control: Admin or Owner
@@ -77,7 +75,7 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
             return res.status(403).send('Unauthorized');
         }
 
-        await db('milestones')
+        await knex('milestones')
             .where({ milestone_id: id })
             .update({
                 milestone_title,
@@ -95,7 +93,7 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
 router.post('/delete/:id', isAuthenticated, async (req, res) => {
     try {
         const { id } = req.params;
-        const milestone = await db('milestones').where({ milestone_id: id }).first();
+        const milestone = await knex('milestones').where({ milestone_id: id }).first();
 
         if (!milestone) return res.status(404).send('Milestone not found');
 
@@ -104,7 +102,7 @@ router.post('/delete/:id', isAuthenticated, async (req, res) => {
             return res.status(403).send('Unauthorized');
         }
 
-        await db('milestones').where({ milestone_id: id }).del();
+        await knex('milestones').where({ milestone_id: id }).del();
         res.redirect(req.get('referer'));
     } catch (err) {
         console.error(err);

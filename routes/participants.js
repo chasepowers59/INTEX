@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const knex = require('knex');
-const knexConfig = require('../knexfile');
-const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
+const knex = require('knex')(require('../knexfile')[process.env.NODE_ENV || 'development']);
 const { isAuthenticated, isManager } = require('../middleware/authMiddleware');
 const upload = require('../middleware/upload');
 const { generateId } = require('../utils/idGenerator');
@@ -11,7 +9,7 @@ const { generateId } = require('../utils/idGenerator');
 router.get('/', isAuthenticated, async (req, res) => {
     try {
         const { search, role, city, sort } = req.query;
-        let query = db('participants').select('*');
+        let query = knex('participants').select('*');
 
         if (search) {
             query = query.where(builder => {
@@ -44,8 +42,8 @@ router.get('/', isAuthenticated, async (req, res) => {
         const participants = await query;
 
         // Fetch distinct values for filters
-        const roles = await db('participants').distinct('participant_role').pluck('participant_role');
-        const cities = await db('participants').distinct('participant_city').pluck('participant_city');
+        const roles = await knex('participants').distinct('participant_role').pluck('participant_role');
+        const cities = await knex('participants').distinct('participant_city').pluck('participant_city');
 
         res.render('participants/list', {
             user: req.user,
@@ -55,7 +53,8 @@ router.get('/', isAuthenticated, async (req, res) => {
             options: { roles: roles.filter(Boolean).sort(), cities: cities.filter(Boolean).sort() }
         });
     } catch (err) {
-        console.error(err);
+        console.error('List Participants Error:', err);
+        req.flash('error', 'An error occurred while loading participants. Please try again.');
         res.status(500).send('Server Error');
     }
 });
@@ -84,24 +83,27 @@ router.post('/add', isAuthenticated, isManager, upload, async (req, res) => {
             participant_field_of_interest: req.body.participant_field_of_interest
         };
 
-        await db('participants').insert(participantData);
+        await knex('participants').insert(participantData);
+        req.flash('success', 'Participant added successfully!');
         res.redirect('/participants');
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Server Error');
+        console.error('Add Participant Error:', err);
+        req.flash('error', 'Error adding participant. Please try again.');
+        res.redirect('/participants/add');
     }
 });
 
 // Participant Self-Edit Profile (GET) - MUST be before /:id route to avoid route conflict
 router.get('/edit-self', isAuthenticated, async (req, res) => {
     try {
-        const participant = await db('participants').where({ participant_id: req.user.participant_id }).first();
+        const participant = await knex('participants').where({ participant_id: req.user.participant_id }).first();
         if (!participant) {
             return res.status(404).send('Participant not found');
         }
         res.render('participants/edit_self', { user: req.user, participant });
     } catch (err) {
-        console.error(err);
+        console.error('Get Edit Self Error:', err);
+        req.flash('error', 'Error loading profile. Please try again.');
         res.status(500).send('Server Error');
     }
 });
@@ -133,7 +135,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
             });
         }
 
-        const participant = await db('participants').where({ participant_id: req.params.id }).first();
+        const participant = await knex('participants').where({ participant_id: req.params.id }).first();
         console.log('Fetching participant:', req.params.id); // DEBUG
         console.log('Data found:', participant); // DEBUG
 
@@ -141,13 +143,13 @@ router.get('/:id', isAuthenticated, async (req, res) => {
 
         // Fetch related data
         console.log('Fetching milestones...');
-        const milestones = await db('milestones')
+        const milestones = await knex('milestones')
             .where({ participant_id: req.params.id })
             .select('*') || [];
         console.log('Milestones found:', milestones.length);
 
         console.log('Fetching events...');
-        const allEvents = await db('registrations')
+        const allEvents = await knex('registrations')
             .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
             .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
             .where({ 'registrations.participant_id': req.params.id })
@@ -165,7 +167,7 @@ router.get('/:id', isAuthenticated, async (req, res) => {
 
         // Separate upcoming and past events
         // Only show events that are in the future (start_time > now)
-        const now = new Date();
+        const now = new Date(); // Single date reference for consistency
         const nowTime = now.getTime();
         console.log('Current time for filtering:', now, 'Timestamp:', nowTime);
         
@@ -218,12 +220,12 @@ router.get('/:id', isAuthenticated, async (req, res) => {
         // Check which registrations have surveys
         const registrationIds = allEvents.map(e => e.registration_id);
         const existingSurveys = registrationIds.length > 0 
-            ? await db('surveys').whereIn('registration_id', registrationIds).select('registration_id') || []
+            ? await knex('surveys').whereIn('registration_id', registrationIds).select('registration_id') || []
             : [];
         const surveyRegistrationIds = new Set(existingSurveys.map(s => s.registration_id));
 
         console.log('Fetching surveys...');
-        const surveys = await db('surveys')
+        const surveys = await knex('surveys')
             .join('registrations', 'surveys.registration_id', 'registrations.registration_id')
             .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
             .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
@@ -234,12 +236,12 @@ router.get('/:id', isAuthenticated, async (req, res) => {
         console.log('Fetching donations...');
         // Business Logic: Only show donations with valid dates (not null, not in the future) and valid amounts
         // This ensures consistency with dashboard and insights calculations
-        const nowForDonations = new Date();
-        const donations = await db('donations')
+        // Use the same 'now' variable for consistency (already defined above)
+        const donations = await knex('donations')
             .where({ participant_id: req.params.id })
             .whereNotNull('donation_date')
             .whereNotNull('donation_amount')
-            .where('donation_date', '<=', nowForDonations) // Don't include future dates
+            .where('donation_date', '<=', now) // Don't include future dates
             .orderBy('donation_date', 'desc') || [];
         console.log('Donations found:', donations.length);
 
@@ -273,7 +275,8 @@ router.get('/:id', isAuthenticated, async (req, res) => {
             res.status(500).send('Error rendering view: ' + renderErr.message);
         }
     } catch (err) {
-        console.error(err);
+        console.error('List Participants Error:', err);
+        req.flash('error', 'An error occurred while loading participants. Please try again.');
         res.status(500).send('Server Error');
     }
 });
@@ -281,10 +284,11 @@ router.get('/:id', isAuthenticated, async (req, res) => {
 // Edit Participant Form
 router.get('/edit/:id', isAuthenticated, isManager, async (req, res) => {
     try {
-        const participant = await db('participants').where({ participant_id: req.params.id }).first();
+        const participant = await knex('participants').where({ participant_id: req.params.id }).first();
         res.render('participants/form', { user: req.user, participant });
     } catch (err) {
-        console.error(err);
+        console.error('Get Edit Participant Error:', err);
+        req.flash('error', 'Error loading participant. Please try again.');
         res.status(500).send('Server Error');
     }
 });
@@ -306,10 +310,12 @@ router.post('/edit/:id', isAuthenticated, isManager, upload, async (req, res) =>
             participant_field_of_interest: req.body.participant_field_of_interest
         };
 
-        await db('participants').where({ participant_id: req.params.id }).update(participantData);
+        await knex('participants').where({ participant_id: req.params.id }).update(participantData);
+        req.flash('success', 'Participant updated successfully!');
         res.redirect(`/participants/${req.params.id}`);
     } catch (err) {
-        console.error(err);
+        console.error('Post Edit Participant Error:', err);
+        req.flash('error', 'Error updating participant. Please try again.');
         res.status(500).send('Server Error');
     }
 });
@@ -317,10 +323,50 @@ router.post('/edit/:id', isAuthenticated, isManager, upload, async (req, res) =>
 // Handle Delete
 router.post('/delete/:id', isAuthenticated, isManager, async (req, res) => {
     try {
-        await db('participants').where({ participant_id: req.params.id }).del();
+        const { id } = req.params;
+        
+        // Delete the participant record and all related records
+        // Use transaction to ensure all-or-nothing deletion
+        // Deletion order: surveys -> registrations -> milestones -> donations (unlink) -> participant
+        await knex.transaction(async (trx) => {
+            // 1. Get all registration IDs for this participant
+            const registrationIds = await trx('registrations')
+                .where({ participant_id: id })
+                .pluck('registration_id');
+            
+            // 2. Delete surveys (via registrations)
+            if (registrationIds.length > 0) {
+                await trx('surveys')
+                    .whereIn('registration_id', registrationIds)
+                    .del();
+            }
+            
+            // 3. Delete registrations
+            await trx('registrations')
+                .where({ participant_id: id })
+                .del();
+            
+            // 4. Delete milestones
+            await trx('milestones')
+                .where({ participant_id: id })
+                .del();
+            
+            // 5. Unlink donations (set participant_id to null to preserve donation history)
+            await trx('donations')
+                .where({ participant_id: id })
+                .update({ participant_id: null });
+            
+            // 6. Finally delete the participant record
+            await trx('participants')
+                .where({ participant_id: id })
+                .del();
+        });
+        
+        req.flash('success', 'Participant deleted successfully!');
         res.redirect('/participants');
     } catch (err) {
-        console.error(err);
+        console.error('Delete Participant Error:', err);
+        req.flash('error', 'Error deleting participant. Please try again.');
         res.status(500).send('Server Error');
     }
 });
@@ -347,11 +393,11 @@ router.post('/edit-self', isAuthenticated, async (req, res) => {
             // Note: participant_role is NOT included - only managers can change roles
         };
 
-        await db('participants').where({ participant_id: req.user.participant_id }).update(participantData);
+        await knex('participants').where({ participant_id: req.user.participant_id }).update(participantData);
         req.flash('success', 'Profile updated successfully!');
         res.redirect(`/participants/${req.user.participant_id}`);
     } catch (err) {
-        console.error(err);
+        console.error('Post Edit Self Error:', err);
         req.flash('error', 'Error updating profile. Please try again.');
         res.redirect('/participants/edit-self');
     }
@@ -368,7 +414,7 @@ router.post('/change-password', isAuthenticated, async (req, res) => {
         }
 
         // Get current participant
-        const participant = await db('participants').where({ participant_id: req.user.participant_id }).first();
+        const participant = await knex('participants').where({ participant_id: req.user.participant_id }).first();
         if (!participant) {
             return res.status(404).send('Participant not found');
         }
@@ -380,14 +426,14 @@ router.post('/change-password', isAuthenticated, async (req, res) => {
         }
 
         // Update password (plain text storage)
-        await db('participants')
+        await knex('participants')
             .where({ participant_id: req.user.participant_id })
             .update({ participant_password: new_password });
 
         req.flash('success', 'Password changed successfully!');
         res.redirect(`/participants/${req.user.participant_id}`);
     } catch (err) {
-        console.error(err);
+        console.error('Change Password Error:', err);
         req.flash('error', 'Error changing password. Please try again.');
         res.redirect('/participants/change-password');
     }

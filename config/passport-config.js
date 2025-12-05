@@ -1,9 +1,6 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const knex = require('knex');
-const knexConfig = require('../knexfile');
-
-const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
+const knex = require('knex')(require('../knexfile')[process.env.NODE_ENV || 'development']);
 
 /**
  * Passport Local Strategy Configuration
@@ -22,7 +19,7 @@ passport.use(new LocalStrategy({
 }, async (participant_email, participant_password, done) => {
     try {
         console.log(`Looking up email: ${participant_email}`);
-        const user = await db('participants').where({ participant_email }).first();
+        const user = await knex('participants').where({ participant_email }).first();
         console.log('User Found?', user ? 'YES' : 'NO');
 
         if (!user) {
@@ -54,7 +51,7 @@ passport.serializeUser((user, done) => {
 // Deserialize user from session
 passport.deserializeUser(async (participant_id, done) => {
     try {
-        const user = await db('participants').where({ participant_id }).first();
+        const user = await knex('participants').where({ participant_id }).first();
         done(null, user);
     } catch (err) {
         console.error('Passport deserialize error:', err);

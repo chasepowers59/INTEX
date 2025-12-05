@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const knex = require('knex');
-const knexConfig = require('../knexfile');
-const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
+const knex = require('knex')(require('../knexfile')[process.env.NODE_ENV || 'development']);
 const { isAuthenticated, isManager } = require('../middleware/authMiddleware');
 
 const { generateId } = require('../utils/idGenerator');
@@ -15,7 +13,7 @@ router.get('/insights', isAuthenticated, isManager, async (req, res) => {
         // Use INNER JOIN to only show donors who are registered participants (excludes visitor donations)
         // This ensures consistency with the dashboard calculation
         const nowForTopDonors = new Date();
-        const topDonors = await db('donations')
+        const topDonors = await knex('donations')
             .join('participants', 'donations.participant_id', 'participants.participant_id')
             .whereNotNull('donations.donation_date')
             .whereNotNull('donations.donation_amount')
@@ -23,9 +21,9 @@ router.get('/insights', isAuthenticated, isManager, async (req, res) => {
             .select(
                 'participants.participant_first_name',
                 'participants.participant_last_name',
-                db.raw('SUM(donations.donation_amount) as total_amount'),
-                db.raw('COUNT(donations.donation_id) as donation_count'),
-                db.raw('MAX(donations.donation_date) as last_donation')
+                knex.raw('SUM(donations.donation_amount) as total_amount'),
+                knex.raw('COUNT(donations.donation_id) as donation_count'),
+                knex.raw('MAX(donations.donation_date) as last_donation')
             )
             .groupBy('participants.participant_id', 'participants.participant_first_name', 'participants.participant_last_name')
             .orderBy('total_amount', 'desc')
@@ -36,7 +34,7 @@ router.get('/insights', isAuthenticated, isManager, async (req, res) => {
         // Only count donations with valid dates (not null, not in the future) and valid amounts
         // This ensures consistency between dashboard KPI and insights page
         const nowForDonations = new Date();
-        const stats = await db('donations')
+        const stats = await knex('donations')
             .whereNotNull('donation_date')
             .whereNotNull('donation_amount')
             .where('donation_date', '<=', nowForDonations) // Don't include future dates

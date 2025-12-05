@@ -1,15 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const knex = require('knex');
-const knexConfig = require('../knexfile');
-const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
+const knex = require('knex')(require('../knexfile')[process.env.NODE_ENV || 'development']);
 const { isAuthenticated } = require('../middleware/authMiddleware');
 const { generateId } = require('../utils/idGenerator');
 
 // Get Survey Form (for a specific registration)
 router.get('/new/:registrationId', isAuthenticated, async (req, res) => {
     try {
-        const registration = await db('registrations')
+        const registration = await knex('registrations')
             .join('event_instances', 'registrations.event_instance_id', 'event_instances.event_instance_id')
             .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
             .where('registrations.registration_id', req.params.registrationId)
@@ -43,7 +41,7 @@ router.post('/new', isAuthenticated, async (req, res) => {
         const { registration_id, satisfaction, usefulness, instructor, recommendation, comments } = req.body;
         
         // Verify registration exists and user has permission
-        const registration = await db('registrations')
+        const registration = await knex('registrations')
             .where('registration_id', registration_id)
             .first();
 
@@ -61,7 +59,7 @@ router.post('/new', isAuthenticated, async (req, res) => {
         }
 
         // Check if survey already exists
-        const existingSurvey = await db('surveys')
+        const existingSurvey = await knex('surveys')
             .where('registration_id', registration_id)
             .first();
 
@@ -92,7 +90,7 @@ router.post('/new', isAuthenticated, async (req, res) => {
             }
         }
 
-        await db('surveys').insert({
+        await knex('surveys').insert({
             survey_id: surveyId,
             registration_id,
             survey_satisfaction_score: satisfaction,

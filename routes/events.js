@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const knex = require('knex');
-const knexConfig = require('../knexfile');
-const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
+const knex = require('knex')(require('../knexfile')[process.env.NODE_ENV || 'development']);
 const { isAuthenticated, isManager } = require('../middleware/authMiddleware');
 const { generateId } = require('../utils/idGenerator');
 
@@ -13,7 +11,7 @@ router.get('/insights', isAuthenticated, isManager, async (req, res) => {
         // We need a subquery or CTE approach. Knex makes this a bit verbose, so we'll do it in steps or raw.
         // Let's use a raw query for the aggregation to be efficient.
 
-        const participantStats = await db.raw(`
+        const participantStats = await knex.raw(`
             SELECT 
                 p.participant_id,
                 p.participant_first_name,
@@ -72,7 +70,8 @@ router.get('/insights', isAuthenticated, isManager, async (req, res) => {
             successStories
         });
     } catch (err) {
-        console.error(err);
+        console.error('Event Insights Error:', err);
+        req.flash('error', 'An error occurred while loading event insights. Please try again.');
         res.status(500).send('Server Error');
     }
 });
@@ -81,8 +80,8 @@ router.get('/insights', isAuthenticated, isManager, async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         const { search, eventType } = req.query;
-        const now = new Date();
-        let query = db('event_instances')
+        const now = new Date(); // Single date reference for consistency
+        let query = knex('event_instances')
             .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
             .select('*')
             // Business Logic: Only show future events on the events list page
@@ -132,7 +131,7 @@ router.get('/', async (req, res) => {
         
         if (req.user && req.user.participant_id) {
             // Fetch all registrations for this user
-            const registrations = await db('registrations')
+            const registrations = await knex('registrations')
                 .where('participant_id', req.user.participant_id)
                 .select('event_instance_id', 'registration_id', 'registration_status');
             
@@ -144,7 +143,7 @@ router.get('/', async (req, res) => {
             // Fetch all surveys for this user's registrations
             const registrationIds = registrations.map(r => r.registration_id);
             if (registrationIds.length > 0) {
-                const surveys = await db('surveys')
+                const surveys = await knex('surveys')
                     .whereIn('registration_id', registrationIds)
                     .select('registration_id');
                 
@@ -164,7 +163,8 @@ router.get('/', async (req, res) => {
             userSurveys         // Map: registration_id -> true (if survey exists)
         });
     } catch (err) {
-        console.error(err);
+        console.error('List Events Error:', err);
+        req.flash('error', 'An error occurred while loading events. Please try again.');
         res.status(500).send('Server Error');
     }
 });
@@ -180,7 +180,7 @@ router.post('/definitions/add', isAuthenticated, isManager, async (req, res) => 
         const { event_name, event_type, event_description, event_recurrence_pattern, event_default_capacity } = req.body;
         const definitionId = generateId();
 
-        await db('event_definitions').insert({
+        await knex('event_definitions').insert({
             event_definition_id: definitionId,
             event_name,
             event_type,
@@ -191,7 +191,8 @@ router.post('/definitions/add', isAuthenticated, isManager, async (req, res) => 
 
         res.redirect('/events/add'); // Redirect to add instance using this new definition
     } catch (err) {
-        console.error(err);
+        console.error('Post Add Definition Error:', err);
+        req.flash('error', 'Error creating event definition. Please try again.');
         res.status(500).send('Server Error');
     }
 });
@@ -199,10 +200,11 @@ router.post('/definitions/add', isAuthenticated, isManager, async (req, res) => 
 // Add Event Form
 router.get('/add', isAuthenticated, isManager, async (req, res) => {
     try {
-        const templates = await db('event_definitions').select('*');
+        const templates = await knex('event_definitions').select('*');
         res.render('events/form', { user: req.user, templates, event: null });
     } catch (err) {
-        console.error(err);
+        console.error('Get Add Event Error:', err);
+        req.flash('error', 'Error loading event form. Please try again.');
         res.status(500).send('Server Error');
     }
 });
@@ -213,7 +215,7 @@ router.post('/add', isAuthenticated, isManager, async (req, res) => {
         const { event_definition_id, event_date_time_start, event_date_time_end, event_location, event_capacity } = req.body;
         const eventInstanceId = generateId();
 
-        await db('event_instances').insert({
+        await knex('event_instances').insert({
             event_instance_id: eventInstanceId,
             event_definition_id: event_definition_id,
             event_date_time_start: event_date_time_start,
@@ -222,9 +224,11 @@ router.post('/add', isAuthenticated, isManager, async (req, res) => {
             event_capacity: event_capacity
         });
 
+        req.flash('success', 'Event added successfully!');
         res.redirect('/events');
     } catch (err) {
-        console.error(err);
+        console.error('Post Add Event Error:', err);
+        req.flash('error', 'Error adding event. Please try again.');
         res.status(500).send('Server Error');
     }
 });
@@ -232,11 +236,12 @@ router.post('/add', isAuthenticated, isManager, async (req, res) => {
 // Edit Event Form
 router.get('/edit/:id', isAuthenticated, isManager, async (req, res) => {
     try {
-        const event = await db('event_instances').where({ event_instance_id: req.params.id }).first();
-        const templates = await db('event_definitions').select('*');
+        const event = await knex('event_instances').where({ event_instance_id: req.params.id }).first();
+        const templates = await knex('event_definitions').select('*');
         res.render('events/form', { user: req.user, templates, event });
     } catch (err) {
-        console.error(err);
+        console.error('Get Edit Event Error:', err);
+        req.flash('error', 'Error loading event. Please try again.');
         res.status(500).send('Server Error');
     }
 });
@@ -246,7 +251,7 @@ router.post('/edit/:id', isAuthenticated, isManager, async (req, res) => {
     try {
         const { event_definition_id, event_date_time_start, event_date_time_end, event_location, event_capacity } = req.body;
 
-        await db('event_instances').where({ event_instance_id: req.params.id }).update({
+        await knex('event_instances').where({ event_instance_id: req.params.id }).update({
             event_definition_id: event_definition_id,
             event_date_time_start: event_date_time_start,
             event_date_time_end: event_date_time_end,
@@ -254,9 +259,11 @@ router.post('/edit/:id', isAuthenticated, isManager, async (req, res) => {
             event_capacity: event_capacity
         });
 
+        req.flash('success', 'Event updated successfully!');
         res.redirect('/events');
     } catch (err) {
-        console.error(err);
+        console.error('Post Edit Event Error:', err);
+        req.flash('error', 'Error updating event. Please try again.');
         res.status(500).send('Server Error');
     }
 });
@@ -264,10 +271,12 @@ router.post('/edit/:id', isAuthenticated, isManager, async (req, res) => {
 // Delete Event
 router.post('/delete/:id', isAuthenticated, isManager, async (req, res) => {
     try {
-        await db('event_instances').where({ event_instance_id: req.params.id }).del();
+        await knex('event_instances').where({ event_instance_id: req.params.id }).del();
+        req.flash('success', 'Event deleted successfully!');
         res.redirect('/events');
     } catch (err) {
-        console.error(err);
+        console.error('Delete Event Error:', err);
+        req.flash('error', 'Error deleting event. Please try again.');
         res.status(500).send('Server Error');
     }
 });
@@ -283,7 +292,7 @@ router.post('/register/:id', isAuthenticated, async (req, res) => {
         }
 
         // Check if already registered
-        const existing = await db('registrations')
+        const existing = await knex('registrations')
             .where({ participant_id: user.participant_id, event_instance_id: req.params.id })
             .first();
 
@@ -293,7 +302,7 @@ router.post('/register/:id', isAuthenticated, async (req, res) => {
         }
 
         // Fetch event details before registration
-        const eventDetails = await db('event_instances')
+        const eventDetails = await knex('event_instances')
             .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
             .where('event_instances.event_instance_id', req.params.id)
             .select(
@@ -311,14 +320,15 @@ router.post('/register/:id', isAuthenticated, async (req, res) => {
 
         // Business Logic: Prevent registration for past events
         // Check if event has already occurred
-        if (eventDetails.event_date_time_start && new Date(eventDetails.event_date_time_start) < new Date()) {
+        const now = new Date(); // Single date reference for consistency
+        if (eventDetails.event_date_time_start && new Date(eventDetails.event_date_time_start) < now) {
             req.flash('error', 'You cannot register for events that have already occurred.');
             return res.redirect('/events');
         }
 
         const registrationId = generateId();
 
-        await db('registrations').insert({
+        await knex('registrations').insert({
             registration_id: registrationId,
             participant_id: user.participant_id,
             event_instance_id: req.params.id,
@@ -327,7 +337,7 @@ router.post('/register/:id', isAuthenticated, async (req, res) => {
         });
 
         // Get participant name for personalized message
-        const participant = await db('participants')
+        const participant = await knex('participants')
             .where('participant_id', user.participant_id)
             .select('participant_first_name', 'participant_last_name')
             .first();
@@ -343,7 +353,8 @@ router.post('/register/:id', isAuthenticated, async (req, res) => {
             participantName: participantName
         });
     } catch (err) {
-        console.error(err);
+        console.error('Register Event Error:', err);
+        req.flash('error', 'Error registering for event. Please try again.');
         res.status(500).send('Server Error');
     }
 });
@@ -360,7 +371,7 @@ router.post('/register-visitor', async (req, res) => {
         }
 
         // Fetch event details before registration
-        const eventDetails = await db('event_instances')
+        const eventDetails = await knex('event_instances')
             .join('event_definitions', 'event_instances.event_definition_id', 'event_definitions.event_definition_id')
             .where('event_instances.event_instance_id', event_instance_id)
             .select(
@@ -378,14 +389,15 @@ router.post('/register-visitor', async (req, res) => {
 
         // Business Logic: Prevent registration for past events
         // Check if event has already occurred
-        if (eventDetails.event_date_time_start && new Date(eventDetails.event_date_time_start) < new Date()) {
+        const now = new Date(); // Single date reference for consistency
+        if (eventDetails.event_date_time_start && new Date(eventDetails.event_date_time_start) < now) {
             req.flash('error', 'You cannot register for events that have already occurred.');
             return res.redirect('/events');
         }
 
         // Check if participant exists by email
         let participantId = null;
-        const existingParticipant = await db('participants')
+        const existingParticipant = await knex('participants')
             .where('participant_email', email)
             .first();
 
@@ -394,7 +406,7 @@ router.post('/register-visitor', async (req, res) => {
         } else {
             // Create new participant record for visitor
             participantId = generateId();
-            await db('participants').insert({
+            await knex('participants').insert({
                 participant_id: participantId,
                 participant_email: email,
                 participant_first_name: first_name,
@@ -405,7 +417,7 @@ router.post('/register-visitor', async (req, res) => {
         }
 
         // Check if already registered for this event
-        const existingRegistration = await db('registrations')
+        const existingRegistration = await knex('registrations')
             .where({ participant_id: participantId, event_instance_id: event_instance_id })
             .first();
 
@@ -416,7 +428,7 @@ router.post('/register-visitor', async (req, res) => {
 
         // Create registration
         const registrationId = generateId();
-        await db('registrations').insert({
+        await knex('registrations').insert({
             registration_id: registrationId,
             participant_id: participantId,
             event_instance_id: event_instance_id,

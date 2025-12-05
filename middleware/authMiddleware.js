@@ -45,9 +45,11 @@ exports.isReadOnlyOrManager = (req, res, next) => {
     res.status(403).send('Access Denied: Manager privileges required for this operation');
 };
 
-exports.isAdmin = (req, res, next) => {
-    if (req.session && req.session.user && req.session.user.participant_role === 'admin') {
-        return next();
-    }
-    res.status(403).send('Access Denied: Admin Only');
-};
+// NOTE: isAdmin is deprecated - use isManager instead
+// Keeping for backward compatibility but should not be used in new code
+// exports.isAdmin = (req, res, next) => {
+//     if (req.session && req.session.user && req.session.user.participant_role === 'admin') {
+//         return next();
+//     }
+//     res.status(403).send('Access Denied: Admin Only');
+// };

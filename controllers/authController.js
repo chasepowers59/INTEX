@@ -1,7 +1,5 @@
 // const bcrypt = require('bcrypt'); // REMOVED
-const knex = require('knex');
-const knexConfig = require('../knexfile');
-const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
+const knex = require('knex')(require('../knexfile')[process.env.NODE_ENV || 'development']);
 const { generateId } = require('../utils/idGenerator');
 const passport = require('passport');
 
@@ -43,13 +41,13 @@ exports.postRegister = async (req, res) => {
         }
 
         // Check if email already exists
-        const existing = await db('participants').where({ participant_email }).first();
+        const existing = await knex('participants').where({ participant_email }).first();
         
         if (existing) {
             // If participant exists but has no password (created from visitor registration/donation)
             // Update the existing record with the password to complete account creation
             if (!existing.participant_password) {
-                await db('participants')
+                await knex('participants')
                     .where({ participant_id: existing.participant_id })
                     .update({
                         participant_first_name: participant_first_name || existing.participant_first_name,
@@ -75,7 +73,7 @@ exports.postRegister = async (req, res) => {
         // Insert into participants table
         // Business Logic: All new user registrations default to 'participant' role
         // Only admins can change roles through the User Maintenance interface
-        await db('participants').insert({
+        await knex('participants').insert({
             participant_id: participantId,
             participant_first_name,
             participant_last_name,
@@ -87,8 +85,9 @@ exports.postRegister = async (req, res) => {
         req.flash('success', 'Registration successful! Please login.');
         res.redirect('/auth/login');
     } catch (err) {
-        console.error(err);
-        res.render('register', { user: null, error: 'An error occurred during registration' });
+        console.error('Post Register Error:', err);
+        req.flash('error', 'An error occurred during registration. Please try again.');
+        res.render('register', { user: null, error: 'An error occurred during registration', messages: req.flash() });
     }
 };
 
